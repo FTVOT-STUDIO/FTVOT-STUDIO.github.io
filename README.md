@@ -12,7 +12,7 @@ ftvot-site/
 │   ├── .nojekyll         # GitHub Pages의 Jekyll 처리 끄기
 │   └── assets/
 │       ├── css/main.css
-│       ├── js/{main.js, sephirot.js, characters.js, roster.js(자동 생성)}
+│       ├── js/{main.js, intro.js, sephirot.js, characters.js, roster.js(자동 생성)}
 │       ├── sephirot/<세피라>-0.webp, -1.webp   # 세피라 캐릭터 대기/동작 프레임
 │       ├── sfx/<세피라>.mp3                     # 노드 클릭 효과음
 │       └── units/<캐릭터>/thumb.webp
@@ -41,7 +41,7 @@ ftvot-site/
 | 9 | 예소드 | yesod | 개발 중, 다음 목표 |
 | 10 | 말쿠트 | malkuth | 연락 |
 
-나무 노드를 누르면 해당 세피라로 이동하면서 `docs/assets/sfx/<id>.mp3`가 재생되고, 세피라 캐릭터가 동작 프레임으로 바뀝니다. 효과음은 푸터 버튼으로 끌 수 있습니다.
+첫 접속 시 인트로가 끝나면 세피로트의 나무가 화면 가득 나타납니다(같은 탭에서는 한 번만). 나무 노드를 누르거나 스크롤하면 해당 세피라로 이동하고, 노드를 누르면 `docs/assets/sfx/<id>.mp3`가 재생되고, 세피라 캐릭터가 동작 프레임으로 바뀝니다. 효과음은 푸터 버튼으로 끌 수 있습니다.
 
 ## 1. GitHub Pages 배포
 
