@@ -1,5 +1,5 @@
 // 사이트를 돌아다니는 캐릭터
-// - 히어로 무리(3명), 선 위에 걸터앉은 캐릭터, 화면 아래를 걷는 캐릭터
+// - 네차흐 정원(전원), 화면 아래를 걷는 캐릭터
 // - 전부 장식이라 aria-hidden 안에 있고, 끄기 버튼으로 걷는 캐릭터를 숨길 수 있습니다
 import { ROSTER } from './roster.js';
 
@@ -61,38 +61,37 @@ void el.offsetWidth; // 리플로우로 애니메이션 리셋
 el.classList.add(className);
 }
 
-/** 깡충 뛴 뒤 다른 캐릭터로 바뀌는 슬롯(무리, 걸터앉기 공용) */
-function makeSwapSlot(el, eager) {
-let current = nextCharacter();
-onStage.add(current.slug);
-el.replaceChildren(makeImg(current, eager));
-el.addEventListener('click', () => {
-replay(el, 'is-hop');
-window.setTimeout(() => {
-el.classList.add('is-swapping');
-window.setTimeout(() => {
-onStage.delete(current.slug);
-current = nextCharacter();
-onStage.add(current.slug);
-el.replaceChildren(makeImg(current, true));
-el.classList.remove('is-swapping');
-}, 150);
-}, 300);
+/* ---------------- 네차흐 정원 ---------------- */
+// 45명 전원을 정원에 흩어 놓습니다. 격자에 무작위 흔들림을 줘서 겹치지 않으면서도 자연스럽게 배치합니다
+function initGarden() {
+const garden = document.querySelector('[data-garden]');
+if (!garden) return;
+const list = [...ROSTER];
+for (let i = list.length - 1; i > 0; i -= 1) {
+const j = Math.floor(Math.random() * (i + 1));
+[list[i], list[j]] = [list[j], list[i]];
+}
+const cols = window.innerWidth < 768 ? 5 : 9;
+const rows = Math.ceil(list.length / cols);
+list.forEach((character, i) => {
+const col = i % cols;
+const row = Math.floor(i / cols);
+const sprout = document.createElement('span');
+sprout.className = 'sprout';
+// 발밑 좌표(%) 기준 배치. 아래 줄일수록 크게 해서 원근감을 줍니다
+const x = ((col + 0.5 + rand(-0.28, 0.28)) / cols) * 100;
+const y = ((row + 1) / rows) * 88 + 6 + rand(-2, 2);
+const scale = 0.72 + (row / Math.max(1, rows - 1)) * 0.45;
+sprout.style.left = `${x.toFixed(2)}%`;
+sprout.style.top = `${y.toFixed(2)}%`;
+sprout.style.setProperty('--w', `${Math.round((window.innerWidth < 768 ? 58 : 86) * scale)}px`);
+sprout.style.zIndex = String(row + 1);
+sprout.append(makeImg(character));
+sprout.addEventListener('click', () => replay(sprout, 'is-hop'));
+garden.append(sprout);
 });
-}
-
-/* ---------------- 히어로 무리 + 걸터앉기 ---------------- */
-function initCrewAndPerches() {
-const crew = document.querySelector('[data-crew]');
-if (crew) {
-for (let i = 0; i < 3; i += 1) {
-const mate = document.createElement('span');
-mate.className = 'mate';
-crew.append(mate);
-makeSwapSlot(mate, true);
-}
-}
-document.querySelectorAll('[data-perch]').forEach((perch) => makeSwapSlot(perch, false));
+const count = document.querySelector('[data-crowd-count]');
+if (count) count.textContent = String(list.length);
 }
 
 /* ---------------- 걷는 캐릭터 ---------------- */
@@ -197,6 +196,8 @@ this.bubbleTimer = window.setTimeout(() => this.bubble.classList.remove('is-on')
 
 function initRoam() {
 const layer = document.querySelector('[data-roam]');
+// 데스크톱은 나무 패널을 뺀 내용 영역만큼만 걷습니다
+const layerWidth = () => layer?.clientWidth || document.documentElement.clientWidth;
 const toggle = document.querySelector('[data-roam-toggle]');
 if (!layer || !ROSTER.length) return;
 
@@ -208,14 +209,14 @@ let last = 0;
 const loop = (now) => {
 const dt = Math.min((now - last) / 1000, 0.05); // 탭 복귀 시 순간이동 방지
 last = now;
-const viewW = document.documentElement.clientWidth;
+const viewW = layerWidth();
 walkers.forEach((w) => w.update(dt, now, viewW));
 rafId = requestAnimationFrame(loop);
 };
 
 const start = () => {
 if (!walkers.length) {
-const viewW = document.documentElement.clientWidth;
+const viewW = layerWidth();
 for (let i = 0; i < count; i += 1) {
 const walker = new Walker(layer);
 walker.dress();
@@ -265,7 +266,7 @@ toggle?.addEventListener('click', () => setEnabled(layer.hidden, true));
 
 // 창 크기가 줄면 화면 밖에 갇힌 캐릭터를 안으로 들입니다
 window.addEventListener('resize', () => {
-const viewW = document.documentElement.clientWidth;
+const viewW = layerWidth();
 walkers.forEach((w) => {
 if (w.x > viewW) w.place(Math.max(0, viewW - w.width));
 });
@@ -274,6 +275,6 @@ if (w.x > viewW) w.place(Math.max(0, viewW - w.width));
 
 export function initCharacters() {
 if (!ROSTER.length) return;
-initCrewAndPerches();
+initGarden();
 initRoam();
 }

@@ -10,6 +10,9 @@
 
 ## 콘텐츠
 
+- 성경 구절: 개역한글판
+- 효과음(`docs/assets/sfx/`)은 FTVOT_STUDIO의 자료입니다.
+
 - 캐릭터 일러스트(`docs/assets/units/`)와 프로젝트 정보는 FTVOT_STUDIO의 자료입니다.
 
 ## 상표

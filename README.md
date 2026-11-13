@@ -12,7 +12,9 @@ ftvot-site/
 │   ├── .nojekyll         # GitHub Pages의 Jekyll 처리 끄기
 │   └── assets/
 │       ├── css/main.css
-│       ├── js/{main.js, characters.js, roster.js(자동 생성), theme-init.js}
+│       ├── js/{main.js, sephirot.js, characters.js, roster.js(자동 생성)}
+│       ├── sephirot/<세피라>-0.webp, -1.webp   # 세피라 캐릭터 대기/동작 프레임
+│       ├── sfx/<세피라>.mp3                     # 노드 클릭 효과음
 │       └── units/<캐릭터>/thumb.webp
 ├── tools/
 │   ├── units.json            # Unity 시트에서 어떤 유닛, 어떤 프레임을 쓸지
@@ -23,6 +25,23 @@ ftvot-site/
 ├── DESIGN.md             # 디자인 결정과 이유
 └── CREDITS.md            # 오픈소스, 글꼴, 상표 표기
 ```
+
+## 구조: 세피로트의 나무
+
+| 번호 | 세피라 | 섹션 id | 내용 |
+|---|---|---|---|
+| 1 | 케테르 | kether | 프로필 |
+| 2 | 호크마 | chokmah | 스택 |
+| 3 | 비나 | binah | 기록, 연표 |
+| 4 | 헤세드 | chesed | 완성작 |
+| 5 | 게부라 | gevurah | 공모전, 대회, 전시 |
+| 6 | 티페레트 | tiferet | 대표작 |
+| 7 | 네차흐 | netzach | 캐릭터 정원 |
+| 8 | 호드 | hod | 게임 밖 작업 |
+| 9 | 예소드 | yesod | 개발 중, 다음 목표 |
+| 10 | 말쿠트 | malkuth | 연락 |
+
+나무 노드를 누르면 해당 세피라로 이동하면서 `docs/assets/sfx/<id>.mp3`가 재생되고, 세피라 캐릭터가 동작 프레임으로 바뀝니다. 효과음과 걷는 캐릭터는 푸터 버튼으로 끌 수 있습니다.
 
 ## 1. GitHub Pages 배포
 
