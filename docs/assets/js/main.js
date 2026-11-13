@@ -9,13 +9,13 @@ document.documentElement.classList.add('js');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 // Lenis 메이저 버전 고정. 마이너 업데이트는 받고 깨지는 변경은 막습니다
 const LENIS_URL = 'https://cdn.jsdelivr.net/npm/lenis@1/+esm';
-// 모바일 상단 바 높이만큼 덜 내려가서 세피라 제목이 가려지지 않게 합니다
+// 상단 바 높이만큼 덜 내려가서 세피라 제목이 가려지지 않게 합니다
 const MOBILE_BAR = 56;
 
 /** @type {any} CDN 실패나 모션 축소 시 null로 남고 기본 스크롤을 씁니다 */
 let lenis = null;
 
-const offset = () => (window.innerWidth < 1024 ? -MOBILE_BAR : 0);
+const offset = () => -(MOBILE_BAR + 16);
 
 /** 섹션으로 이동 (Lenis가 있으면 부드럽게, 없으면 브라우저 기본) */
 function scrollToEl(el) {
