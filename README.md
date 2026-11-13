@@ -12,12 +12,13 @@ ftvot-site/
 │   ├── .nojekyll         # GitHub Pages의 Jekyll 처리 끄기
 │   └── assets/
 │       ├── css/main.css
-│       ├── js/{main.js, theme-init.js}
-│       └── units/<유닛>/{thumb.webp, 0.webp, 1.webp ...}
+│       ├── js/{main.js, characters.js, roster.js(자동 생성), theme-init.js}
+│       └── units/<캐릭터>/thumb.webp
 ├── tools/
-│   ├── units.json            # 어떤 유닛, 어떤 프레임을 쓸지
+│   ├── units.json            # Unity 시트에서 어떤 유닛, 어떤 프레임을 쓸지
 │   ├── make_sprites.py       # Unity 스프라이트 시트 → WebP
-│   └── render_units.py       # index.html의 도감/선택 칸 자동 생성
+│   ├── add_characters.py     # 낱장 캐릭터 PNG → WebP
+│   └── render_units.py       # 캐릭터 풀(roster.js) 자동 생성
 ├── wrangler.jsonc        # Cloudflare Workers 배포 설정
 ├── DESIGN.md             # 디자인 결정과 이유
 └── CREDITS.md            # 오픈소스, 글꼴, 상표 표기
@@ -55,20 +56,21 @@ cd docs && python3 -m http.server 8080
 # http://localhost:8080
 ```
 
-## 4. 유닛 추가/교체 (자동화)
+## 4. 돌아다니는 캐릭터 추가 (자동화)
 
-Unity 프로젝트의 `Unit` 폴더(.png와 .png.meta)를 그대로 씁니다. 슬라이스 좌표는 .meta에서 읽습니다.
+사이트에는 캐릭터 45명이 무작위로 등장합니다. 화면 아래를 걷는 캐릭터(데스크톱 4명, 모바일 2명), 히어로의 3명, 선 위에 걸터앉은 3명입니다. 누르면 깡충 뛰고, 걸터앉은 캐릭터는 다른 캐릭터로 바뀝니다. 걷는 캐릭터는 화면 밖으로 나갔다 들어오면서 다른 캐릭터로 바뀝니다.
 
 ```bash
 pip install pillow
-# 1) tools/units.json에 ["slug", "표시 이름", ["프레임이름", ...]] 한 줄 추가
-# 2) WebP 생성 (8K 시트가 있어서 몇 분 걸립니다)
+# 낱장 PNG(투명 배경)를 추가할 때
+python3 tools/add_characters.py 새캐릭터1.png 새캐릭터2.png
+# Unity 스프라이트 시트에서 다시 뽑을 때 (tools/units.json 수정 후)
 python3 tools/make_sprites.py ~/Unity_Project/<프로젝트>/Assets/Unit
-# 3) index.html에 반영
+# 마지막에 항상 실행: 캐릭터 풀 갱신
 python3 tools/render_units.py
 ```
 
-프레임 이름은 Unity Sprite Editor에서 붙인 이름입니다(예: `Saya_Field_0`). 앞의 4명이 도감에서 크게, 앞의 6명이 히어로 선택 칸에 나옵니다.
+캐릭터 이름은 `tools/units.json`(Unity 유닛)과 `tools/extras.manifest.json`(낱장 캐릭터)의 이름 값입니다. 이름이 있으면 걷는 캐릭터를 눌렀을 때 말풍선으로 보입니다.
 
 ## 5. 수정 위치
 

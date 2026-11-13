@@ -10,7 +10,7 @@
 
 ## 콘텐츠
 
-- 유닛 일러스트(`docs/assets/units/`)와 프로젝트 정보는 FTVOT_STUDIO의 자료입니다.
+- 캐릭터 일러스트(`docs/assets/units/`)와 프로젝트 정보는 FTVOT_STUDIO의 자료입니다.
 
 ## 상표
 

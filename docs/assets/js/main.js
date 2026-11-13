@@ -1,5 +1,6 @@
 // FTVOT_STUDIO — main.js
 // 빌드 없는 ES 모듈입니다. 모든 기능은 JS가 실패해도 기본 HTML이 동작하도록 "덧붙이는" 방식입니다.
+import { initCharacters } from './characters.js';
 
 const root = document.documentElement;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -97,40 +98,6 @@ if (pastHero) setState('shown');
 });
 }
 
-/* ---------------- 히어로 유닛 선택 ---------------- */
-function initStage() {
-const img = document.querySelector('[data-stage-img]');
-const nameEl = document.querySelector('[data-stage-name]');
-const countEl = document.querySelector('.stage-count');
-const picks = [...document.querySelectorAll('.pick')];
-if (!img || !nameEl || !picks.length) return;
-const total = document.querySelectorAll('.unit').length;
-
-picks.forEach((pick) => {
-pick.addEventListener('click', async () => {
-if (pick.getAttribute('aria-pressed') === 'true') return;
-const { src, w, h, name, index } = pick.dataset;
-// 새 이미지를 먼저 받아두고 전환합니다. 전환 중에 빈 칸이 보이지 않게
-const next = new Image();
-next.src = src;
-try {
-await next.decode();
-} catch (error) {
-// 디코드 실패해도 src 교체로 진행합니다
-}
-morph(() => {
-img.src = src;
-img.width = Number(w);
-img.height = Number(h);
-img.alt = `${name} 유닛 일러스트`;
-nameEl.textContent = name;
-if (countEl) countEl.textContent = `UNIT ${String(index).padStart(2, '0')} / ${total}`;
-picks.forEach((p) => p.setAttribute('aria-pressed', String(p === pick)));
-});
-});
-});
-}
-
 /* ---------------- 프로젝트 필터 ---------------- */
 function initFilter() {
 const buttons = [...document.querySelectorAll('.filter-btn')];
@@ -173,104 +140,6 @@ if (current !== filter) morph(() => apply(filter));
 };
 buttons.forEach((btn) => btn.addEventListener('click', () => run(btn.dataset.filter ?? 'all')));
 resetBtn?.addEventListener('click', () => run('all'));
-}
-
-/* ---------------- 유닛 도감 상세 ---------------- */
-function initUnitDialog() {
-const dialog = document.querySelector('[data-unit-dialog]');
-const tiles = [...document.querySelectorAll('.unit')];
-if (!dialog || !tiles.length) return;
-const img = dialog.querySelector('[data-dlg-img]');
-const nameEl = dialog.querySelector('[data-dlg-name]');
-const labelEl = dialog.querySelector('[data-dlg-label]');
-const framesEl = dialog.querySelector('[data-dlg-frames]');
-const prevBtn = dialog.querySelector('[data-dlg-prev]');
-const nextBtn = dialog.querySelector('[data-dlg-next]');
-
-let unitIndex = 0;
-let frameIndex = 0;
-/** @type {Array<[number, number]>} */
-let frames = [];
-
-const frameSrc = (slug, i) => `./assets/units/${slug}/${i}.webp`;
-
-const showFrame = (i) => {
-const slug = tiles[unitIndex].dataset.unit;
-frameIndex = i;
-const [w, h] = frames[i];
-img.src = frameSrc(slug, i);
-img.width = w;
-img.height = h;
-img.alt = `${tiles[unitIndex].dataset.name} 프레임 ${i + 1}`;
-labelEl.textContent = `프레임 ${i + 1} / ${frames.length}`;
-framesEl.querySelectorAll('.dlg-frame').forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
-};
-
-const load = (index) => {
-unitIndex = (index + tiles.length) % tiles.length;
-const tile = tiles[unitIndex];
-const slug = tile.dataset.unit;
-try {
-frames = JSON.parse(tile.dataset.frames ?? '[]');
-} catch (error) {
-frames = [];
-}
-if (!frames.length) return;
-nameEl.textContent = tile.dataset.name ?? '';
-framesEl.replaceChildren(...frames.map(([w, h], i) => {
-const btn = document.createElement('button');
-btn.type = 'button';
-btn.className = 'dlg-frame';
-btn.setAttribute('aria-label', `프레임 ${i + 1}`);
-btn.setAttribute('aria-pressed', 'false');
-const thumb = document.createElement('img');
-thumb.src = frameSrc(slug, i);
-thumb.width = w;
-thumb.height = h;
-thumb.alt = '';
-thumb.loading = 'lazy';
-btn.append(thumb);
-btn.addEventListener('click', () => morph(() => showFrame(i)));
-return btn;
-}));
-showFrame(0);
-};
-
-tiles.forEach((tile, i) => {
-tile.addEventListener('click', () => {
-const tileImg = tile.querySelector('img');
-// 타일 그림 → 다이얼로그 그림으로 모핑. 같은 이름을 잠깐 공유합니다
-if (tileImg) tileImg.style.viewTransitionName = 'unit-focus';
-const transition = morph(() => {
-if (tileImg) tileImg.style.viewTransitionName = '';
-img.style.viewTransitionName = 'unit-focus';
-load(i);
-dialog.showModal();
-lenis?.stop();
-});
-const cleanup = () => { img.style.viewTransitionName = ''; };
-if (transition) transition.finished.finally(cleanup);
-else cleanup();
-});
-});
-
-prevBtn?.addEventListener('click', () => morph(() => load(unitIndex - 1)));
-nextBtn?.addEventListener('click', () => morph(() => load(unitIndex + 1)));
-
-// 방향키로 프레임 넘기기
-dialog.addEventListener('keydown', (event) => {
-if (!frames.length) return;
-if (event.key === 'ArrowRight') { event.preventDefault(); morph(() => showFrame((frameIndex + 1) % frames.length)); }
-if (event.key === 'ArrowLeft') { event.preventDefault(); morph(() => showFrame((frameIndex - 1 + frames.length) % frames.length)); }
-});
-// 바깥 어두운 영역 클릭 시 닫기
-dialog.addEventListener('click', (event) => {
-if (event.target === dialog) dialog.close();
-});
-dialog.addEventListener('close', () => {
-lenis?.start();
-tiles[unitIndex]?.focus({ preventScroll: true });
-});
 }
 
 /* ---------------- 테마 전환 ---------------- */
@@ -340,8 +209,7 @@ if (el) el.textContent = String(new Date().getFullYear());
 initTheme();
 initAnchors();
 initNav();
-initStage();
 initFilter();
-initUnitDialog();
+initCharacters();
 initYear();
 initSmoothScroll();

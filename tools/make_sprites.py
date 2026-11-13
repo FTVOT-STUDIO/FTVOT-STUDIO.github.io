@@ -2,8 +2,8 @@
 
 사용법: python3 tools/make_sprites.py <Unity의 Unit 폴더 경로>
 - .png.meta에 저장된 슬라이스 좌표(좌하단 원점)로 프레임을 자릅니다
-- 투명 여백을 잘라내고 썸네일(256px)과 상세(512px) WebP를 만듭니다
-- 어떤 프레임을 쓸지는 tools/units.json에서 정합니다
+- 투명 여백을 잘라내고 256px WebP(thumb.webp)를 만듭니다. 사이트를 돌아다니는 캐릭터 그림으로 씁니다
+- 각 유닛의 첫 프레임(보통 Idle)을 씁니다. 프레임 선택은 tools/units.json에서 정합니다
 """
 import json, os, re, sys
 from PIL import Image
@@ -11,7 +11,7 @@ from PIL import Image
 Image.MAX_IMAGE_PIXELS = None  # 8K 시트도 열 수 있게
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'docs', 'assets', 'units')
-THUMB, FULL = 256, 512
+THUMB = 256
 RECT = re.compile(r'name: (.+)\n\s+rect:\n\s+serializedVersion: 2\n\s+x: (\S+)\n\s+y: (\S+)\n\s+width: (\S+)\n\s+height: (\S+)')
 
 
@@ -54,8 +54,7 @@ def main():
             continue
         os.makedirs(os.path.join(OUT, slug), exist_ok=True)
         tw, th = save(frames[names[0]], os.path.join(OUT, slug, 'thumb.webp'), THUMB)
-        sizes = [save(frames[n], os.path.join(OUT, slug, f'{i}.webp'), FULL) for i, n in enumerate(names)]
-        manifest.append({'slug': slug, 'name': label, 'thumb': [tw, th], 'frames': sizes})
+        manifest.append({'slug': slug, 'name': label, 'thumb': [tw, th]})
     json.dump(manifest, open(os.path.join(ROOT, 'tools', 'units.manifest.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print(f'{len(manifest)}명 변환 완료 → {OUT}')
 

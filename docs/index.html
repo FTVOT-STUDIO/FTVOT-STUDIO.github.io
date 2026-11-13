@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FTVOT_STUDIO | Unity 게임 개발자 김연우</title>
-<meta name="description" content="Unity 게임 개발자 김연우(FTVOT_STUDIO)의 포트폴리오입니다. 출시작 2개, 완성작 9개와 직접 만든 게임의 유닛 캐릭터를 소개합니다.">
+<meta name="description" content="Unity 게임 개발자 김연우(FTVOT_STUDIO)의 포트폴리오입니다. 출시작 2개, 완성작 9개를 소개합니다.">
 <meta name="theme-color" content="#F5F1E8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#15121C" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="FTVOT_STUDIO">
 <meta property="og:description" content="경험치는 Nothing이지만 어디든지 갈 수 있는 Passion이 있다.">
-<meta property="og:image" content="./assets/units/saya/0.webp">
+<meta property="og:image" content="./assets/units/saya/thumb.webp">
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <!--
   Credits
@@ -22,7 +22,6 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="image" href="./assets/units/saya/0.webp" fetchpriority="high">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400..600&display=swap">
 <link rel="stylesheet" href="./assets/css/main.css">
@@ -36,7 +35,7 @@
 <a class="pill-brand" href="#top" aria-label="맨 위로">FTVOT</a>
 <ul class="pill-links">
 <li><a href="#work">프로젝트</a></li>
-<li><a href="#units">유닛</a></li>
+<li><a href="#stack">스택</a></li>
 <li><a href="#history">이력</a></li>
 <li><a href="#contact">연락</a></li>
 </ul>
@@ -56,28 +55,12 @@
 <p class="hero-lede">2023년부터 Unity로 게임을 만들고 있습니다. 대부분의 작품에서 기획, 아트, 개발을 직접 맡았고, 다음 목표는 풀스택 개발자입니다.</p>
 <div class="hero-actions">
 <a class="btn btn-primary" href="#work">프로젝트 12개 보기</a>
-<a class="btn btn-secondary" href="#units">유닛 도감 열기</a>
+<a class="btn btn-secondary ext" href="https://github.com/FTVOT-STUDIO?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub 보기</a>
 </div>
 </div>
 
-<!-- 캐릭터 선택 화면: 아래 칸을 누르면 무대의 유닛이 바뀝니다 -->
-<div class="stage-wrap">
-<figure class="stage sticker" aria-live="polite">
-<img class="stage-img" src="./assets/units/saya/0.webp" width="411" height="512" alt="Saya 유닛 일러스트" fetchpriority="high" data-stage-img>
-<figcaption class="stage-tag" data-stage-name>Saya</figcaption>
-<span class="stage-count mono" aria-hidden="true">UNIT 01 / 34</span>
-</figure>
-<div class="picker" role="group" aria-label="무대에 올릴 유닛 고르기">
-<!-- PICKER:START -->
-<button type="button" class="pick" aria-pressed="true" aria-label="Saya" data-src="./assets/units/saya/0.webp" data-w="411" data-h="512" data-name="Saya" data-index="1"><img src="./assets/units/saya/thumb.webp" width="206" height="256" alt="" decoding="async"></button>
-<button type="button" class="pick" aria-pressed="false" aria-label="SnowWhite" data-src="./assets/units/snowwhite/0.webp" data-w="396" data-h="512" data-name="SnowWhite" data-index="2"><img src="./assets/units/snowwhite/thumb.webp" width="198" height="256" alt="" decoding="async"></button>
-<button type="button" class="pick" aria-pressed="false" aria-label="Zoomoji" data-src="./assets/units/zoomoji/0.webp" data-w="492" data-h="512" data-name="Zoomoji" data-index="3"><img src="./assets/units/zoomoji/thumb.webp" width="246" height="256" alt="" decoding="async"></button>
-<button type="button" class="pick" aria-pressed="false" aria-label="CHOKMAH" data-src="./assets/units/chokmah/0.webp" data-w="512" data-h="446" data-name="CHOKMAH" data-index="4"><img src="./assets/units/chokmah/thumb.webp" width="256" height="223" alt="" decoding="async"></button>
-<button type="button" class="pick" aria-pressed="false" aria-label="ShockBeat" data-src="./assets/units/shockbeat/0.webp" data-w="421" data-h="512" data-name="ShockBeat" data-index="5"><img src="./assets/units/shockbeat/thumb.webp" width="211" height="256" alt="" decoding="async"></button>
-<button type="button" class="pick" aria-pressed="false" aria-label="LimeEcho" data-src="./assets/units/limeecho/0.webp" data-w="436" data-h="512" data-name="LimeEcho" data-index="6"><img src="./assets/units/limeecho/thumb.webp" width="218" height="256" alt="" decoding="async"></button>
-<!-- PICKER:END -->
-</div>
-</div>
+<!-- 캐릭터 무리: 새로고침할 때마다 다른 캐릭터가 모입니다 (JS가 채움) -->
+<div class="hero-crew" aria-hidden="true" data-crew></div>
 </div>
 <div class="hero-sentinel"></div>
 </section>
@@ -115,6 +98,7 @@
 <p class="filter-count mono" aria-live="polite"><span data-count>12</span>개 표시 중</p>
 
 <div class="proj-years">
+<span class="perch" aria-hidden="true" data-perch></span>
 <section class="proj-year" aria-label="2026년">
 <h3>2026</h3>
 <ul class="proj-list">
@@ -237,56 +221,6 @@
 </div>
 </section>
 
-<!-- ============ 유닛 도감 ============ -->
-<section id="units" class="section units" aria-labelledby="units-title" tabindex="-1">
-<div class="container">
-<div class="section-head">
-<div>
-<h2 id="units-title" class="section-title">유닛 도감<span class="mono">34</span></h2>
-<p class="section-sub">게임에 들어가는 유닛 일러스트입니다. 눌러서 대기, 공격, 변신 프레임을 넘겨볼 수 있습니다.</p>
-</div>
-</div>
-<ul class="unit-grid">
-<!-- UNITS:START -->
-<li class="is-big"><button type="button" class="unit is-big" data-unit="saya" data-name="Saya" data-frames='[[411,512],[512,442],[345,512],[512,506],[512,464],[497,512]]' aria-haspopup="dialog"><img src="./assets/units/saya/0.webp" width="411" height="512" alt="" loading="lazy" decoding="async"><span class="unit-name">Saya</span><span class="unit-frames mono" aria-hidden="true">6F</span></button></li>
-<li class="is-big"><button type="button" class="unit is-big" data-unit="snowwhite" data-name="SnowWhite" data-frames='[[396,512],[501,512],[512,435],[512,503]]' aria-haspopup="dialog"><img src="./assets/units/snowwhite/0.webp" width="396" height="512" alt="" loading="lazy" decoding="async"><span class="unit-name">SnowWhite</span><span class="unit-frames mono" aria-hidden="true">4F</span></button></li>
-<li class="is-big"><button type="button" class="unit is-big" data-unit="zoomoji" data-name="Zoomoji" data-frames='[[492,512],[512,473],[426,512],[511,512]]' aria-haspopup="dialog"><img src="./assets/units/zoomoji/0.webp" width="492" height="512" alt="" loading="lazy" decoding="async"><span class="unit-name">Zoomoji</span><span class="unit-frames mono" aria-hidden="true">4F</span></button></li>
-<li class="is-big"><button type="button" class="unit is-big" data-unit="chokmah" data-name="CHOKMAH" data-frames='[[512,446],[512,512],[451,512],[512,504]]' aria-haspopup="dialog"><img src="./assets/units/chokmah/0.webp" width="512" height="446" alt="" loading="lazy" decoding="async"><span class="unit-name">CHOKMAH</span><span class="unit-frames mono" aria-hidden="true">4F</span></button></li>
-<li><button type="button" class="unit" data-unit="shockbeat" data-name="ShockBeat" data-frames='[[421,512],[512,512]]' aria-haspopup="dialog"><img src="./assets/units/shockbeat/thumb.webp" width="211" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">ShockBeat</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="limeecho" data-name="LimeEcho" data-frames='[[436,512],[474,512]]' aria-haspopup="dialog"><img src="./assets/units/limeecho/thumb.webp" width="218" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">LimeEcho</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="pulsebutler" data-name="PulseButler" data-frames='[[473,512],[457,512]]' aria-haspopup="dialog"><img src="./assets/units/pulsebutler/thumb.webp" width="236" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">PulseButler</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="binah-yesod" data-name="Binah · Yesod" data-frames='[[466,512],[474,512],[366,512],[480,512]]' aria-haspopup="dialog"><img src="./assets/units/binah-yesod/thumb.webp" width="233" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Binah · Yesod</span><span class="unit-frames mono" aria-hidden="true">4F</span></button></li>
-<li><button type="button" class="unit" data-unit="bryce-luciela" data-name="Bryce Luciela" data-frames='[[468,512],[499,512]]' aria-haspopup="dialog"><img src="./assets/units/bryce-luciela/thumb.webp" width="234" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Bryce Luciela</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="chesed" data-name="Chesed" data-frames='[[403,512],[502,512]]' aria-haspopup="dialog"><img src="./assets/units/chesed/thumb.webp" width="201" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Chesed</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="delta" data-name="Delta" data-frames='[[512,441],[512,469]]' aria-haspopup="dialog"><img src="./assets/units/delta/thumb.webp" width="256" height="221" alt="" loading="lazy" decoding="async"><span class="unit-name">Delta</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="epica" data-name="Epica" data-frames='[[336,512],[475,512]]' aria-haspopup="dialog"><img src="./assets/units/epica/thumb.webp" width="168" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Epica</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="epsilon" data-name="Epsilon" data-frames='[[491,512],[512,488]]' aria-haspopup="dialog"><img src="./assets/units/epsilon/thumb.webp" width="246" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Epsilon</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="four-horsemen" data-name="Four Horsemen" data-frames='[[457,512],[512,403],[415,512],[512,509],[512,512]]' aria-haspopup="dialog"><img src="./assets/units/four-horsemen/thumb.webp" width="229" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Four Horsemen</span><span class="unit-frames mono" aria-hidden="true">5F</span></button></li>
-<li><button type="button" class="unit" data-unit="gevurah" data-name="Gevurah" data-frames='[[324,512],[488,512]]' aria-haspopup="dialog"><img src="./assets/units/gevurah/thumb.webp" width="162" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Gevurah</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="hod" data-name="Hod" data-frames='[[512,421],[512,511],[447,512],[512,498]]' aria-haspopup="dialog"><img src="./assets/units/hod/thumb.webp" width="256" height="210" alt="" loading="lazy" decoding="async"><span class="unit-name">Hod</span><span class="unit-frames mono" aria-hidden="true">4F</span></button></li>
-<li><button type="button" class="unit" data-unit="ignis" data-name="Ignis" data-frames='[[393,512],[426,512],[489,512],[512,497]]' aria-haspopup="dialog"><img src="./assets/units/ignis/thumb.webp" width="196" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Ignis</span><span class="unit-frames mono" aria-hidden="true">4F</span></button></li>
-<li><button type="button" class="unit" data-unit="jin-illustrator" data-name="Jin Illustrator" data-frames='[[512,452],[512,502]]' aria-haspopup="dialog"><img src="./assets/units/jin-illustrator/thumb.webp" width="256" height="226" alt="" loading="lazy" decoding="async"><span class="unit-name">Jin Illustrator</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="jules-de-fore" data-name="Jules de Fore" data-frames='[[458,512],[454,512]]' aria-haspopup="dialog"><img src="./assets/units/jules-de-fore/thumb.webp" width="229" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Jules de Fore</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="kether" data-name="Kether" data-frames='[[455,512],[512,505]]' aria-haspopup="dialog"><img src="./assets/units/kether/thumb.webp" width="227" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Kether</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="luna" data-name="Luna" data-frames='[[482,512],[512,466]]' aria-haspopup="dialog"><img src="./assets/units/luna/thumb.webp" width="241" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Luna</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="malkuth" data-name="Malkuth" data-frames='[[385,512],[340,512],[512,377],[502,512]]' aria-haspopup="dialog"><img src="./assets/units/malkuth/thumb.webp" width="192" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Malkuth</span><span class="unit-frames mono" aria-hidden="true">4F</span></button></li>
-<li><button type="button" class="unit" data-unit="minimel" data-name="Minimel" data-frames='[[352,512],[433,512]]' aria-haspopup="dialog"><img src="./assets/units/minimel/thumb.webp" width="176" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Minimel</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="nemesis" data-name="Nemesis" data-frames='[[501,512],[510,512]]' aria-haspopup="dialog"><img src="./assets/units/nemesis/thumb.webp" width="251" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Nemesis</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="netzach" data-name="Netzach" data-frames='[[512,436],[512,299]]' aria-haspopup="dialog"><img src="./assets/units/netzach/thumb.webp" width="256" height="218" alt="" loading="lazy" decoding="async"><span class="unit-name">Netzach</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="pie" data-name="Pie" data-frames='[[366,512],[475,512]]' aria-haspopup="dialog"><img src="./assets/units/pie/thumb.webp" width="183" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Pie</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="scalar" data-name="Scalar" data-frames='[[441,512],[508,512],[483,512],[512,512]]' aria-haspopup="dialog"><img src="./assets/units/scalar/thumb.webp" width="221" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Scalar</span><span class="unit-frames mono" aria-hidden="true">4F</span></button></li>
-<li><button type="button" class="unit" data-unit="starlight" data-name="StarLight" data-frames='[[512,468],[508,512]]' aria-haspopup="dialog"><img src="./assets/units/starlight/thumb.webp" width="256" height="234" alt="" loading="lazy" decoding="async"><span class="unit-name">StarLight</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="the-516th-batter" data-name="The 516th Batter" data-frames='[[507,512],[512,292]]' aria-haspopup="dialog"><img src="./assets/units/the-516th-batter/thumb.webp" width="254" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">The 516th Batter</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="tiphereth" data-name="Tiphereth" data-frames='[[360,512],[448,512]]' aria-haspopup="dialog"><img src="./assets/units/tiphereth/thumb.webp" width="180" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Tiphereth</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="tsubasa-shirai" data-name="Tsubasa Shirai" data-frames='[[512,425],[512,489]]' aria-haspopup="dialog"><img src="./assets/units/tsubasa-shirai/thumb.webp" width="256" height="212" alt="" loading="lazy" decoding="async"><span class="unit-name">Tsubasa Shirai</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="voidcluster" data-name="VoidCluster" data-frames='[[505,512],[512,505]]' aria-haspopup="dialog"><img src="./assets/units/voidcluster/thumb.webp" width="253" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">VoidCluster</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="yesod" data-name="Yesod" data-frames='[[512,488],[512,418]]' aria-haspopup="dialog"><img src="./assets/units/yesod/thumb.webp" width="256" height="244" alt="" loading="lazy" decoding="async"><span class="unit-name">Yesod</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<li><button type="button" class="unit" data-unit="zeta" data-name="Zeta" data-frames='[[417,512],[512,510]]' aria-haspopup="dialog"><img src="./assets/units/zeta/thumb.webp" width="208" height="256" alt="" loading="lazy" decoding="async"><span class="unit-name">Zeta</span><span class="unit-frames mono" aria-hidden="true">2F</span></button></li>
-<!-- UNITS:END -->
-</ul>
-</div>
-</section>
-
 <!-- ============ 이력 ============ -->
 <section id="history" class="section history" aria-labelledby="history-title" tabindex="-1">
 <div class="container">
@@ -294,6 +228,7 @@
 <h2 id="history-title" class="section-title">이력</h2>
 </div>
 <div class="timeline">
+<span class="perch perch-left" aria-hidden="true" data-perch></span>
 <section class="tl-year" aria-label="2026년">
 <h3>2026</h3>
 <ul class="tl-items">
@@ -351,27 +286,17 @@
 </section>
 </main>
 
-<!-- 유닛 상세: 네이티브 dialog라 Esc 닫기, 포커스 가두기, 포커스 복귀를 브라우저가 처리합니다 -->
-<dialog class="unit-dialog" aria-labelledby="dlg-name" data-unit-dialog>
-<div class="dlg-inner">
-<div class="dlg-stage"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" width="512" height="512" data-dlg-img></div>
-<div class="dlg-side">
-<h2 id="dlg-name" class="dlg-name" data-dlg-name>유닛</h2>
-<p class="dlg-frame-label mono" data-dlg-label>프레임 1 / 1</p>
-<div class="dlg-frames" role="group" aria-label="프레임 선택" data-dlg-frames></div>
-<div class="dlg-nav">
-<button type="button" class="btn btn-secondary" data-dlg-prev>이전 유닛</button>
-<button type="button" class="btn btn-secondary" data-dlg-next>다음 유닛</button>
-</div>
-</div>
-</div>
-<form method="dialog"><button class="dlg-close" aria-label="닫기">×</button></form>
-</dialog>
+<!-- 화면 아래를 돌아다니는 캐릭터. 장식용이라 보조기기에서는 숨깁니다 -->
+<div class="roam" aria-hidden="true" data-roam></div>
 
 <footer class="footer">
+<span class="perch perch-footer" aria-hidden="true" data-perch></span>
 <div class="container footer-grid">
 <p>© <span data-year>2026</span> FTVOT_STUDIO · 김연우</p>
+<div class="footer-actions">
+<button class="theme-toggle theme-toggle-text" type="button" data-roam-toggle aria-pressed="true">캐릭터 끄기</button>
 <button class="theme-toggle theme-toggle-text" type="button" data-theme-toggle>테마 전환</button>
+</div>
 <p class="fineprint">글꼴: Pretendard, Geist Mono (SIL OFL 1.1) · 스크롤: Lenis (MIT) · Unity는 Unity Technologies, Geometry Dash는 RobTop Games의 상표입니다.</p>
 </div>
 </footer>
