@@ -41,7 +41,7 @@ ftvot-site/
 | 9 | 예소드 | yesod | 개발 중, 다음 목표 |
 | 10 | 말쿠트 | malkuth | 연락 |
 
-나무 노드를 누르면 해당 세피라로 이동하면서 `docs/assets/sfx/<id>.mp3`가 재생되고, 세피라 캐릭터가 동작 프레임으로 바뀝니다. 효과음과 걷는 캐릭터는 푸터 버튼으로 끌 수 있습니다.
+나무 노드를 누르면 해당 세피라로 이동하면서 `docs/assets/sfx/<id>.mp3`가 재생되고, 세피라 캐릭터가 동작 프레임으로 바뀝니다. 효과음은 푸터 버튼으로 끌 수 있습니다.
 
 ## 1. GitHub Pages 배포
 
@@ -77,7 +77,7 @@ cd docs && python3 -m http.server 8080
 
 ## 4. 돌아다니는 캐릭터 추가 (자동화)
 
-사이트에는 캐릭터 45명이 무작위로 등장합니다. 화면 아래를 걷는 캐릭터(데스크톱 4명, 모바일 2명), 히어로의 3명, 선 위에 걸터앉은 3명입니다. 누르면 깡충 뛰고, 걸터앉은 캐릭터는 다른 캐릭터로 바뀝니다. 걷는 캐릭터는 화면 밖으로 나갔다 들어오면서 다른 캐릭터로 바뀝니다.
+캐릭터 45명은 네차흐 섹션의 정원에 무작위로 흩어져 등장하고, 누르면 깡충 뜁니다.
 
 ```bash
 pip install pillow
@@ -89,7 +89,7 @@ python3 tools/make_sprites.py ~/Unity_Project/<프로젝트>/Assets/Unit
 python3 tools/render_units.py
 ```
 
-캐릭터 이름은 `tools/units.json`(Unity 유닛)과 `tools/extras.manifest.json`(낱장 캐릭터)의 이름 값입니다. 이름이 있으면 걷는 캐릭터를 눌렀을 때 말풍선으로 보입니다.
+캐릭터 이름은 `tools/units.json`(Unity 유닛)과 `tools/extras.manifest.json`(낱장 캐릭터)의 이름 값입니다. 
 
 ## 5. 수정 위치
 

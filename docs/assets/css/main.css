@@ -440,7 +440,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3);
   position: relative; z-index: 1;
   margin-top: var(--s-8);
-  padding: var(--s-6) 0 calc(var(--s-6) + 96px);
+  padding: var(--s-6) 0 var(--s-7);
   border-top: var(--bw) solid var(--line);
   font-size: 14px; color: var(--ink-2);
 }
@@ -483,28 +483,8 @@ html { scroll-padding-top: calc(var(--mbar-h) + var(--s-4)); }
   font-size: 22px; line-height: 1; cursor: pointer; z-index: 2;
 }
 
-/* ---------- 돌아다니는 캐릭터 ---------- */
-.roam { position: fixed; left: 0; right: 0; bottom: 0; height: 0; z-index: 40; pointer-events: none; overflow-x: clip; overflow-y: visible; }
-.roam[hidden] { display: none; }
-.roamer { position: absolute; bottom: 2px; left: 0; width: var(--roamer-w, 72px); will-change: transform; }
-.roamer-body { display: block; pointer-events: auto; cursor: pointer; transform-origin: 50% 100%; }
-.roamer-body img { width: 100%; height: auto; pointer-events: none; transform: scaleX(var(--face, 1)); }
-.roamer::after { content: ''; position: absolute; left: 18%; right: 18%; bottom: -3px; height: 8px; border-radius: 50%; background: rgb(0 0 0 / 0.35); z-index: -1; }
-.bubble {
-  position: absolute; bottom: calc(100% + 6px); left: 50%; translate: -50% 0;
-  padding: 2px var(--s-3);
-  background: var(--card); border: 2px solid var(--edge); border-radius: var(--r-pill);
-  font-size: 12px; font-weight: 800; white-space: nowrap;
-  opacity: 0; scale: 0.6; transform-origin: 50% 100%;
-  transition: opacity 0.2s ease-out, scale 0.45s var(--ease-spring);
-  pointer-events: none;
-}
-.bubble.is-on { opacity: 1; scale: 1; }
-
+/* ---------- 캐릭터 모션 ---------- */
 @media (prefers-reduced-motion: no-preference) {
-  .roamer-body { animation: idle-bob 2.6s ease-in-out infinite; }
-  .roamer.is-walking .roamer-body { animation: waddle 0.46s ease-in-out infinite alternate; }
-  .roamer .roamer-body.is-hop { animation: hop 0.55s var(--ease-out-expo); }
   /* 정원 캐릭터는 translate로 발밑 기준 배치라, 움직임은 margin으로 줍니다 */
   .sprout { animation: sprout-bob 2.6s ease-in-out infinite; }
   .sprout:nth-child(3n) { animation-delay: -0.9s; }
@@ -514,8 +494,6 @@ html { scroll-padding-top: calc(var(--mbar-h) + var(--s-4)); }
   .sphere.is-acting .sphere-art { animation: act-shake 0.5s var(--ease-out-expo); }
 }
 @keyframes idle-bob { 50% { translate: 0 -4px; } }
-@keyframes waddle { from { rotate: -5deg; } to { rotate: 5deg; translate: 0 -3px; } }
-@keyframes hop { 0% { translate: 0 0; scale: 1 1; } 25% { scale: 1.08 0.9; } 55% { translate: 0 -28px; scale: 0.96 1.06; } 100% { translate: 0 0; scale: 1 1; } }
 @keyframes sprout-bob { 50% { margin-top: -4px; } }
 @keyframes sprout-hop { 55% { margin-top: -28px; } }
 @keyframes act-shake { 20% { scale: 1.06 0.94; } 45% { scale: 0.97 1.05; } }
@@ -531,8 +509,6 @@ html { scroll-padding-top: calc(var(--mbar-h) + var(--s-4)); }
 }
 @media (max-width: 767px) {
   :root { --sphere: 128px; }
-  .roam { --roamer-w: 56px; }
-  .footer { padding-bottom: calc(var(--s-6) + 76px); }
   .tree-row { padding-block: var(--s-6); }
   .seph-panel { padding: 20px; border-radius: var(--r-lg); }
   .blessing { margin-bottom: var(--s-6); }
