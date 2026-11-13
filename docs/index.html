@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FTVOT_STUDIO | Unity 게임과 Linux 도구를 만드는 개발자</title>
+<meta name="description" content="FTVOT_STUDIO의 작업 기록입니다. Unity 게임, 데스크톱 펫, GNOME 확장, Raspberry Pi 서버 프로젝트를 소개합니다.">
+<meta name="theme-color" content="#FAFAF9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B0B0E" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="FTVOT_STUDIO">
+<meta property="og:description" content="Unity 게임과 Linux 도구를 만드는 개발자의 작업 기록입니다.">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<!--
+  Credits
+  - Lenis (MIT) © darkroom.engineering — https://github.com/darkroomengineering/lenis
+  - Pretendard (SIL OFL 1.1) © Kil Hyung-jin — https://github.com/orioncactus/pretendard
+  - Geist, Geist Mono (SIL OFL 1.1) © Vercel — https://vercel.com/font
+-->
+<!-- 테마 깜빡임 방지: 첫 페인트 전에 저장된 테마를 적용합니다 -->
+<script src="./assets/js/theme-init.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="./assets/css/main.css">
+<script type="module" src="./assets/js/main.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#work">본문으로 건너뛰기</a>
+
+<!-- 히어로를 지나면 pill 형태로 모핑 등장하는 헤더 -->
+<header class="pill-nav" data-state="hidden">
+<nav aria-label="주요 메뉴">
+<a class="pill-brand" href="#top" aria-label="맨 위로">FTVOT</a>
+<ul class="pill-links">
+<li><a href="#work">작업</a></li>
+<li><a href="#stack">스택</a></li>
+<li><a href="#contact">연락</a></li>
+</ul>
+<span class="pill-theta theta-readout" aria-hidden="true">θ </span>
+<button class="theme-toggle" type="button" data-theme-toggle aria-label="테마 전환">
+<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor"/></svg>
+</button>
+</nav>
+</header>
+
+<main id="top">
+<section class="hero" aria-labelledby="hero-title">
+<div class="container hero-grid">
+<div class="hero-copy">
+<p class="hero-name">FTVOT_STUDIO</p>
+<h1 id="hero-title" class="hero-title"><span class="line">Find the value</span> <span class="line">of <span class="theta-glyph">θ</span>.</span></h1>
+<p class="hero-lede">Unity로 게임을 만들고, Linux와 Raspberry Pi로 매일 쓰는 도구를 직접 만듭니다. 그 과정을 이곳에 기록합니다.</p>
+<div class="hero-actions">
+<a class="btn btn-primary" href="https://github.com/FTVOT-STUDIO" target="_blank" rel="noopener noreferrer">GitHub 저장소 보기</a>
+<a class="btn btn-secondary" href="#work">작업 7개 살펴보기</a>
+</div>
+</div>
+
+<!-- 스크롤 진행률을 각도 θ로 보여주는 다이얼. 정보는 장식이라 스크린리더에서 숨깁니다 -->
+<figure class="dial-wrap" aria-hidden="true">
+<svg class="dial" viewBox="-170 -170 340 340" width="340" height="340">
+<circle class="dial-ring" r="150"/>
+<line class="dial-base" x1="0" y1="0" x2="150" y2="0"/>
+<g transform="scale(1,-1)">
+<circle class="dial-arc" r="150" pathLength="360"/>
+<circle class="dial-mark" r="46" pathLength="360"/>
+<g class="dial-hand">
+<line x1="0" y1="0" x2="150" y2="0"/>
+<circle class="dial-tip" cx="150" cy="0" r="6"/>
+</g>
+</g>
+<circle class="dial-center" r="3.5"/>
+</svg>
+<figcaption class="dial-readout theta-readout">θ = </figcaption>
+</figure>
+</div>
+<div class="hero-sentinel"></div>
+</section>
+
+<section id="work" class="section work" aria-labelledby="work-title" tabindex="-1">
+<div class="container">
+<div class="section-head">
+<h2 id="work-title" class="section-title">작업</h2>
+<div class="filter" role="group" aria-label="작업 분류 필터">
+<button type="button" class="filter-btn" data-filter="all" aria-pressed="true">전체<span class="filter-ind"></span></button>
+<button type="button" class="filter-btn" data-filter="game" aria-pressed="false">게임</button>
+<button type="button" class="filter-btn" data-filter="tool" aria-pressed="false">도구</button>
+<button type="button" class="filter-btn" data-filter="system" aria-pressed="false">시스템</button>
+</div>
+</div>
+<p class="work-count" aria-live="polite"><span data-count>7</span>개 표시 중</p>
+
+<ol class="work-list">
+<li class="work-item" data-category="game">
+<details name="work">
+<summary><span class="idx">01</span><span class="w-title">Project P</span><span class="w-kind">Unity · 로그라이크 플랫포머</span><span class="chev" aria-hidden="true"></span></summary>
+<div class="w-body">
+<p>Unity로 만드는 싱글플레이 로그라이크 플랫포머입니다. GIGDC 출품을 염두에 두고 기획했습니다.</p>
+<dl class="spec">
+<dt>엔진</dt><dd>Unity, C#</dd>
+<dt>장르</dt><dd>로그라이크, 플랫포머, 싱글플레이</dd>
+</dl>
+</div>
+</details>
+</li>
+<li class="work-item" data-category="tool">
+<details name="work">
+<summary><span class="idx">02</span><span class="w-title">FABLEFORGE</span><span class="w-kind">Unity 에셋 · 내러티브 도구</span><span class="chev" aria-hidden="true"></span></summary>
+<div class="w-body">
+<p>Unity 에디터에서 대화와 분기를 그래프로 설계하는 내러티브 도구입니다. 직접 만든 에셋입니다.</p>
+<dl class="spec">
+<dt>형태</dt><dd>Unity 에디터 확장 에셋</dd>
+<dt>용도</dt><dd>대화 흐름, 분기 설계</dd>
+</dl>
+</div>
+</details>
+</li>
+<li class="work-item" data-category="game">
+<details name="work">
+<summary><span class="idx">03</span><span class="w-title">Geometry Dash 모작</span><span class="w-kind">Unity · 리듬 액션</span><span class="chev" aria-hidden="true"></span></summary>
+<div class="w-body">
+<p>Geometry Dash의 조작감을 따라 만든 모작입니다. 이동, 점프, 게임오버와 포탈, 패드, 오브 오브젝트를 구현했습니다.</p>
+<dl class="spec">
+<dt>엔진</dt><dd>Unity, C#</dd>
+<dt>구현</dt><dd>이동, 점프, 게임오버, 포탈, 패드, 오브</dd>
+</dl>
+</div>
+</details>
+</li>
+<li class="work-item" data-category="game">
+<details name="work">
+<summary><span class="idx">04</span><span class="w-title">고래 클리커 (가제)</span><span class="w-kind">Unity · 클리커</span><span class="chev" aria-hidden="true"></span></summary>
+<div class="w-body">
+<p>아이들을 위한 병맛 콘셉트의 고래 클리커입니다. 자원과 수치 UI를 다시 설계하면서 공통 UI와 씬 전용 UI의 책임을 나눴습니다.</p>
+<dl class="spec">
+<dt>엔진</dt><dd>Unity, C#, UGUI</dd>
+<dt>구조</dt><dd>UIManager(공통) / WhaleSceneUI(씬 전용), OnEnable 구독과 OnDisable 해제</dd>
+</dl>
+</div>
+</details>
+</li>
+<li class="work-item" data-category="tool">
+<details name="work">
+<summary><span class="idx">05</span><span class="w-title">Moe Pet × Clau</span><span class="w-kind">Electron · 데스크톱 펫</span><span class="chev" aria-hidden="true"></span></summary>
+<div class="w-body">
+<p>바탕화면 위에 사는 데스크톱 펫입니다. 직접 만든 Moe Pet과 친구가 만든 Clau의 기능을 하나로 합치고 있습니다. 말풍선은 젤리처럼 튀어나오는 애니메이션을 씁니다.</p>
+<dl class="spec">
+<dt>플랫폼</dt><dd>Electron</dd>
+<dt>형태</dt><dd>공동 작업, 기능 병합</dd>
+</dl>
+</div>
+</details>
+</li>
+<li class="work-item" data-category="system">
+<details name="work">
+<summary><span class="idx">06</span><span class="w-title">studio-desktop</span><span class="w-kind">GNOME Shell 확장</span><span class="chev" aria-hidden="true"></span></summary>
+<div class="w-body">
+<p>Ubuntu GNOME 바탕화면에 시스템, 날씨, 음악 상태 위젯을 띄우는 확장입니다. 잠금 화면의 시계 위치와 굵기도 직접 다듬었습니다.</p>
+<dl class="spec">
+<dt>환경</dt><dd>Ubuntu, GNOME Shell</dd>
+<dt>기술</dt><dd>JavaScript, CSS, JSON, Shell</dd>
+</dl>
+</div>
+</details>
+</li>
+<li class="work-item" data-category="system">
+<details name="work">
+<summary><span class="idx">07</span><span class="w-title">MeloNest</span><span class="w-kind">Raspberry Pi · 개인 서버</span><span class="chev" aria-hidden="true"></span></summary>
+<div class="w-body">
+<p>Raspberry Pi와 외장 HDD로 만든 개인 서버입니다. nginx 경로 기반으로 서비스를 붙여서, 새 서비스를 추가해도 기존 주소가 바뀌지 않게 구성했습니다.</p>
+<dl class="spec">
+<dt>하드웨어</dt><dd>Raspberry Pi, 외장 HDD</dd>
+<dt>구성</dt><dd>nginx 경로 라우팅, Tailscale 원격 접속</dd>
+</dl>
+</div>
+</details>
+</li>
+</ol>
+<p class="work-empty" hidden>이 분류에는 아직 공개한 작업이 없습니다. <button type="button" class="link-btn" data-filter-reset>전체 보기</button></p>
+</div>
+</section>
+
+<section id="stack" class="section stack" aria-labelledby="stack-title" tabindex="-1">
+<div class="container stack-grid">
+<h2 id="stack-title" class="section-title">스택</h2>
+<dl class="sheet">
+<div><dt>게임 클라이언트</dt><dd>Unity 6, C#, UGUI, 오브젝트 풀링, 제네릭 싱글턴</dd></div>
+<div><dt>모바일</dt><dd>Android Studio, Kotlin, Gradle, ADB</dd></div>
+<div><dt>시스템</dt><dd>Ubuntu, GNOME Shell 확장, Wine/Proton, C/C++</dd></div>
+<div><dt>서버와 네트워크</dt><dd>Raspberry Pi, nginx, Tailscale, rclone WebDAV</dd></div>
+<div><dt>협업</dt><dd>Git, GitHub, Unity DevOps</dd></div>
+<div><dt>창작</dt><dd>Aseprite(픽셀 아트), Audiotool(음악)</dd></div>
+</dl>
+</div>
+</section>
+
+<section id="contact" class="section contact" aria-labelledby="contact-title" tabindex="-1">
+<div class="container">
+<h2 id="contact-title" class="contact-title">코드와 진행 상황은<br>GitHub에 올립니다.</h2>
+<!-- TODO: 공개용 연락 이메일을 정하면 여기에 mailto 링크를 추가합니다 -->
+<a class="btn btn-primary btn-lg" href="https://github.com/FTVOT-STUDIO" target="_blank" rel="noopener noreferrer">github.com/FTVOT-STUDIO</a>
+</div>
+</section>
+</main>
+
+<footer class="footer">
+<div class="container footer-grid">
+<p>© <span data-year>2026</span> FTVOT_STUDIO</p>
+<button class="theme-toggle theme-toggle-text" type="button" data-theme-toggle>테마 전환</button>
+<p class="fineprint">글꼴: Pretendard, Geist (SIL OFL 1.1) · 스크롤: Lenis (MIT) · Unity는 Unity Technologies, Geometry Dash는 RobTop Games의 상표입니다.</p>
+</div>
+</footer>
+</body>
+</html>

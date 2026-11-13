@@ -1,0 +1,13 @@
+// Cloudflare Workers 정적 에셋 배포 설정
+// 사용법: npx wrangler deploy  (docs/ 폴더만 업로드됩니다)
+{
+  "name": "ftvot-site",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    // GitHub Pages와 같은 폴더를 그대로 씁니다. 저장소 하나로 두 곳에 배포됩니다
+    "directory": "./docs",
+    // 없는 경로는 docs/404.html을 404 상태로 응답합니다
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  }
+}
