@@ -590,6 +590,8 @@ main { position: relative; z-index: 1; }
 .ht-coordinate { display: none; position: absolute; right: 6vw; bottom: 12vh; font-size: 10px; color: var(--text-3); line-height: 2; letter-spacing: 0.12em; }
 .ht-tree .node-ring { fill: rgb(8 7 13 / 0.9); }
 .ht-tree .node.is-current .node-ring { fill: color-mix(in oklab, var(--sc) 18%, var(--bg)); }
+.ht-tree .node.is-current .node-name { fill: var(--text); }
+.ht-tree .node.is-current .node-sym { fill: var(--sc); }
 .ht-tree .path { stroke: rgb(190 174 212 / 0.42); stroke-width: 1.15; }
 .arka-eyebrow { color: var(--text-3); font-size: 11px; letter-spacing: 0.18em; }
 .arka-title { margin-top: 8px; font-size: clamp(4.5rem, 12vw, 7.5rem); font-weight: 450; letter-spacing: 0.08em; line-height: 1.1; }
@@ -651,3 +653,93 @@ details[open] > summary .arka-expand { rotate: 45deg; }
   .arka-faction-group .arka-definitions { padding-inline: 0; }
 }
 
+
+/* 움직이는 배경은 화면 밖까지 여유를 두어 마우스 이동 때 가장자리가 비지 않습니다. */
+.sky { inset: -32px; transform: translate3d(var(--parallax-x, 0px), var(--parallax-y, 0px), 0); }
+.cosmic-orbits { transform: translate3d(var(--parallax-x, 0px), var(--parallax-y, 0px), 0); }
+.intro { display: none; background: #050408; }
+.js .intro { display: grid; }
+.intro-title { font-size: 18px; font-weight: 500; letter-spacing: 0.18em; }
+.intro-caption { margin-top: 12px; color: var(--text-2); font-size: 10px; letter-spacing: 0.24em; }
+.intro-state { color: var(--text-3); }
+.intro-constellation { position: relative; width: 112px; height: 112px; margin: 0 auto 32px; }
+.intro-constellation span { position: absolute; inset: 12px; border: 1px solid rgb(182 154 203 / 0.42); border-radius: 50%; transform: rotate(-30deg) scaleY(0.42); }
+.intro-constellation span:nth-child(2) { transform: rotate(45deg) scaleY(0.55); }
+.intro-constellation span:nth-child(3) { transform: rotate(-70deg) scaleY(0.6); border-style: dashed; opacity: 0.6; }
+.intro-constellation i { position: absolute; inset: calc(50% - 3px); background: var(--c1); border-radius: 50%; }
+@media (prefers-reduced-motion: no-preference) {
+  .intro-constellation { animation: archive-arrive 1.3s ease both; }
+}
+@keyframes archive-arrive { from { opacity: 0; transform: scale(0.75) rotate(-12deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+/* 실제 픽셀 경계로 위치를 보정하므로 이미지의 자동 축소를 해제합니다. */
+.orb-art { position: relative; display: block; width: 82%; height: 82%; min-width: 0; min-height: 0; }
+.orb-art img, .portrait-frame img { position: absolute; max-width: none; object-fit: contain; object-position: center; }
+.orb-art img { left: 0; top: 0; }
+.portrait-frame { position: relative; display: block; width: 128px; height: 164px; overflow: hidden; }
+.portrait-frame img { width: 100%; height: 100%; left: 0; top: 0; }
+.arka-story { grid-template-columns: 128px minmax(0, 1fr); }
+.arka-sephira, .arka-faction-group, .project-entry { scroll-margin-top: 76px; overflow-anchor: none; }
+.section-label { font-size: 11px; color: var(--text-3); letter-spacing: 0.16em; margin-bottom: 16px; }
+.stack-intro { color: var(--text-2); margin-bottom: 40px; max-width: 36em; }
+.stack-list { margin: 0; }
+.stack-list > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 32px; border-top: 1px solid var(--line); padding-block: 28px; }
+.stack-list dt { color: var(--text); font-size: 17px; }
+.stack-list dt .mono { display: block; color: var(--text-3); font-size: 10px; letter-spacing: 0.08em; margin-bottom: 8px; }
+.stack-list dd { margin: 0; }
+.stack-list strong { display: block; font-size: 18px; font-weight: 550; line-height: 1.6; }
+.stack-list dd p { margin-top: 12px; font-size: 14px; color: var(--text-2); line-height: 1.9; }
+.stack-tags { display: block; margin-top: 16px; font-size: 12px; color: var(--c2); }
+.stack-list .stack-art { margin-top: 24px; font-size: 16px; }
+.stack-next { border-top: 1px solid var(--line); padding-top: 24px; color: var(--text-2); font-size: 13px; }
+.stack-next .mono { display: block; color: var(--c2); font-size: 10px; letter-spacing: 0.16em; margin-bottom: 8px; }
+.project-list { border-top: 1px solid var(--line-2); }
+.project-entry { border-bottom: 1px solid var(--line); }
+.project-entry > summary { display: grid; grid-template-columns: 100px minmax(0, 1fr) 24px; align-items: center; gap: 24px; padding: 28px 0; cursor: pointer; list-style: none; }
+.project-entry > summary::-webkit-details-marker { display: none; }
+.project-year { font-size: 11px; line-height: 1.8; color: var(--text-3); }
+.project-heading { display: grid; gap: 8px; }
+.project-heading b { font-size: clamp(19px, 2.5vw, 24px); line-height: 1.4; font-weight: 550; letter-spacing: -0.025em; }
+.project-heading > span { font-size: 13px; color: var(--text-2); }
+.project-open { font-size: 25px; font-weight: 300; color: var(--text-3); }
+.project-entry[open] .project-open { rotate: 45deg; }
+.project-entry > summary:hover .project-heading b { color: var(--sc); }
+.project-content { padding-bottom: 28px; min-width: 0; }
+.project-role { font-size: 13px; color: var(--text-2); margin-bottom: 20px; }
+.project-gallery { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 20px; overscroll-behavior-inline: contain; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+.project-gallery figure { flex: 0 0 min(80%, 360px); min-width: 0; margin: 0; scroll-snap-align: start; }
+.project-gallery a { display: grid; place-items: center; height: 400px; background: rgb(13 12 18 / 0.8); border: 1px solid var(--line); }
+.project-gallery img { width: 100%; height: 100%; max-height: 398px; object-fit: contain; }
+.project-gallery figcaption { padding-top: 10px; font: 10px var(--font-mono); color: var(--text-3); letter-spacing: 0.12em; }
+.project-links { display: flex; gap: 16px 24px; align-items: center; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+.project-links a { padding-block: 8px; text-underline-offset: 5px; }
+.project-links .note { font-size: 11px; }
+.contact-title { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 500; letter-spacing: -0.04em; line-height: 1.35; }
+.contact-intro { margin-top: 20px; color: var(--text-2); font-size: 15px; }
+.contact-email { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px 24px; margin-top: 48px; padding-block: 24px 32px; border-block: 1px solid var(--line-2); text-decoration: none; }
+.contact-email > .mono { grid-column: 1 / -1; font-size: 10px; letter-spacing: 0.16em; color: var(--text-3); }
+.contact-email > span:nth-child(2) { font-size: clamp(18px, 2.8vw, 27px); font-weight: 450; line-height: 1.6; overflow-wrap: anywhere; }
+.contact-email > span:last-child { font-size: 24px; color: var(--c10); }
+.contact-email:hover { color: var(--c10); }
+.contact-links { margin-top: 32px; }
+.contact-links a { display: grid; grid-template-columns: 150px minmax(0, 1fr) 20px; gap: 24px; min-height: 72px; align-items: center; padding-block: 16px; border-bottom: 1px solid var(--line); text-decoration: none; font-size: 14px; }
+.contact-links .mono { font-size: 11px; color: var(--text-3); }
+.contact-links a > span:last-child { color: var(--c10); }
+.contact-links a:hover { color: var(--c10); border-color: var(--c10); }
+@media (max-width: 767px) {
+  .stack-list > div { grid-template-columns: 1fr; gap: 16px; }
+  .project-entry > summary { grid-template-columns: minmax(0, 1fr) 24px; gap: 10px 16px; }
+  .project-year { grid-column: 1; }
+  .project-heading { grid-column: 1; }
+  .project-open { grid-column: 2; grid-row: 1 / 3; }
+  .project-gallery a { height: 340px; }
+  .project-gallery img { max-height: 338px; }
+  .arka-story { grid-template-columns: 1fr; }
+  .portrait-frame { justify-self: center; }
+  .contact-links a { grid-template-columns: 1fr 20px; gap: 6px 16px; }
+  .contact-links .mono { grid-column: 1; }
+  .contact-links a > span:nth-child(2) { grid-column: 1; }
+  .contact-links a > span:last-child { grid-column: 2; grid-row: 1 / 3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky, .cosmic-orbits { transform: none; }
+}
