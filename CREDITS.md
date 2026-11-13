@@ -6,7 +6,11 @@
 |---|---|---|---|
 | Lenis | MIT | © darkroom.engineering | https://github.com/darkroomengineering/lenis |
 | Pretendard | SIL OFL 1.1 | © Kil Hyung-jin | https://github.com/orioncactus/pretendard |
-| Geist, Geist Mono | SIL OFL 1.1 | © Vercel | https://vercel.com/font |
+| Geist Mono | SIL OFL 1.1 | © Vercel | https://vercel.com/font |
+
+## 콘텐츠
+
+- 유닛 일러스트(`docs/assets/units/`)와 프로젝트 정보는 FTVOT_STUDIO의 자료입니다.
 
 ## 상표
 

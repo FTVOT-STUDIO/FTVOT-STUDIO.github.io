@@ -12,7 +12,12 @@ ftvot-site/
 │   ├── .nojekyll         # GitHub Pages의 Jekyll 처리 끄기
 │   └── assets/
 │       ├── css/main.css
-│       └── js/{main.js, theme-init.js}
+│       ├── js/{main.js, theme-init.js}
+│       └── units/<유닛>/{thumb.webp, 0.webp, 1.webp ...}
+├── tools/
+│   ├── units.json            # 어떤 유닛, 어떤 프레임을 쓸지
+│   ├── make_sprites.py       # Unity 스프라이트 시트 → WebP
+│   └── render_units.py       # index.html의 도감/선택 칸 자동 생성
 ├── wrangler.jsonc        # Cloudflare Workers 배포 설정
 ├── DESIGN.md             # 디자인 결정과 이유
 └── CREDITS.md            # 오픈소스, 글꼴, 상표 표기
@@ -50,10 +55,29 @@ cd docs && python3 -m http.server 8080
 # http://localhost:8080
 ```
 
-## 4. 수정 위치
+## 4. 유닛 추가/교체 (자동화)
+
+Unity 프로젝트의 `Unit` 폴더(.png와 .png.meta)를 그대로 씁니다. 슬라이스 좌표는 .meta에서 읽습니다.
+
+```bash
+pip install pillow
+# 1) tools/units.json에 ["slug", "표시 이름", ["프레임이름", ...]] 한 줄 추가
+# 2) WebP 생성 (8K 시트가 있어서 몇 분 걸립니다)
+python3 tools/make_sprites.py ~/Unity_Project/<프로젝트>/Assets/Unit
+# 3) index.html에 반영
+python3 tools/render_units.py
+```
+
+프레임 이름은 Unity Sprite Editor에서 붙인 이름입니다(예: `Saya_Field_0`). 앞의 4명이 도감에서 크게, 앞의 6명이 히어로 선택 칸에 나옵니다.
+
+## 5. 수정 위치
 
 | 바꿀 것 | 위치 |
 |---|---|
-| 작업 목록 | `docs/index.html`의 `<ol class="work-list">` |
-| 악센트 색 | `docs/assets/css/main.css`의 `--accent` |
+| 프로젝트 | `docs/index.html`의 `.proj-years` (연도별 `<li class="proj">`, `data-tags`로 필터 분류) |
+| 기록 숫자 | `docs/index.html`의 `.stats-list` |
+| 이력 | `docs/index.html`의 `.timeline` |
+| 악센트 색 | `docs/assets/css/main.css`의 `--pink`, `--pink-fill` |
 | 스택 | `docs/index.html`의 `<dl class="sheet">` |
+
+`data-tags` 값: `featured`(대표작), `release`(스토어 출시), `collab`(협업), `dev`(개발 중). 여러 개는 공백으로 구분합니다.
