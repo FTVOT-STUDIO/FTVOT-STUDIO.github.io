@@ -14,7 +14,7 @@
   --surface: rgb(20 18 28 / 0.72);
   --text: #F0EFF3;
   --text-2: #B9B4C2;
-  --text-3: #8C8796;
+  --text-3: #A49DAD;
   --line: rgb(174 159 197 / 0.18);
   --line-2: rgb(174 159 197 / 0.32);
   --glow-purple: #A481CA;
@@ -216,7 +216,7 @@ main { position: relative; z-index: 1; }
    ========================================================= */
 .hero-tree {
   position: relative;
-  height: 100vh; height: 100svh; min-height: 560px;   /* 나무 전체가 한 화면에 들어오게 높이를 고정 */
+  height: 100vh; height: 100svh; min-height: 680px;   /* 나무 전체가 한 화면에 들어오게 높이를 고정 */
   display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
   justify-items: center;
   gap: var(--s-4);
@@ -224,8 +224,9 @@ main { position: relative; z-index: 1; }
 }
 .ht-copy { text-align: center; }
 .ht-kicker { font-size: 11px; letter-spacing: 0.24em; color: var(--text-3); }
-.ht-title { margin-top: var(--s-2); font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; }
-.ht-sub { margin-top: var(--s-2); font-size: 14px; color: var(--text-3); }
+.ht-title { margin-top: var(--s-3); font-size: clamp(2rem, 3.2vw, 3.6rem); font-weight: 550; letter-spacing: -0.055em; line-height: 1.05; }
+.ht-title span { display: block; color: var(--text-2); }
+.ht-sub { margin-top: var(--s-5); font-size: 16px; line-height: 1.8; color: var(--text-2); }
 .ht-tree { width: min(560px, 92vw); height: 100%; min-height: 0; }
 .ht-tree { container-type: size; }
 /* 상자 높이와 너비 중 작은 쪽에 맞춰 나무 전체가 보이게 합니다 (viewBox 400x720) */
@@ -527,7 +528,7 @@ main { position: relative; z-index: 1; }
     align-items: center;
     padding-block: var(--s-6) var(--s-3);
   }
-  .ht-copy { grid-column: 1; grid-row: 1; justify-self: end; text-align: right; max-width: 22em; padding-right: var(--s-6); }
+  .ht-copy { grid-column: 1; grid-row: 1; justify-self: end; text-align: left; max-width: 22em; padding-right: var(--s-6); }
   .ht-tree { grid-column: 2; grid-row: 1; width: 100%; }
   .ht-down { grid-column: 2; grid-row: 2; }
 }
@@ -560,3 +561,93 @@ main { position: relative; z-index: 1; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.15s !important; }
   .drift { display: none; }
 }
+
+/* 우주를 장식하는 궤도와 성운은 정적으로 두어 글과 나무 탐색에 집중하게 합니다. */
+.sky {
+  background:
+    radial-gradient(ellipse at 76% 16%, rgb(117 76 118 / 0.12), transparent 38%),
+    radial-gradient(ellipse at 23% 72%, rgb(60 84 99 / 0.13), transparent 42%),
+    radial-gradient(ellipse at 50% 50%, rgb(89 67 112 / 0.09), transparent 60%),
+    #050408;
+}
+.sky::before, .sky::after {
+  content: ''; position: absolute; inset: -10%; opacity: 0.4;
+  background-image: radial-gradient(circle, #e3daef 0 0.7px, transparent 1px), radial-gradient(circle, #b4bdd0 0 0.8px, transparent 1.2px);
+  background-size: 173px 211px, 293px 337px;
+  background-position: 31px 47px, 137px 173px;
+}
+.sky::after { rotate: 19deg; scale: 1.2; opacity: 0.19; background-size: 121px 157px, 431px 293px; }
+.hero-tree > :not(.cosmic-orbits) { z-index: 1; }
+.ht-author { margin-top: 16px; color: var(--text-3); font-size: 12px; letter-spacing: 0.04em; }
+.ht-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 24px; margin-top: 28px; font-size: 13px; }
+.ht-links a { padding-block: 8px; text-decoration: none; border-bottom: 1px solid var(--line-2); }
+.ht-links a:hover { color: var(--c1); border-color: var(--c1); }
+.ht-links span { margin-left: 8px; }
+.cosmic-orbits { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.cosmic-orbits span { position: absolute; left: 50%; top: 48%; width: min(82vw, 940px); aspect-ratio: 1; border: 1px solid rgb(177 159 199 / 0.12); border-radius: 50%; transform: translate(-50%, -50%) rotate(-28deg) scaleY(0.42); }
+.cosmic-orbits span:nth-child(2) { width: min(100vw, 1190px); transform: translate(-50%, -50%) rotate(49deg) scaleY(0.48); border-style: dashed; border-color: rgb(177 159 199 / 0.09); }
+.cosmic-orbits span:nth-child(3) { width: min(68vw, 760px); transform: translate(-50%, -50%) rotate(-62deg) scaleY(0.7); border-color: rgb(177 159 199 / 0.08); }
+.ht-coordinate { display: none; position: absolute; right: 6vw; bottom: 12vh; font-size: 10px; color: var(--text-3); line-height: 2; letter-spacing: 0.12em; }
+.ht-tree .node-ring { fill: rgb(8 7 13 / 0.9); }
+.ht-tree .node.is-current .node-ring { fill: color-mix(in oklab, var(--sc) 18%, var(--bg)); }
+.ht-tree .path { stroke: rgb(190 174 212 / 0.42); stroke-width: 1.15; }
+.arka-eyebrow { color: var(--text-3); font-size: 11px; letter-spacing: 0.18em; }
+.arka-title { margin-top: 8px; font-size: clamp(4.5rem, 12vw, 7.5rem); font-weight: 450; letter-spacing: 0.08em; line-height: 1.1; }
+.arka-title span { display: block; margin-top: 12px; font-size: 19px; letter-spacing: 0.12em; color: var(--text-2); }
+.arka-genres { margin-top: 24px; color: var(--text-3); font-size: 13px; }
+.arka-lead { margin-top: 48px; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.6; letter-spacing: -0.025em; }
+.arka-nav { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 40px; padding-block: 20px; border-block: 1px solid var(--line); font-size: 12px; color: var(--text-2); }
+.arka-nav a { display: inline-flex; min-height: 44px; align-items: center; text-underline-offset: 6px; text-decoration-color: transparent; }
+.arka-nav a:hover { text-decoration-color: currentColor; color: var(--text); }
+.arka-part { margin-top: clamp(64px, 10vw, 112px); scroll-margin-top: 88px; }
+.arka-part > h3 { margin-block: 12px 28px; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 550; letter-spacing: -0.03em; }
+.arka-part p:not(.arka-eyebrow) { color: var(--text-2); }
+.arka-part > p + p { margin-top: 20px; }
+.arka-part blockquote { margin: 36px 0; padding: 4px 0 4px 24px; border-left: 1px solid var(--c1); color: var(--text); font-size: clamp(1.15rem, 2vw, 1.5rem); line-height: 1.8; letter-spacing: -0.02em; }
+.arka-definitions { margin: 0; }
+.arka-definitions > div { padding-block: 24px; border-bottom: 1px solid var(--line); }
+.arka-definitions dt { font-weight: 600; font-size: 17px; }
+.arka-definitions dt .mono { display: block; margin-top: 4px; color: var(--text-3); font-weight: 400; font-size: 11px; letter-spacing: 0.03em; }
+.arka-definitions dd { margin: 14px 0 0; color: var(--text-2); font-size: 15px; line-height: 1.9; }
+.arka-sephira-list { margin-top: 32px; }
+.arka-sephira { border-top: 1px solid var(--line); }
+.arka-sephira:last-child { border-bottom: 1px solid var(--line); }
+.arka-sephira summary, .arka-faction-group summary { cursor: pointer; display: flex; align-items: center; gap: 24px; padding: 22px 4px; list-style: none; }
+.arka-sephira summary::-webkit-details-marker, .arka-faction-group summary::-webkit-details-marker { display: none; }
+.arka-index { color: var(--sc); font-size: 12px; }
+.arka-person { display: flex; align-items: baseline; flex-wrap: wrap; gap: 16px; }
+.arka-person b { font-size: 20px; font-weight: 550; }
+.arka-person > span { color: var(--text-3); font-size: 13px; }
+.arka-expand { margin-left: auto; color: var(--text-3); font-size: 23px; font-weight: 300; }
+details[open] > summary .arka-expand { rotate: 45deg; }
+.arka-sephira summary:hover .arka-person b { color: var(--sc); }
+.arka-story { display: grid; grid-template-columns: 112px minmax(0, 1fr); align-items: start; gap: 32px; padding: 8px 0 32px; }
+.arka-story img { width: 112px; height: 144px; object-fit: contain; object-position: top; }
+.arka-story p { font-size: 15px; line-height: 1.9; }
+.arka-story p + p { margin-top: 16px; }
+.arka-story blockquote { margin: 24px 0 0; font-size: 17px; border-color: var(--sc); }
+.arka-faction-group { border-bottom: 1px solid var(--line); }
+.arka-faction-group > summary { font-size: 17px; font-weight: 550; }
+.arka-faction-group .arka-definitions { padding: 0 20px 24px; }
+.arka-faction-group .arka-definitions > div:last-child { border-bottom: 0; }
+.s-netzach .ne-garden { border: 0; border-radius: 0; border-block: 1px solid var(--line); background: radial-gradient(ellipse at 50% 90%, rgb(110 77 132 / 0.1), transparent 70%); }
+.s-netzach .ch-head { justify-items: center; text-align: center; }
+@media (min-width: 1024px) {
+  .ht-links { justify-content: flex-start; }
+  .ht-coordinate { display: block; }
+}
+@media (max-width: 767px) {
+  .hero-tree { min-height: 820px; padding-top: 36px; gap: 20px; }
+  .ht-title span { display: inline; }
+  .ht-kicker { font-size: 9px; }
+  .ht-sub { margin-top: 16px; font-size: 14px; }
+  .ht-author { margin-top: 8px; }
+  .ht-links { margin-top: 12px; }
+  .ht-tree { width: min(440px, 95vw); }
+  .arka-nav { gap: 4px 20px; }
+  .arka-story { grid-template-columns: 1fr; gap: 16px; }
+  .arka-story img { justify-self: center; }
+  .arka-sephira summary { gap: 16px; }
+  .arka-faction-group .arka-definitions { padding-inline: 0; }
+}
+
