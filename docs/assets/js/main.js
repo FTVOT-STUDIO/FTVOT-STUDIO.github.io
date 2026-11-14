@@ -1,8 +1,8 @@
 // FTVOT_STUDIO — main.js
 // 빌드 없는 ES 모듈입니다. 모든 기능은 JS가 실패해도 기본 HTML이 동작하도록 "덧붙이는" 방식입니다.
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
-import { initIntro, initSky } from './intro.js?v=20261114j';
-import { initSephirot } from './sephirot.js?v=20261114k';
+import { initIntro, initSky } from './intro.js?v=20261114n';
+import { initSephirot } from './sephirot.js?v=20261114n';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
 document.documentElement.classList.add('js');
@@ -46,19 +46,32 @@ resetTop();
 window.addEventListener('pageshow', () => requestAnimationFrame(resetTop), { once: true });
 }
 
-initSky();
-initAnchors();
-initSephirot({ scrollTo: scrollToEl });
-initArkaReader();
-initDetails();
-initPortraits();
-initYear();
-initPresentation();
-initImageViewer();
-initProjectFilters();
-initArtworkGallery();
-// 인트로가 걷히면 첫 화면의 나무가 자라납니다
-initIntro(() => document.documentElement.classList.add('tree-grown'));
+let enhancementFailed = false;
+const enhance = (init) => {
+if (enhancementFailed) return;
+try { init(); } catch (error) {
+// 장식 기능이 실패해도 기본 HTML의 내용과 내비게이션은 남깁니다.
+enhancementFailed = true;
+document.documentElement.classList.remove('js', 'motion-ready');
+document.documentElement.classList.add('tree-grown');
+document.body.classList.remove('is-intro', 'viewer-open');
+document.querySelector('[data-intro]')?.remove();
+document.querySelectorAll('.arka-part, .project-entry').forEach((item) => item.hidden = false);
+console.error('화면 연출을 기본 표시로 전환했습니다.', error);
+}
+};
+enhance(initSky);
+enhance(() => initSephirot({ scrollTo: scrollToEl }));
+enhance(initAnchors);
+enhance(initArkaReader);
+enhance(initDetails);
+enhance(initPortraits);
+enhance(initYear);
+enhance(initPresentation);
+enhance(initImageViewer);
+enhance(initProjectFilters);
+enhance(initArtworkGallery);
+enhance(() => initIntro(() => document.documentElement.classList.add('tree-grown')));
 
 function initDetails() {
 const lists = document.querySelectorAll('.arka-sephira, .project-entry, .arka-faction-group');
@@ -103,12 +116,13 @@ const frames = document.querySelectorAll('.orb-art, .portrait-frame');
 const measure = (img) => {
 if (boundsCache.has(img.currentSrc)) return boundsCache.get(img.currentSrc);
 const canvas = document.createElement('canvas');
-canvas.width = img.naturalWidth;
-canvas.height = img.naturalHeight;
+const ratio = Math.min(1, 192 / Math.max(img.naturalWidth, img.naturalHeight));
+canvas.width = Math.max(1, Math.round(img.naturalWidth * ratio));
+canvas.height = Math.max(1, Math.round(img.naturalHeight * ratio));
 const context = canvas.getContext('2d', { willReadFrequently: true });
 if (!context) return null;
 try {
-context.drawImage(img, 0, 0);
+context.drawImage(img, 0, 0, canvas.width, canvas.height);
 const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
 let left = canvas.width, top = canvas.height, right = -1, bottom = -1;
 let mass = 0, momentX = 0, momentY = 0;
@@ -122,7 +136,7 @@ top = Math.min(top, y); bottom = Math.max(bottom, y);
 }
 }
 if (right < left) return null;
-const bounds = { left, top, width: right - left + 1, height: bottom - top + 1, mass, centerX: momentX / mass, centerY: momentY / mass };
+const bounds = { left: left / ratio, top: top / ratio, width: (right - left + 1) / ratio, height: (bottom - top + 1) / ratio, mass: mass / (ratio * ratio), centerX: momentX / mass / ratio, centerY: momentY / mass / ratio };
 boundsCache.set(img.currentSrc, bounds);
 return bounds;
 } catch { return null; }
@@ -176,15 +190,23 @@ const range = document.documentElement.scrollHeight - innerHeight;
 document.documentElement.style.setProperty('--reading-progress', String(range > 0 ? scrollY / range : 0));
 pending = false;
 };
-window.addEventListener('scroll', () => {
+const scheduleProgress = () => {
 if (pending) return;
 pending = true;
 requestAnimationFrame(progress);
-}, { passive: true });
-window.addEventListener('resize', progress);
-new ResizeObserver(progress).observe(document.body);
+};
+window.addEventListener('scroll', scheduleProgress, { passive: true });
+window.addEventListener('resize', scheduleProgress);
+new ResizeObserver(scheduleProgress).observe(document.body);
 progress();
-document.addEventListener('visibilitychange', () => document.documentElement.classList.toggle('is-page-hidden', document.hidden));
+const syncVisibility = () => document.documentElement.classList.toggle('is-page-hidden', document.hidden);
+document.addEventListener('visibilitychange', syncVisibility);
+syncVisibility();
+// 이미 지난 구간에서는 보이지 않는 궤도와 장식의 연산을 멈춥니다.
+const motionObserver = new IntersectionObserver((entries) => {
+entries.forEach((entry) => entry.target.classList.toggle('is-in-view', entry.isIntersecting));
+}, { rootMargin: '200px 0px' });
+document.querySelectorAll('.chapter, .hero-tree').forEach((section) => motionObserver.observe(section));
 document.querySelectorAll('.project-content').forEach((content) => {
 if (content.querySelectorAll('.project-gallery figure').length < 2) {
 const arrows = content.querySelector('.gallery-toolbar > div');
@@ -195,7 +217,8 @@ document.querySelectorAll('[data-gallery-step]').forEach((button) => {
 button.addEventListener('click', () => {
 const gallery = button.closest('.project-content').querySelector('.project-gallery');
 const card = gallery.querySelector('figure');
-const amount = card ? card.getBoundingClientRect().width + 20 : gallery.clientWidth;
+const gap = Number.parseFloat(getComputedStyle(gallery).columnGap) || 0;
+const amount = card ? card.getBoundingClientRect().width + gap : gallery.clientWidth;
 gallery.scrollBy({ left: Number(button.dataset.galleryStep) * amount, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
 });
 });
@@ -230,7 +253,7 @@ document.body.append(dialog);
 const image = dialog.querySelector('img');
 const caption = dialog.querySelector('.viewer-caption');
 const count = dialog.querySelector('[data-viewer-count]');
-let galleryLinks = [], current = 0, trigger = null;
+let galleryLinks = [], current = 0, trigger = null, imageAnimation = null;
 const render = () => {
 const link = galleryLinks[current];
 image.src = link.href;
@@ -239,17 +262,19 @@ caption.textContent = image.alt;
 count.textContent = `${String(current + 1).padStart(2, '0')} / ${String(galleryLinks.length).padStart(2, '0')}`;
 dialog.querySelector('[data-viewer-prev]').disabled = galleryLinks.length < 2;
 dialog.querySelector('[data-viewer-next]').disabled = galleryLinks.length < 2;
-if (!reduceMotion.matches) image.animate([{ opacity: 0, transform: 'scale(0.98)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 260, easing: 'ease-out' });
+imageAnimation?.cancel();
+if (!reduceMotion.matches) imageAnimation = image.animate([{ opacity: 0, transform: 'scale(0.98)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 260, easing: 'ease-out' });
 };
-const step = (direction) => { current = (current + direction + galleryLinks.length) % galleryLinks.length; render(); };
+const step = (direction) => { if (!galleryLinks.length) return; current = (current + direction + galleryLinks.length) % galleryLinks.length; render(); };
 document.addEventListener('click', (event) => {
 const link = event.target instanceof Element ? event.target.closest('.project-gallery figure > a, .artwork-grid .artwork-card > a') : null;
-if (!link) return;
+if (!link || dialog.open) return;
 if (link.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return; }
 if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
 event.preventDefault();
 galleryLinks = [...link.closest('.project-gallery, .artwork-grid').querySelectorAll('figure > a')].filter((item) => item.getAttribute('aria-disabled') !== 'true');
 current = galleryLinks.indexOf(link);
+if (current < 0) return;
 trigger = link;
 render();
 dialog.showModal();
@@ -266,6 +291,10 @@ dialog.addEventListener('click', (event) => { if (event.target === dialog) dialo
 dialog.addEventListener('close', () => {
 document.body.classList.remove('viewer-open');
 trigger?.focus({ preventScroll: true });
+imageAnimation?.cancel();
+image.removeAttribute('src');
+galleryLinks = [];
+trigger = null;
 });
 }
 
@@ -290,11 +319,7 @@ entries.forEach((entry) => {
 const index = matches.indexOf(entry);
 entry.hidden = index < page * pageSize || index >= (page + 1) * pageSize;
 entry.classList.remove('is-filter-arriving');
-if (!entry.hidden && !reduceMotion.matches) {
-entry.style.setProperty('--entry-delay', `${index % pageSize * 45}ms`);
-void entry.offsetWidth;
-entry.classList.add('is-filter-arriving');
-}
+if (!entry.hidden) entry.style.setProperty('--entry-delay', `${index % pageSize * 45}ms`);
 if (entry.hidden) entry.open = false;
 });
 pager.replaceChildren();
@@ -308,7 +333,11 @@ if (i === page) button.setAttribute('aria-current', 'page');
 button.addEventListener('click', () => { page = i; render(); });
 pager.append(button);
 }
-if (status) status.textContent = `${matches.length}개 중 ${page * pageSize + 1}–${Math.min(matches.length, (page + 1) * pageSize)}개를 표시합니다.`;
+if (status) status.textContent = `${matches.length}개 중 ${matches.length ? page * pageSize + 1 : 0}–${Math.min(matches.length, (page + 1) * pageSize)}개를 표시합니다.`;
+if (!reduceMotion.matches) {
+void controls.offsetWidth;
+entries.filter((entry) => !entry.hidden).forEach((entry) => entry.classList.add('is-filter-arriving'));
+}
 };
 controls.querySelectorAll('button').forEach((button) => {
 button.addEventListener('click', () => {
@@ -328,7 +357,15 @@ const count = document.querySelector('[data-artwork-count]');
 const refresh = document.querySelector('[data-artwork-refresh]');
 if (!grid || !state) return;
 const endpoint = 'https://api.github.com/repos/FTVOT-STUDIO/FTVOT-STUDIO.github.io/contents/docs/assets/gallery?ref=main';
-const cacheKey = 'ftvot-artwork-gallery-v1';
+const cacheKey = 'ftvot-artwork-gallery-v2';
+const validFile = (file) => file && typeof file.name === 'string' && file.name.length <= 255 && !/^[._]/.test(file.name) && !/[\\/\u0000-\u001f]/.test(file.name) && /\.(png|jpe?g|webp|gif|avif)$/i.test(file.name) && typeof file.sha === 'string' && /^[a-f0-9]{40,64}$/i.test(file.sha);
+const artObserver = new ResizeObserver((entries) => {
+entries.forEach(({ target }) => {
+const width = `${target.getBoundingClientRect().width}px`;
+const figure = target.closest('.artwork-card');
+if (figure && figure.style.getPropertyValue('--art-width') !== width) figure.style.setProperty('--art-width', width);
+});
+});
 let loading = false;
 const showState = (title, detail) => {
 state.hidden = false;
@@ -336,6 +373,8 @@ state.querySelector('p').textContent = title;
 state.querySelector('span:last-child').textContent = detail;
 };
 const render = (files) => {
+files = files.filter(validFile);
+artObserver.disconnect();
 grid.replaceChildren();
 if (count) count.textContent = `ART COLLECTION / ${String(files.length).padStart(2, '0')}`;
 if (!files.length) {
@@ -354,16 +393,14 @@ const link = document.createElement('a');
 link.className = 'artwork-frame';
 link.href = url;
 link.target = '_blank';
-link.rel = 'noopener';
+link.rel = 'noopener noreferrer';
 const image = document.createElement('img');
 image.src = url;
 image.alt = title;
 image.loading = 'lazy';
 image.decoding = 'async';
 // 반사도 실제로 줄어든 그림 폭을 따라가야 세로 그림 옆으로 번지지 않습니다.
-const syncArtWidth = () => figure.style.setProperty('--art-width', `${image.getBoundingClientRect().width}px`);
-image.addEventListener('load', syncArtWidth);
-new ResizeObserver(syncArtWidth).observe(image);
+artObserver.observe(image);
 link.append(image);
 const pending = document.createElement('span');
 pending.className = 'artwork-pending';
@@ -402,24 +439,27 @@ if (loading) return;
 loading = true;
 refresh.disabled = true;
 let cached = null;
+const controller = new AbortController();
+const timeout = window.setTimeout(() => controller.abort(), 12000);
 try { cached = JSON.parse(sessionStorage.getItem(cacheKey) || 'null'); } catch { /* 캐시를 읽지 못해도 서버에서 불러옵니다. */ }
 try {
-if (!force && cached && Array.isArray(cached.files) && Date.now() - cached.time < 120000) {
+if (!force && cached && Array.isArray(cached.files) && Number.isFinite(cached.time) && Date.now() >= cached.time && Date.now() - cached.time < 120000) {
 render(cached.files);
 return;
 }
 if (!grid.children.length) showState('그림을 불러오고 있습니다.', '잠시만 기다려 주세요.');
-const response = await fetch(endpoint, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
+const response = await fetch(endpoint, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', signal: controller.signal });
 if (!response.ok) throw new Error('Gallery unavailable');
 const data = await response.json();
 if (!Array.isArray(data)) throw new Error('Invalid gallery listing');
-const files = data.filter((item) => item.type === 'file' && !/^[._]/.test(item.name) && /\.(png|jpe?g|webp|gif|avif)$/i.test(item.name)).map(({ name, sha }) => ({ name, sha })).sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
+const files = data.filter((item) => item && item.type === 'file' && validFile(item)).map(({ name, sha }) => ({ name, sha })).sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
 render(files);
 try { sessionStorage.setItem(cacheKey, JSON.stringify({ files, time: Date.now() })); } catch { /* 저장이 막혀도 작품은 표시됩니다. */ }
 } catch {
 if (cached && Array.isArray(cached.files) && cached.files.length) render(cached.files);
 showState('그림 목록을 새로 불러오지 못했습니다.', '잠시 후 새로고침해 주세요. 방금 올린 작품은 배포가 끝난 뒤 표시됩니다.');
 } finally {
+window.clearTimeout(timeout);
 loading = false;
 refresh.disabled = false;
 }

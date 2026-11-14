@@ -52,7 +52,7 @@ const sky = document.querySelector('.sky');
 const orbits = document.querySelector('.cosmic-orbits');
 if (!sky) return;
 let currentX = 0, currentY = 0, targetX = 0, targetY = 0, frame = 0;
-const enabled = () => !reduceMotion.matches && finePointer.matches;
+const enabled = () => !document.hidden && !reduceMotion.matches && finePointer.matches;
 const draw = () => {
 currentX += (targetX - currentX) * 0.075;
 currentY += (targetY - currentY) * 0.075;
@@ -84,4 +84,5 @@ el?.style.setProperty('--parallax-y', '0px');
 };
 reduceMotion.addEventListener('change', change);
 finePointer.addEventListener('change', change);
+document.addEventListener('visibilitychange', change);
 }

@@ -186,6 +186,7 @@ minimap?.classList.toggle('is-shown', away);
 }, { threshold: 0.15 }).observe(hero);
 }
 
+let navigationActTimer = 0;
 // 노드 클릭: 효과음 + 파동 + 이동 + 캐릭터 동작
 nodes.forEach((node) => {
 node.addEventListener('click', (event) => {
@@ -197,7 +198,10 @@ playSfx(chapter.id);
 pulse(node);
 chapter.classList.add('is-open');
 nav.scrollTo(chapter);
-window.setTimeout(() => act(chapter.querySelector('.orb')), reduceMotion.matches ? 0 : 650);
+window.clearTimeout(navigationActTimer);
+navigationActTimer = window.setTimeout(() => {
+if (!document.hidden && location.hash === `#${chapter.id}`) act(chapter.querySelector('.orb'));
+}, reduceMotion.matches ? 0 : 650);
 chapter.focus({ preventScroll: true });
 history.replaceState(null, '', `#${chapter.id}`);
 });
@@ -218,6 +222,15 @@ act(orb);
 });
 });
 
+document.addEventListener('visibilitychange', () => {
+if (!document.hidden) return;
+playing?.pause();
+window.clearTimeout(navigationActTimer);
+document.querySelectorAll('[data-orb]').forEach((orb) => {
+window.clearTimeout(Number(orb.dataset.actTimer ?? 0));
+orb.classList.remove('is-acting');
+});
+});
 initSoundToggle();
 const fromHash = chapters.find((c) => `#${c.id}` === location.hash);
 setCurrent((fromHash ?? chapters[0]).dataset.seph);
