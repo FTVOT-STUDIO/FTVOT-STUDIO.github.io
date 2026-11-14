@@ -514,7 +514,8 @@ const schedule = () => { if (!pending) pending = requestAnimationFrame(update); 
 let tensionTimer = 0, tensionFrame = 0;
 const TENSION_PX = 520;      // 이만큼 당겨야 넘어갑니다
 const SNAP_MS = 950;         // 케테르까지 내려가는 시간
-const easeOutBack = (x) => { const c1 = 1.25, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); }; // 살짝 지나쳤다 자리 잡는 '찰진' 착지
+// 시작·끝만 살짝 부드럽고 가운데는 거의 일정한 속도 (튕김 없음)
+const autoEase = (x) => (x < .15 ? (x * x) / .3 : x > .85 ? 1 - ((1 - x) * (1 - x)) / .3 : (x - .075) / .85);
 const inTensionZone = () => laid && !snapping && !scrollLocked && !reduceMotion.matches && scrollY - heroTop < heroHeight * PIN_RATIO * .95;
 const release = () => {
 cancelAnimationFrame(tensionFrame);
@@ -525,27 +526,24 @@ const snapToKether = () => {
 const kether = document.getElementById('kether'); if (!kether) return;
 snapping = true; setScrollLock(true); cancelAnimationFrame(tensionFrame); clearTimeout(tensionTimer);
 const from = scrollY, to = kether.getBoundingClientRect().top + scrollY, start = performance.now(), t0 = tension;
+// 마우스 휠 클릭 자동 스크롤처럼 일정한 속도로 미끄러지게: 거리 1px당 약 1.4ms, 0.9~2.2초 범위
+const duration = Math.min(2200, Math.max(900, Math.abs(to - from) * 1.4));
 const step = (now) => {
-const x = Math.min(1, (now - start) / SNAP_MS);
-scrollTo(0, from + (to - from) * easeOutBack(x));
+const x = Math.min(1, (now - start) / duration);
+scrollTo(0, from + (to - from) * autoEase(x));
 tension = t0 * (1 - Math.min(1, x * 3)); // 출발하면서 당겨졌던 긴장이 풀립니다
 schedule();
 if (x < 1) requestAnimationFrame(step); else { snapping = false; tension = 0; setScrollLock(false); }
 };
 requestAnimationFrame(step);
 };
-const pull = (delta) => {
-cancelAnimationFrame(tensionFrame); clearTimeout(tensionTimer);
-// 당길수록 점점 무거워지는 저항 (남은 거리에 비례해서만 늘어남)
-tension = Math.min(1, tension + (delta / TENSION_PX) * (1 - tension * .55));
-schedule();
-if (tension >= 1) snapToKether(); else tensionTimer = setTimeout(release, 160);
-};
-window.addEventListener('wheel', (event) => { if (event.deltaY > 0 && inTensionZone()) { event.preventDefault(); pull(event.deltaY); } }, { passive: false });
+// 활성 상태에서 아래로 스크롤하면 당김 없이 바로 자동 스크롤을 시작합니다 (입력 크기와 무관)
+const pull = () => { if (!snapping) snapToKether(); };
+window.addEventListener('wheel', (event) => { if (event.deltaY > 0 && inTensionZone()) { event.preventDefault(); pull(); } }, { passive: false });
 let touchY = 0;
 window.addEventListener('touchstart', (event) => { touchY = event.touches[0]?.clientY ?? 0; }, { passive: true });
-window.addEventListener('touchmove', (event) => { const y = event.touches[0]?.clientY ?? 0, d = touchY - y; touchY = y; if (d > 0 && inTensionZone()) { event.preventDefault(); pull(d * 1.6); } }, { passive: false });
-window.addEventListener('keydown', (event) => { if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(event.key) && inTensionZone()) { event.preventDefault(); pull(event.key === 'ArrowDown' ? 140 : 340); } });
+window.addEventListener('touchmove', (event) => { const y = event.touches[0]?.clientY ?? 0, d = touchY - y; touchY = y; if (d > 0 && inTensionZone()) { event.preventDefault(); pull(); } }, { passive: false });
+window.addEventListener('keydown', (event) => { if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(event.key) && inTensionZone()) { event.preventDefault(); pull(); } });
 const measure = () => {
 heroTop = hero.getBoundingClientRect().top + scrollY;
 heroHeight = hero.offsetHeight;
