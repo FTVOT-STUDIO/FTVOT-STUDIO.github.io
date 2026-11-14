@@ -1456,3 +1456,14 @@ summary:hover .arka-expand { color: var(--sc); }
 }
 
 @media (hover: hover) and (pointer: fine) { .chapter .chapter-sigil { pointer-events: auto; } }
+
+/* 탐색 바와 겹치지 않는 오른쪽 상단에 소리 설정을 모읍니다. */
+.audio-controls { position: fixed; z-index: 60; top: 64px; right: clamp(16px, 3vw, 40px); display: flex; align-items: center; gap: 0; padding: 0 4px; background: rgb(5 4 8 / 0.92); border-bottom: 1px solid rgb(190 168 214 / 0.35); }
+.audio-controls .music-control, .audio-controls .sound-control { position: static; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 0; border-radius: 0; background: transparent; color: var(--text-2); font: 11px var(--font-mono); letter-spacing: 0.03em; cursor: pointer; transition: color 0.25s; }
+.audio-controls .sound-control { border-left: 1px solid var(--line); }
+.audio-controls button:hover { color: var(--text); }
+.audio-controls button[hidden] { display: none; }
+@media (max-width: 600px) {
+.audio-controls { top: 60px; right: 12px; }
+.audio-controls .music-control, .audio-controls .sound-control { padding-inline: 9px; font-size: 10px; }
+}
