@@ -1430,3 +1430,29 @@ summary:hover .arka-expand { color: var(--sc); }
 .js .chapter:not(.is-in-view) .chapter-atmosphere { visibility: hidden; }
 .js .chapter:not(.is-in-view) :is(.chapter-sigil *, .boundary-orbit::before, .orb .p-idle, .contact-satellite, .contact-core),
 .js .hero-tree:not(.is-in-view) :is(.cosmic-orbits span, .path-signal, .node-echo, .node-ring, .node-aura) { animation: none; }
+
+/* 작은 빛과 문양만 반응시켜 전체 화면 크기의 합성 레이어를 추가하지 않습니다. */
+.pointer-aura { position: fixed; top: 0; left: 0; width: 140px; height: 140px; z-index: 4; pointer-events: none; border-radius: 50%; background: radial-gradient(circle, rgb(205 181 233 / 0.055), transparent 67%); opacity: 0; transition: opacity 0.35s; contain: strict; }
+.pointer-aura.is-visible { opacity: 1; }
+.pointer-ripple { position: fixed; width: 92px; height: 92px; border: 1px solid rgb(211 187 236 / 0.42); border-radius: 50%; z-index: 90; pointer-events: none; }
+.chapter-sigil, .project-cover, .artwork-card > a { transition: transform 0.45s var(--ease-out-expo); }
+.is-pointer-near:is(.chapter-sigil, .project-cover, .artwork-card > a) { transform: perspective(700px) rotateX(var(--pointer-rx, 0deg)) rotateY(var(--pointer-ry, 0deg)); }
+.music-control { position: fixed; z-index: 60; bottom: 18px; left: clamp(16px, 3vw, 40px); display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border: 0; border-bottom: 1px solid rgb(190 168 214 / 0.35); border-radius: 0; color: var(--text-2); background: rgb(5 4 8 / 0.92); font: 11px var(--font-mono); letter-spacing: 0.05em; cursor: pointer; transition: color 0.25s, border-color 0.25s; }
+.music-control:hover { color: var(--text); border-color: var(--c1); }
+.music-control[hidden] { display: none; }
+.music-wave { display: inline-flex; align-items: center; gap: 3px; height: 14px; }
+.music-wave i { display: block; width: 1px; height: 5px; background: var(--c1); transform-origin: center; }
+.music-wave i:nth-child(2) { height: 12px; }
+.music-wave i:nth-child(3) { height: 8px; }
+@media (prefers-reduced-motion: no-preference) {
+.music-control.is-playing .music-wave i { animation: ambient-wave 1.2s ease-in-out infinite alternate; }
+.music-control.is-playing .music-wave i:nth-child(2) { animation-delay: -0.4s; }
+.music-control.is-playing .music-wave i:nth-child(3) { animation-delay: -0.8s; }
+}
+@keyframes ambient-wave { from { transform: scaleY(0.4); } to { transform: scaleY(1); } }
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+.pointer-aura, .pointer-ripple { display: none; }
+.is-pointer-near:is(.chapter-sigil, .project-cover, .artwork-card > a) { transform: none; }
+}
+
+@media (hover: hover) and (pointer: fine) { .chapter .chapter-sigil { pointer-events: auto; } }
