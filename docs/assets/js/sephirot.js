@@ -284,6 +284,19 @@ hero.append(dial);
 // 세피라 원: 회전 중 케테르부터 말쿠트까지 순서대로 한 번씩 부풀었다 돌아오는 파동
 const rings = [...tree.querySelectorAll('.node-ring')].map((ring) => [ring, Number(ring.getAttribute('r'))]);
 let dialBox = { x: 0, y: 0 };
+// 도착 연출: 다 누우면 케테르→말쿠트 순서로 세피라가 하나씩 점등됩니다 (파문 고리 + 원 채움 + 글자 튀어오름)
+tree.querySelectorAll('.node').forEach((node, i) => {
+node.style.setProperty('--i', String(i));
+const ring = node.querySelector('.node-ring'); if (!ring) return;
+for (let k = 0; k < 2; k++) { const ripple = document.createElementNS(NS, 'circle'); ripple.setAttribute('class', `node-ripple r${k}`); ripple.setAttribute('cx', ring.getAttribute('cx')); ripple.setAttribute('cy', ring.getAttribute('cy')); ripple.setAttribute('r', ring.getAttribute('r')); node.prepend(ripple); }
+});
+let arriveTimer = 0;
+const arrive = () => {
+if (reduceMotion.matches) return;
+clearTimeout(arriveTimer);
+hero.classList.remove('is-arrived'); void tree.offsetWidth; hero.classList.add('is-arrived');
+arriveTimer = setTimeout(() => hero.classList.remove('is-arrived'), 2600);
+};
 const setUpright = (angle) => {
 const a = Math.round(angle * 10) / 10; if (a === lastAngle) return; lastAngle = a;
 for (const [el, cx, cy] of upright) { if (a) el.setAttribute('transform', `rotate(${a} ${cx} ${cy})`); else el.removeAttribute('transform'); }
@@ -303,7 +316,7 @@ const distance = Math.max(0, scrollY - heroTop);
 const progress = Math.min(1, distance / pin);
 const e = easeInOut(progress);
 // 다 누웠을 때 / 다시 섰을 때 경로에 빛을 한 번 흘립니다
-if (progress >= 1 && !laid) { laid = true; trace(); }
+if (progress >= 1 && !laid) { laid = true; trace(); arrive(); }
 if (progress < 0.02 && laid) { laid = false; trace(); }
 previous = progress;
 if (reduceMotion.matches) { tree.style.transform = ''; setUpright(0); dial.style.opacity = '0'; return; }
