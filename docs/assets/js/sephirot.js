@@ -13,7 +13,7 @@ const volumeOf = (sid) => Math.min(1, SFX_VOLUME * (SFX_BOOST[sid] || 1));
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
 const GROW_STEP = 120;
 
-const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click', 'node-lit', 'tree-on', 'tree-off'];
+const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click', 'node-lit', 'tree-on', 'tree-off', 'nav-jump'];
 const audioCache = new Map();
 const buffers = new Map();
 const loadingSounds = new Map();
@@ -74,6 +74,13 @@ o.connect(g); g.connect(out); o.start(at); o.stop(at + 1.5);
 setTimeout(() => out.disconnect(), (duration + 1.6) * 1000);
 }
 
+// 버튼(링크)으로 세피라 장에 이동할 때의 소리. 스크롤 이동에는 울리지 않습니다
+const SEPH_IDS = new Set(['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth']);
+document.addEventListener('click', (event) => {
+const link = event.target instanceof Element ? event.target.closest('a[href^="#"]') : null;
+if (link && SEPH_IDS.has(link.getAttribute('href').slice(1))) playLayer('nav-jump');
+});
+
 // 겹쳐 울려도 되는 소리: 다른 효과음을 끊지 않고 위에 얹어 재생합니다 (나무 활성 소리 위로 점등음이 겹치도록)
 function playLayer(sid) {
 if (!soundOn || !SFX_IDS.includes(sid)) return;
@@ -89,7 +96,7 @@ const audio = new Audio(soundPath(sid)); audio.volume = volumeOf(sid); audio.pla
 function soundPath(sid) {
 if (sid === 'ui-click') return './assets/ui-click.mp3?v=2';
 if (sid === 'node-lit') return './assets/node-lit.mp3'; // 나무에서 세피라가 켜질 때
-if (sid === 'tree-on' || sid === 'tree-off') return `./assets/${sid}.mp3`; // 나무 활성/비활성
+if (sid === 'tree-on' || sid === 'tree-off' || sid === 'nav-jump') return `./assets/${sid}.mp3`; // 나무 활성/비활성
 return `${SFX_PATH}/${sid}.mp3`;
 }
 
@@ -223,7 +230,7 @@ const alreadyPlayed = target && pointerTarget === target && event.detail !== 0;
 pointerTarget = null;
 if (target && !alreadyPlayed) { /* 버튼 클릭음은 사용자 요청으로 끔 */ }
 });
-['tree-on', 'tree-off', 'node-lit'].forEach(prepareSfx); // 나무 소리를 미리 받아 첫 재생 지연을 없앱니다
+['tree-on', 'tree-off', 'node-lit', 'nav-jump'].forEach(prepareSfx); // 나무 소리를 미리 받아 첫 재생 지연을 없앱니다
 }
 
 /** 세피라 캐릭터를 공격 프레임으로 잠깐 바꿉니다 */
