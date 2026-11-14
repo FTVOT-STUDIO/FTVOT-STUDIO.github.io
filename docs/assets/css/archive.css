@@ -84,7 +84,7 @@ body { background: var(--bg); }
 .project-pagination button[aria-current] { border: 0; border-bottom: 1px solid var(--sc); background: transparent; color: var(--sc); }
 .unified-projects .project-entry > summary { grid-template-columns: 144px minmax(0, 1fr); padding-block: 26px; gap: 32px; }
 .project-cover > img:first-child { max-height: 112px; }
-.project-cover .project-reflection, .image-mirror { display: none !important; }
+.project-cover .project-reflection { display: none !important; } /* 갤러리·아트워크 반사(.image-mirror)는 다시 켬 */
 .unified-projects .project-heading b { font-size: 22px; font-weight: 500; }
 .project-heading > span { font-size: 12px; }
 .project-entry[open] > summary { border-bottom: 1px solid var(--line); }

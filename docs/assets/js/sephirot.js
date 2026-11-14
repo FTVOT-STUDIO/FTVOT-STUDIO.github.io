@@ -472,8 +472,9 @@ const now = performance.now();
 const dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 0; lastTime = now;
 anim += Math.sign(target - anim) * Math.min(Math.abs(target - anim), dt / MORPH_SECONDS);
 const progress = anim;
-if (target === 0 && anim < 1 && !reversing && raw0 > 8) { reversing = true; setTimeout(() => playLayer('tree-off'), 500); /* 0.5초 뒤 재생 */ }
+if (target === 0 && anim > 0 && !reversing) { /* 아래 장에서 한 번에 맨 위로 올라온 경우도 포함 */ reversing = true; setTimeout(() => playLayer('tree-off'), 500); /* 0.5초 뒤 재생 */ }
 if (anim <= 0) { reversing = false; wantUp = false; }
+if (target === 1) reversing = false; /* 가로로 다시 가면 비활성 소리를 다시 낼 수 있게 초기화 */
 if (anim >= 1) wantDown = false;
 const inHero = raw0 <= pin + 2;
 if (!inHero && target === 1) anim = 1; // 링크로 멀리 점프한 경우: 잠그지 않고 즉시 완료

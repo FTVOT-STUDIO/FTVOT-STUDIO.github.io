@@ -132,3 +132,12 @@
 @keyframes b-spin { to { rotate: 360deg; } }
 @keyframes b-orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
 @media (prefers-reduced-motion: reduce) { .ht-backdrop * { animation: none !important; } }
+/* 이미지 반사: 모든 이미지 아래에 옅게 비치는 반사를 둡니다.
+   갤러리·아트워크는 기존 .image-mirror 요소를, 그 밖의 이미지(캐릭터 원, 프로젝트 표지 등)는 box-reflect를 씁니다.
+   반사는 물 위처럼 아주 천천히 일렁여 정적인 느낌을 덜어 줍니다 (Firefox는 box-reflect 미지원이라 반사 없이 보입니다) */
+.image-mirror { opacity: .26; transform-origin: top center; animation: mirror-ripple 7s ease-in-out infinite alternate; }
+.project-cover img, .orb-art img, .chapter-emblem img, .artwork-card img:not(.image-mirror img) {
+-webkit-box-reflect: below 6px linear-gradient(to bottom, transparent 62%, rgb(0 0 0 / .2));
+}
+@keyframes mirror-ripple { 0% { transform: scaleY(1) skewX(0deg); opacity: .26; } 50% { transform: scaleY(.94) skewX(.6deg); opacity: .2; } 100% { transform: scaleY(1.03) skewX(-.4deg); opacity: .28; } }
+@media (prefers-reduced-motion: reduce) { .image-mirror { animation: none; } }
