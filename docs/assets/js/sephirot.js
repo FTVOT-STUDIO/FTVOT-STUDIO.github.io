@@ -7,7 +7,7 @@ const SFX_PATH = './assets/sfx';
 const SOUND_KEY = 'sfx';
 // 공격 프레임을 보여주는 시간. 효과음 앞부분의 타격감과 맞춘 길이입니다
 const ACT_MS = 820;
-const SFX_VOLUME = 0.15;
+const SFX_VOLUME = 0.06;
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
 const GROW_STEP = 120;
 
