@@ -4,6 +4,7 @@
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261114w';
 import { initSephirot } from './sephirot.js?v=20261115a';
+import { initChapterScenes } from './chapter-scenes.js?v=20261115a';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
 document.documentElement.classList.add('js');
@@ -65,6 +66,7 @@ enhance(initSky);
 enhance(() => { if (document.querySelector('link[href*="cosmic.css"]')) initCosmos(); });
 enhance(initAmbientAudio);
 enhance(() => initSephirot({ scrollTo: scrollToEl }));
+enhance(() => initChapterScenes()); // 세피라별 배경 연출 (좌우 여백에 선화로 그림)
 enhance(initAnchors);
 enhance(initArkaReader);
 enhance(initDetails);
