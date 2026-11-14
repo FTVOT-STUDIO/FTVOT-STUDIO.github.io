@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261114w';
-import { initSephirot } from './sephirot.js?v=20261114y';
+import { initSephirot } from './sephirot.js?v=20261114z';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
 document.documentElement.classList.add('js');
@@ -115,6 +115,17 @@ finish(expanding);
 
 function initPortraits() {
 const boundsCache = new Map();
+// 화면 가까이에 온 장만 먼저 준비해 첫 화면의 요청 경쟁을 줄입니다.
+if ('IntersectionObserver' in window) {
+const near = new IntersectionObserver((entries) => {
+entries.forEach((entry) => {
+if (!entry.isIntersecting) return;
+entry.target.querySelectorAll('.p-idle').forEach((img) => { img.loading = 'eager'; });
+near.unobserve(entry.target);
+});
+}, { rootMargin: '600px 0px' });
+document.querySelectorAll('.chapter').forEach((section) => near.observe(section));
+}
 const frames = document.querySelectorAll('.orb-art, .portrait-frame');
 const measure = (img) => {
 if (boundsCache.has(img.currentSrc)) return boundsCache.get(img.currentSrc);
@@ -516,8 +527,8 @@ function initAmbientAudio() {
 const button = document.querySelector('[data-music-toggle]');
 if (!button) return;
 // 긴 곡을 PCM으로 전부 풀지 않고 브라우저의 미디어 스트림으로 재생합니다.
-const audio = new Audio('./assets/space-ambient.mp3');
-audio.preload = 'metadata';
+const audio = new Audio();
+audio.preload = 'none';
 audio.loop = true;
 // 배경음은 볼륨 변화 없이 작은 소리로 계속 반복합니다.
 audio.volume = 0.08;
@@ -535,7 +546,8 @@ sync();
 };
 const start = () => {
 if (!enabled || document.hidden || !audio.paused) return;
-// 자동 재생이 차단되면 다음 실제 입력에서 다시 시도합니다.
+// 첫 화면이 먼저 준비되도록 실제 재생 직전까지 음원 요청을 미룹니다.
+if (!audio.getAttribute('src')) audio.src = './assets/space-ambient.mp3';
 audio.play().then(() => {
 if (!enabled || document.hidden) { stop(); return; }
 sync();
@@ -559,6 +571,14 @@ audio.addEventListener('play', sync);
 audio.addEventListener('pause', sync);
 audio.addEventListener('error', () => { stop(); button.hidden = true; });
 sync();
+const afterLoad = () => {
+const idle = window.requestIdleCallback || ((run) => setTimeout(run, 0));
+idle(() => {
+document.querySelectorAll('[data-font-styles]').forEach((link) => { link.media = 'all'; });
 start();
+});
+};
+if (document.readyState === 'complete') afterLoad();
+else window.addEventListener('load', afterLoad, { once: true });
 }
 

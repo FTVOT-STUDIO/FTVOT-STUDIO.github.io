@@ -243,6 +243,52 @@ p.after(signal);
 });
 }
 
+// 나무의 회전은 스크롤 위치로만 계산해 복귀할 때도 같은 자세를 지나갑니다.
+function initTreeScroll(hero, tree) {
+if (!hero || !tree) return;
+let pending = 0, previous = 0, leftHero = false, traceTimer = 0;
+let heroTop = 0, heroHeight = 1, treeHeight = 1;
+const trace = () => {
+if (reduceMotion.matches) return;
+clearTimeout(traceTimer);
+hero.classList.remove('is-tracing');
+void tree.offsetWidth;
+hero.classList.add('is-tracing');
+traceTimer = setTimeout(() => hero.classList.remove('is-tracing'), 2400);
+};
+const update = () => {
+pending = 0;
+const distance = Math.max(0, scrollY - heroTop);
+const progress = Math.min(1, distance / (heroHeight * 0.42));
+const eased = progress * progress * (3 - 2 * progress);
+if (distance > heroHeight * 0.7) leftHero = true;
+if (leftHero && progress < 0.28 && previous >= 0.28) { trace(); leftHero = false; }
+previous = progress;
+if (reduceMotion.matches) { tree.style.transform = ''; return; }
+const targetScale = Math.min(1, (innerWidth - 48) / treeHeight);
+const scale = 1 + (targetScale - 1) * eased;
+tree.style.transform = `translate3d(0, ${Math.min(distance, heroHeight) * 0.55}px, 0) rotate(${-90 * eased}deg) scale(${scale})`;
+};
+const schedule = () => { if (!pending) pending = requestAnimationFrame(update); };
+const measure = () => {
+heroTop = hero.getBoundingClientRect().top + scrollY;
+heroHeight = hero.offsetHeight;
+treeHeight = tree.querySelector('svg')?.clientHeight || tree.clientHeight;
+schedule();
+};
+window.addEventListener('scroll', schedule, { passive: true });
+window.addEventListener('resize', measure);
+reduceMotion.addEventListener('change', schedule);
+// 첫 등장과 충분히 내려갔다 돌아온 때만 빛을 흘려 경계의 반복 점멸을 막습니다.
+const ready = new MutationObserver(() => {
+if (!document.documentElement.classList.contains('tree-grown')) return;
+ready.disconnect();
+trace();
+});
+ready.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+measure();
+}
+
 /**
  * @param {{ scrollTo: (el: HTMLElement) => void }} nav 섹션 이동 함수
  */
@@ -261,6 +307,7 @@ const tbName = document.querySelector('[data-tb-name]');
 const tbNow = document.querySelector('[data-tb-now]');
 
 prepareGrowth(heroTree);
+initTreeScroll(hero, heroTree);
 heroTree?.querySelectorAll('.node').forEach((node) => {
 const ring = node.querySelector('.node-ring');
 if (!ring) return;
