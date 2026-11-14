@@ -294,7 +294,13 @@ for (let k = 0; k < 2; k++) { const ripple = document.createElementNS(NS, 'circl
 });
 let arriveTimer = 0;
 // 케테르로 빨려 들어가는 연출용: 나무 중심(viewBox 200, 320)에서 케테르 원 중심까지의 벡터 (viewBox 단위)
-let ketherAt = null;
+let ketherFrom = null;
+const orbTarget = document.querySelector('#kether .orb');
+// 날아가는 원: 고정 위치 오버레이. 케테르 색 테두리와 문양만 가진 가벼운 HTML 요소입니다
+const handoff = document.createElement('div');
+handoff.className = 'k-handoff'; handoff.setAttribute('aria-hidden', 'true');
+const handoffSym = document.createElement('span'); handoffSym.textContent = '♇\uFE0E'; handoff.append(handoffSym);
+document.body.append(handoff);
 const ketherRing = tree.querySelector('[data-seph="1"] .node-ring') || tree.querySelector('.node-ring');
 const kv = ketherRing ? [Number(ketherRing.getAttribute('cx')) - 200, Number(ketherRing.getAttribute('cy')) - 320] : [0, 0];
 const arrive = () => {
@@ -335,28 +341,36 @@ const hold = Math.min(distance, pin);
 const sway = Math.sin(Math.PI * e) * SWAY_DEG;
 // 나무는 눕지만 이름·문양·히브리 글자는 각자 제자리에서 반대로 돌아 항상 똑바로 읽히게 합니다
 setUpright(90 * e);
-// 케테르 줌: 다 눕고 점등이 끝난 뒤 남은 고정 구간 후반부에서 케테르를 화면 중앙으로 끌어오며 확대하고, 나머지는 사라집니다
-const zRaw = Math.min(1, Math.max(0, (distance - pin * .62) / (pin * .38)));
-const z = zRaw * zRaw * (3 - 2 * zRaw);
 const lift = `translate3d(0, ${hold.toFixed(1)}px, 0)`;
 const spin = `perspective(1600px) rotateX(${sway.toFixed(2)}deg) rotate(${(-90 * e).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
-const base = `${lift} ${spin}`;
-if (z <= 0) { tree.style.transform = base; ketherAt = null; }
-else {
-// 줌 직전(z=0) 상태에서 케테르의 실제 화면 위치를 한 번 재서 기억합니다
-if (!ketherAt && ketherRing) { tree.style.transform = base; const r = ketherRing.getBoundingClientRect(); ketherAt = [r.left + r.width / 2, r.top + r.height / 2, hold]; }
-const k = ketherAt || [innerWidth / 2, innerHeight / 2];
-const zoom = 1 + z * z * 5.5;
-// 1) 화면 중심을 축으로 확대한 모습을 먼저 적용하고
-tree.style.transform = `${lift} scale(${zoom.toFixed(3)}) ${spin}`;
-// 2) 그때 케테르가 실제로 어디 있는지 재서, 목표 지점(처음 위치 → 화면 중앙)으로 화면 좌표 그대로 옮깁니다
-const r = ketherRing.getBoundingClientRect();
-const tx = lerp(k[0], innerWidth / 2, z) - (r.left + r.width / 2), ty = lerp(k[1], innerHeight / 2, z) - (r.top + r.height / 2);
-tree.style.transform = `translate(${tx.toFixed(1)}px, ${ty.toFixed(1)}px) ${lift} scale(${zoom.toFixed(3)}) ${spin}`;
+// 케테르 이어짐: 다 눕고 점등이 끝나면 케테르 원만 나무에서 떨어져 나와, 아래에서 올라오는 케테르 장의 캐릭터 원 자리로 날아가 겹쳐집니다.
+// 확대 없이 '같은 원이 다음 페이지의 원이 되는' 공유 요소 전환입니다. 목표 위치는 매 프레임 실제 위치를 읽어 스크롤과 함께 따라갑니다
+const zRaw = Math.min(1, Math.max(0, (distance - pin * .7) / (pin * .3 + innerHeight * .6)));
+const z = easeInOut(zRaw);
+tree.style.transform = `${lift} ${spin}`;
+if (zRaw <= 0 || zRaw >= 1 || !ketherRing || !orbTarget) {
+handoff.style.opacity = '0'; ketherFrom = null;
+hero.classList.remove('is-diving'); orbTarget?.style.removeProperty('opacity');
+} else {
+if (!ketherFrom) { const r = ketherRing.getBoundingClientRect(); ketherFrom = [r.left + r.width / 2, r.top + r.height / 2, r.width]; }
+const to = orbTarget.getBoundingClientRect();
+const toSize = Math.min(to.width, to.height);
+// 출발점은 나무가 고정을 벗어나 올라가는 만큼 같이 올라가야 자연스럽게 떨어져 나옵니다
+const drift = Math.max(0, distance - pin);
+const fx = ketherFrom[0], fy = ketherFrom[1] - drift;
+// 곡선 경로: 직선 대신 위로 살짝 떠올랐다 내려앉는 호를 그립니다
+const x = lerp(fx, to.left + to.width / 2, z), y = lerp(fy, to.top + to.height / 2, z) - Math.sin(Math.PI * z) * innerHeight * .12;
+const size = lerp(ketherFrom[2], toSize, z);
+handoff.style.width = handoff.style.height = `${size.toFixed(1)}px`;
+handoff.style.transform = `translate3d(${(x - size / 2).toFixed(1)}px, ${(y - size / 2).toFixed(1)}px, 0) rotate(${(z * 360).toFixed(1)}deg)`;
+handoffSym.style.transform = `rotate(${(-z * 360).toFixed(1)}deg)`;
+handoffSym.style.fontSize = `${(size * .34).toFixed(1)}px`; // 원 크기에 맞춰 문양도 함께 커집니다
+// 도착 직전에 원은 사라지고 캐릭터가 그 자리에서 나타납니다
+handoff.style.opacity = (1 - Math.max(0, (z - .82) / .18)).toFixed(3);
+orbTarget.style.opacity = Math.max(0, (z - .78) / .22).toFixed(3);
+hero.classList.add('is-diving');
 }
-tree.style.opacity = (1 - Math.max(0, (z - .75) / .25)).toFixed(3);
-tree.style.setProperty('--others', (1 - Math.min(1, z * 2.2)).toFixed(3));
-hero.classList.toggle('is-diving', z > 0);
+tree.style.opacity = (1 - Math.min(1, zRaw * 5)).toFixed(3); // 나머지는 케테르가 떠나는 초반에 빠르게 사라집니다
 hero.classList.toggle('is-diving', z > 0);
 // 다이얼: 회전 중간에 가장 진하고, 시작과 끝에서는 사라집니다. 바깥 고리는 반대로, 안쪽 바늘은 빠르게 돕니다
 const presence = Math.sin(Math.PI * e);
