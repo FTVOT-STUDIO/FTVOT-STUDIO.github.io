@@ -1475,3 +1475,6 @@ summary:hover .arka-expand { color: var(--sc); }
 .topbar.is-shown ~ .audio-controls { top: 60px; }
 .hero-tree { padding-top: 72px; }
 }
+
+/* 장면은 클릭과 읽기를 방해하지 않는 단일 배경 버퍼로 표시합니다. */
+.chapter-cosmos { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; contain: strict; }
