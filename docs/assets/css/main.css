@@ -1309,7 +1309,7 @@ summary:hover .arka-expand { color: var(--sc); }
 /* 같은 우주 안에서도 각 세피라의 기원은 다른 문양으로 드러냅니다. */
 .chapter-sigil { position: absolute; top: 112px; right: -28px; width: min(34vw, 420px); color: var(--sc); opacity: 0.13; pointer-events: none; user-select: none; }
 .chapter-sigil svg { display: block; width: 100%; height: auto; overflow: visible; stroke: currentColor; stroke-width: 1.1; stroke-linejoin: round; stroke-linecap: round; }
-.chapter-sigil .sigil-faint { opacity: 0.38; }
+:is(.chapter-sigil, .chapter-atmosphere) .sigil-faint { opacity: 0.38; }
 .chapter .ch-inner, .seph-boundary { position: relative; }
 .chapter .seph-boundary { position: absolute; }
 .pillar-right .chapter-sigil { right: auto; left: -18px; }
@@ -1367,13 +1367,13 @@ summary:hover .arka-expand { color: var(--sc); }
 .chapter .chapter-sigil { position: relative; inset: auto; width: 168px; height: 168px; grid-column: 3; align-self: center; opacity: 0.82; contain: layout paint style; }
 .chapter .chapter-sigil svg { height: 100%; stroke-width: 1.1; }
 .chapter-sigil :is(path, circle, ellipse, rect, line, polygon) { vector-effect: non-scaling-stroke; }
-.chapter-sigil .motif-fill { fill: currentColor; fill-opacity: 0.09; stroke: none; }
-.chapter-sigil .motif-tint { fill: currentColor; fill-opacity: 0.17; stroke: currentColor; stroke-opacity: 0.42; }
-.chapter-sigil .motif-solid { fill: currentColor; fill-opacity: 0.8; stroke: none; }
-.chapter-sigil .motif-bright { stroke: color-mix(in oklab, var(--sc) 65%, white); stroke-opacity: 0.9; }
-.chapter-sigil .sigil-faint { opacity: 0.5; }
-.chapter-sigil .horizon-core { fill: #020105; stroke: none; }
-.chapter-sigil .horizon-aura { stroke-width: 3px; opacity: 0.13; }
+:is(.chapter-sigil, .chapter-atmosphere) .motif-fill { fill: currentColor; fill-opacity: 0.09; stroke: none; }
+:is(.chapter-sigil, .chapter-atmosphere) .motif-tint { fill: currentColor; fill-opacity: 0.17; stroke: currentColor; stroke-opacity: 0.42; }
+:is(.chapter-sigil, .chapter-atmosphere) .motif-solid { fill: currentColor; fill-opacity: 0.8; stroke: none; }
+:is(.chapter-sigil, .chapter-atmosphere) .motif-bright { stroke: color-mix(in oklab, var(--sc) 65%, white); stroke-opacity: 0.9; }
+:is(.chapter-sigil, .chapter-atmosphere) .sigil-faint { opacity: 0.5; }
+:is(.chapter-sigil, .chapter-atmosphere) .horizon-core { fill: #020105; stroke: none; }
+:is(.chapter-sigil, .chapter-atmosphere) .horizon-aura { stroke-width: 3px; opacity: 0.13; }
 .chapter-sigil.sigil-black-hole { opacity: 1; }
 .s-chesed .chapter-sigil { color: #e9dce9; }
 .s-hod .chapter-sigil svg { stroke-width: 1.2; }
@@ -1397,3 +1397,26 @@ summary:hover .arka-expand { color: var(--sc); }
 }
 @media (prefers-reduced-motion: reduce) { .node-aura { display: none; } }
 @media (prefers-reduced-motion: no-preference) { .ht-tree .node:hover .node-aura-second, .ht-tree .node:focus-visible .node-aura-second { animation-delay: calc(var(--d, 0) * 1ms + 1200ms); } }
+
+/* 머리말의 선명한 문양과 중간·하단의 환경을 나눠 한 구간 전체에 성격을 이어갑니다. */
+.chapter-atmosphere { position: absolute; inset: 0; overflow: clip; color: var(--sc); pointer-events: none; user-select: none; contain: layout paint style; }
+.chapter .ch-inner, .chapter .seph-boundary { z-index: 1; }
+.atmosphere-echo { position: absolute; top: 34%; right: -100px; width: min(40vw, 460px); opacity: 0.22; transform: rotate(-12deg); }
+.pillar-right .atmosphere-echo { right: auto; left: -100px; transform: rotate(12deg); }
+.pillar-center .atmosphere-echo { right: auto; left: -165px; }
+.atmosphere-echo svg { display: block; width: 100%; height: auto; fill: none; stroke: currentColor; stroke-width: 1.3; }
+.atmosphere-landscape { position: absolute; bottom: 0; left: 0; width: 100%; height: 220px; stroke: currentColor; stroke-width: 1; opacity: 0.28; mask-image: linear-gradient(to bottom, transparent, #000 38%, #000); }
+.chapter-atmosphere :is(path, circle, ellipse, rect) { vector-effect: non-scaling-stroke; }
+.chapter-atmosphere .horizon-core { fill: var(--bg); stroke: none; }
+.s-chesed .atmosphere-landscape { color: #e9dce9; opacity: 0.32; }
+.s-gevurah .atmosphere-landscape { stroke-dasharray: none; }
+.s-netzach .atmosphere-landscape { opacity: 0.32; }
+.s-hod .atmosphere-echo { top: 42%; opacity: 0.24; }
+.s-yesod .atmosphere-echo { opacity: 0.2; }
+.js .chapter:not(.is-in-view) .chapter-atmosphere * { animation-play-state: paused; }
+@media (max-width: 767px) {
+.atmosphere-echo, .pillar-right .atmosphere-echo, .pillar-center .atmosphere-echo { top: 46%; left: auto; right: -110px; width: 260px; opacity: 0.16; }
+.atmosphere-landscape { height: 130px; width: 760px; left: 50%; transform: translateX(-50%); opacity: 0.22; }
+.chapter { padding-bottom: 90px; }
+}
+@media (prefers-reduced-motion: reduce) { .chapter-atmosphere * { animation: none !important; } }
