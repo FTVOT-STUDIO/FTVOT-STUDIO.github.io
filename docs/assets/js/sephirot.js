@@ -13,7 +13,7 @@ const volumeOf = (sid) => Math.min(1, SFX_VOLUME * (SFX_BOOST[sid] || 1));
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
 const GROW_STEP = 120;
 
-const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click', 'node-lit', 'tree-on', 'tree-off', 'nav-jump'];
+const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click', 'node-lit', 'tree-on', 'tree-off', 'nav-jump', 'path-trace'];
 const audioCache = new Map();
 const buffers = new Map();
 const loadingSounds = new Map();
@@ -96,7 +96,7 @@ const audio = new Audio(soundPath(sid)); audio.volume = volumeOf(sid); audio.pla
 function soundPath(sid) {
 if (sid === 'ui-click') return './assets/ui-click.mp3?v=2';
 if (sid === 'node-lit') return './assets/node-lit.mp3'; // 나무에서 세피라가 켜질 때
-if (sid === 'tree-on' || sid === 'tree-off' || sid === 'nav-jump') return `./assets/${sid}.mp3`; // 나무 활성/비활성
+if (sid === 'tree-on' || sid === 'tree-off' || sid === 'nav-jump' || sid === 'path-trace') return `./assets/${sid}.mp3`; // 나무 활성/비활성
 return `${SFX_PATH}/${sid}.mp3`;
 }
 
@@ -230,7 +230,7 @@ const alreadyPlayed = target && pointerTarget === target && event.detail !== 0;
 pointerTarget = null;
 if (target && !alreadyPlayed) { /* 버튼 클릭음은 사용자 요청으로 끔 */ }
 });
-['tree-on', 'tree-off', 'node-lit', 'nav-jump'].forEach(prepareSfx); // 나무 소리를 미리 받아 첫 재생 지연을 없앱니다
+['tree-on', 'tree-off', 'node-lit', 'nav-jump', 'path-trace'].forEach(prepareSfx); // 나무 소리를 미리 받아 첫 재생 지연을 없앱니다
 }
 
 /** 세피라 캐릭터를 공격 프레임으로 잠깐 바꿉니다 */
@@ -469,7 +469,7 @@ if (scrollLocked) { const to = heroTop + heroHeight * PIN_RATIO * .55; scrollTo(
 const e = easeInOut(progress);
 if (anim !== target) schedule(); else lastTime = 0;
 // 다 누웠을 때 / 다시 섰을 때 경로에 빛을 한 번 흘립니다
-if (progress >= 1 && !laid) { laid = true; hero.classList.add('is-laid'); trace(); }
+if (progress >= 1 && !laid) { laid = true; hero.classList.add('is-laid'); trace(); playLayer('path-trace'); } // 경로를 따라 빛이 흐를 때 마법진 울림
 if (progress < 0.02 && laid) { laid = false; hero.classList.remove('is-laid'); trace(); }
 previous = progress;
 if (reduceMotion.matches) { tree.style.transform = ''; morph(1); return; }

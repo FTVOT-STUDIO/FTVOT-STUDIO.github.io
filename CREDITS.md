@@ -33,6 +33,8 @@
 
 - 세피라 이동 `docs/assets/nav-jump.mp3`: yodguard, "Water Magic 3" (Pixabay #378618로 추정, 사용자 제공 파일). Pixabay Content License
 
+- 경로 빛 `docs/assets/path-trace.mp3`: freesound_community, "Magic Circle Long Ringing SFX" (Pixabay #45483로 추정, 사용자 제공 파일). Pixabay Content License
+
 ## 작업 방식
 
 - 디자인 필터: antislop (MIT) https://github.com/miqdadbadjuber/anti-slop
