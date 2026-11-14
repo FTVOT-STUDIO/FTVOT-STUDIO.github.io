@@ -167,7 +167,7 @@ if (open > 0) { const f = seg(p, .62, 1), bx = x + 10 + Math.sin(f * 7 + k) * 35
 },
 // 헤세드: 세 겹의 겨울 도시. 멀리 있는 건물일수록 옅고, 앞쪽 건물 지붕엔 눈이 쌓이며, 세 깊이의 눈송이가 돌풍에 휘몰아칩니다
 chesed(c, t) {
-const gust = .75 + Math.sin(t * .5) * .35 + Math.max(0, Math.sin(t * 1.7)) ** 6 * .6; // 가끔 세게 몰아치는 돌풍
+const gust = .75 + Math.sin(t * .5) * .35 + Math.max(0, Math.sin(t * .9)) ** 6 * .4; // 가끔 세게 몰아치는 돌풍
 const skyline = (seed, count, base, minH, maxH, w, alpha, windows) => {
 c.save(); c.globalAlpha *= alpha;
 for (let i = 0; i < count; i++) {
@@ -189,18 +189,18 @@ c.restore();
 c.save(); c.globalAlpha *= .35; circle(c, 230, 70, 22); for (let i = 0; i < 3; i++) { const y = 60 + i * 26, o = (t * 6 * (i + 1)) % 340 - 40; c.beginPath(); c.moveTo(o - 60, y); c.bezierCurveTo(o - 30, y - 14, o + 10, y - 14, o + 40, y); c.stroke(); } c.restore();
 skyline(40, 13, 400, 120, 230, 22, .28, false);
 // 먼 눈송이 (작고 느림)
-for (let i = 0; i < 70; i++) { const sp = 18 + rand(i) * 14, y = (rand(i + 3) * 480 + t * sp) % 480, x = ((rand(i + 5) * 340 + t * sp * gust * 1.2 + Math.sin(y * .02 + i) * 10) % 340) - 20; c.save(); c.globalAlpha *= .45; dot(c, x, y, .6); c.restore(); }
+for (let i = 0; i < 70; i++) { const sp = 8 + rand(i) * 6, y = (rand(i + 3) * 480 + t * sp) % 480, x = ((rand(i + 5) * 340 + t * sp * gust * .9 + Math.sin(y * .02 + i) * 10) % 340) - 20; c.save(); c.globalAlpha *= .45; dot(c, x, y, .6); c.restore(); }
 skyline(80, 9, 415, 80, 170, 30, .6, true);
 // 가로등과 원뿔 불빛 속에서 반짝이는 눈
 for (let i = 0; i < 3; i++) { const x = 45 + i * 105; line(c, x, 440, x, 372); c.beginPath(); c.moveTo(x, 372); c.quadraticCurveTo(x, 364, x + 10, 364); c.stroke(); c.strokeRect(x + 7, 364, 7, 4);
 c.save(); c.globalAlpha *= .22 + .06 * Math.sin(t * 7 + i); c.beginPath(); c.moveTo(x + 10, 368); c.lineTo(x - 18, 440); c.lineTo(x + 38, 440); c.closePath(); c.stroke(); c.restore();
-for (let j = 0; j < 6; j++) { const yy = 372 + ((t * 25 + j * 12 + i * 7) % 66), xx = x + 10 + (yy - 368) * (rand(j + i * 6) - .5) * .8 + Math.sin(t * 2 + j) * 3; dot(c, xx, yy, 1.1); } }
+for (let j = 0; j < 6; j++) { const yy = 372 + ((t * 10 + j * 12 + i * 7) % 66), xx = x + 10 + (yy - 368) * (rand(j + i * 6) - .5) * .8 + Math.sin(t * 2 + j) * 3; dot(c, xx, yy, 1.1); } }
 skyline(120, 6, 440, 40, 95, 44, 1, true);
 // 바람에 쓸려 쌓이는 지면의 눈
 c.beginPath(); c.moveTo(0, 440); for (let x = 0; x <= 300; x += 8) c.lineTo(x, 436 - Math.sin(x * .045 + t * .15) * 4 - Math.sin(x * .13) * 2); c.stroke();
-for (let i = 0; i < 6; i++) { const x = ((t * 40 * gust + i * 60) % 360) - 30; c.save(); c.globalAlpha *= .5; c.beginPath(); c.moveTo(x, 438); c.quadraticCurveTo(x + 15, 430, x + 34, 436); c.stroke(); c.restore(); }
+for (let i = 0; i < 6; i++) { const x = ((t * 16 * gust + i * 60) % 360) - 30; c.save(); c.globalAlpha *= .5; c.beginPath(); c.moveTo(x, 438); c.quadraticCurveTo(x + 15, 430, x + 34, 436); c.stroke(); c.restore(); }
 // 가까운 눈송이 (크고 빠르며 꼬리를 끕니다)
-for (let i = 0; i < 80; i++) { const sp = 60 + rand(i + 20) * 70, y = (rand(i + 23) * 480 + t * sp) % 480, x = ((rand(i + 25) * 360 + t * sp * gust * 1.8 + Math.sin(y * .035 + t * 1.3 + i) * 22) % 360) - 30, r = .9 + rand(i + 29) * 1.5; dot(c, x, y, r); if (r > 1.6) line(c, x, y, x - 10 * gust, y - 5); }
+for (let i = 0; i < 80; i++) { const sp = 22 + rand(i + 20) * 22, y = (rand(i + 23) * 480 + t * sp) % 480, x = ((rand(i + 25) * 360 + t * sp * gust * 1.1 + Math.sin(y * .035 + t * 1.3 + i) * 22) % 360) - 30, r = .9 + rand(i + 29) * 1.5; dot(c, x, y, r); if (r > 1.6) line(c, x, y, x - 6 * gust, y - 3); }
 // 휘몰아치는 돌풍 곡선
 for (let i = 0; i < 5; i++) { const y = 120 + i * 62 + Math.sin(t * .8 + i) * 16, o = Math.sin(t * .6 + i) * 30; c.save(); c.globalAlpha *= .35 * gust; c.beginPath(); c.moveTo(-20 + o, y); c.bezierCurveTo(70 + o, y - 34 * gust, 150 + o, y + 30, 230 + o, y - 8); c.quadraticCurveTo(255 + o, y - 22, 245 + o, y - 30); c.stroke(); c.restore(); }
 },

@@ -79,3 +79,11 @@
 @media (prefers-reduced-motion: reduce) { .ht-tree { transform: none !important; } }
 /* 고정된 나무가 히어로 경계 밖으로 내려가도 잘리지 않고 다음 섹션 위에 그려지도록 합니다 (가로 넘침은 body가 막습니다) */
 .js .hero-tree { overflow: visible; position: relative; z-index: 3; }
+/* 나무 회전 다이얼: 히어로 좌상단 기준으로 JS가 위치를 잡습니다. 글자·선은 Kether 보라를 옅게 씁니다 */
+.ht-dial { position: absolute; left: 0; top: 0; z-index: 1; pointer-events: none; opacity: 0; overflow: visible; will-change: transform, opacity; }
+.ht-dial .dial-line { fill: none; stroke: color-mix(in oklab, var(--text-2, #a1a1aa) 55%, transparent); stroke-width: .5; vector-effect: non-scaling-stroke; }
+.ht-dial .dial-dash { stroke-dasharray: 2 4; }
+.ht-dial .dial-arm { stroke: color-mix(in oklab, #a78bfa 70%, transparent); }
+.ht-dial .dial-text { fill: var(--text-2, #a1a1aa); font: 500 5px/1 "Geist Mono", ui-monospace, monospace; text-anchor: middle; letter-spacing: .08em; }
+.ht-dial .dial-readout { font-size: 5.5px; fill: var(--text-1, #fafafa); }
+@media (prefers-reduced-motion: reduce) { .ht-dial { display: none; } }

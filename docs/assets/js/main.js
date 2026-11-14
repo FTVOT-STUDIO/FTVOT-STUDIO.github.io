@@ -2,9 +2,9 @@
 // 빌드 없는 ES 모듈입니다. 모든 기능은 JS가 실패해도 기본 HTML이 동작하도록 "덧붙이는" 방식입니다.
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
-import { initCosmos } from './cosmos.js?v=20261114w';
-import { initSephirot } from './sephirot.js?v=20261115c';
-import { initChapterScenes } from './chapter-scenes.js?v=20261115c';
+import { initCosmos } from './cosmos.js?v=20261115a';
+import { initSephirot } from './sephirot.js?v=20261115e';
+import { initChapterScenes } from './chapter-scenes.js?v=20261115d';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
 document.documentElement.classList.add('js');

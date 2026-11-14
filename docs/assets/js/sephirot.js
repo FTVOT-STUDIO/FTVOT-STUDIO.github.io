@@ -267,6 +267,23 @@ const dot = badge.querySelector('circle'), text = badge.querySelector('text'); i
 upright.push([text, dot.getAttribute('cx'), dot.getAttribute('cy')]);
 });
 let lastAngle = -1;
+// 회전 연출용 다이얼: 나무 뒤에 눈금 고리와 각도 표시가 떠올라 나무와 반대로 돌며 회전량을 읽어 줍니다
+const NS = 'http://www.w3.org/2000/svg';
+const dial = document.createElementNS(NS, 'svg');
+dial.setAttribute('class', 'ht-dial'); dial.setAttribute('viewBox', '-100 -100 200 200'); dial.setAttribute('aria-hidden', 'true');
+const outer = document.createElementNS(NS, 'g'), inner = document.createElementNS(NS, 'g');
+const add = (parent, tag, attrs) => { const el = document.createElementNS(NS, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); parent.append(el); return el; };
+add(outer, 'circle', { r: 96, class: 'dial-line' });
+for (let i = 0; i < 120; i++) { const a = i / 120 * Math.PI * 2, l = i % 10 === 0 ? 7 : i % 5 === 0 ? 4 : 2; add(outer, 'line', { x1: Math.cos(a) * 96, y1: Math.sin(a) * 96, x2: Math.cos(a) * (96 - l), y2: Math.sin(a) * (96 - l), class: 'dial-line' }); }
+['א', 'מ', 'ש', 'ת'].forEach((ch, i) => { const a = i / 4 * Math.PI * 2 - Math.PI / 2; const tx = add(outer, 'text', { x: Math.cos(a) * 84, y: Math.sin(a) * 84 + 2.5, class: 'dial-text' }); tx.textContent = ch; });
+add(inner, 'circle', { r: 72, class: 'dial-line dial-dash' });
+add(inner, 'line', { x1: 0, y1: 0, x2: 0, y2: -72, class: 'dial-line dial-arm' });
+const readout = add(dial, 'text', { x: 0, y: 92, class: 'dial-text dial-readout' });
+dial.prepend(inner); dial.prepend(outer);
+hero.append(dial);
+// 세피라 원: 회전 중 케테르부터 말쿠트까지 순서대로 한 번씩 부풀었다 돌아오는 파동
+const rings = [...tree.querySelectorAll('.node-ring')].map((ring) => [ring, Number(ring.getAttribute('r'))]);
+let dialBox = { x: 0, y: 0 };
 const setUpright = (angle) => {
 const a = Math.round(angle * 10) / 10; if (a === lastAngle) return; lastAngle = a;
 for (const [el, cx, cy] of upright) { if (a) el.setAttribute('transform', `rotate(${a} ${cx} ${cy})`); else el.removeAttribute('transform'); }
@@ -289,7 +306,7 @@ const e = easeInOut(progress);
 if (progress >= 1 && !laid) { laid = true; trace(); }
 if (progress < 0.02 && laid) { laid = false; trace(); }
 previous = progress;
-if (reduceMotion.matches) { tree.style.transform = ''; setUpright(0); return; }
+if (reduceMotion.matches) { tree.style.transform = ''; setUpright(0); dial.style.opacity = '0'; return; }
 // 누운 나무가 화면 너비(누운 뒤의 가로 = 원래 세로)와 높이 안에 들어오도록 크기를 맞춥니다
 const fit = Math.min((innerWidth - 64) / treeH, (innerHeight * 0.78) / treeW, 1.25);
 const scale = 1 + (fit - 1) * e;
@@ -300,6 +317,17 @@ const sway = Math.sin(Math.PI * e) * SWAY_DEG;
 // 나무는 눕지만 이름·문양·히브리 글자는 각자 제자리에서 반대로 돌아 항상 똑바로 읽히게 합니다
 setUpright(90 * e);
 tree.style.transform = `translate3d(0, ${hold.toFixed(1)}px, 0) perspective(1600px) rotateX(${sway.toFixed(2)}deg) rotate(${(-90 * e).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+// 다이얼: 회전 중간에 가장 진하고, 시작과 끝에서는 사라집니다. 바깥 고리는 반대로, 안쪽 바늘은 빠르게 돕니다
+const presence = Math.sin(Math.PI * e);
+const diameter = Math.max(treeW, treeH) * scale * .86;
+dial.style.width = dial.style.height = `${diameter.toFixed(0)}px`;
+dial.style.transform = `translate3d(${(dialBox.x - diameter / 2).toFixed(1)}px, ${(dialBox.y - diameter / 2 + hold).toFixed(1)}px, 0) scale(${(.92 + presence * .08).toFixed(3)})`;
+dial.style.opacity = (presence * .9).toFixed(3);
+outer.setAttribute('transform', `rotate(${(90 * e * .6).toFixed(2)})`);
+inner.setAttribute('transform', `rotate(${(-90 * e * 4).toFixed(2)})`);
+readout.textContent = `${String(Math.round(90 * e)).padStart(3, '0')}°`;
+// 파동: 각 원이 순서대로 최대 12% 부풀었다 돌아옵니다
+rings.forEach(([ring, r], i) => { const k = Math.min(1, Math.max(0, e * 1.5 - i * .05)); ring.setAttribute('r', (r * (1 + Math.sin(Math.PI * k) * .12)).toFixed(2)); });
 // 왼쪽 소개 글은 나무가 눕는 동안 함께 고정되며 천천히 사라집니다
 if (copy) {
 copy.style.transform = `translate3d(0, ${hold.toFixed(1)}px, 0)`;
@@ -313,6 +341,8 @@ heroHeight = hero.offsetHeight;
 const svg = tree.querySelector('svg');
 treeW = svg?.clientWidth || tree.clientWidth;
 treeH = svg?.clientHeight || tree.clientHeight;
+// 다이얼 중심 = 나무 중심 (히어로 기준 좌표, 고정 이동량은 update에서 더합니다)
+dialBox = { x: tree.offsetLeft + tree.offsetWidth / 2, y: tree.offsetTop + tree.offsetHeight / 2 };
 schedule();
 };
 window.addEventListener('scroll', schedule, { passive: true });

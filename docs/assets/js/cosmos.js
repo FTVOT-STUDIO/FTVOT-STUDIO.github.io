@@ -76,25 +76,8 @@ for(let branch=0;branch<3;branch++){const p=phase(t,23,branch*.26),growth=Math.m
 if(p>.43){const f=(p-.43)/.57,bx=x+dir*(40+f*110)+Math.sin(f*7)*12,by=base-length-f*170;c.save();c.globalAlpha*=Math.sin(f*Math.PI);const wing=3+Math.abs(Math.sin(t*4+branch))*9;oval(c,bx-wing,by-4,wing,7,-.4);oval(c,bx+wing,by-4,wing,7,.4);line(c,bx,by-9,bx,by+8);c.restore();}}
 }
 },
-chesed(c,w,h,t){
-const ground=h*.91;
-for(let layer=0;layer<2;layer++){
-const count=layer?15:20,unit=w/count,base=ground-layer*32;
-c.save();c.globalAlpha*=layer?.24:.48;
-for(let i=0;i<count;i++){
-const x=i*unit-12,height=35+(i*47+layer*29)%135,roof=base-height,bw=unit-3;
-c.beginPath();c.moveTo(x,base);c.lineTo(x,roof+12);
-if(i%3===0){c.lineTo(x+bw*.5,roof-9);c.lineTo(x+bw,roof+12);}else{c.lineTo(x,roof);c.lineTo(x+bw*.25,roof);c.lineTo(x+bw*.25,roof-7);c.lineTo(x+bw*.7,roof-7);c.lineTo(x+bw*.7,roof);c.lineTo(x+bw,roof);}
-c.lineTo(x+bw,base);c.closePath();c.save();c.globalAlpha*=.18;c.fill();c.restore();c.stroke();
-if(i%4===0){line(c,x+bw*.5,roof-5,x+bw*.5,roof-35);ring(c,x+bw*.5,roof-38,2);}
-for(let row=0;row<4;row++)for(let col=0;col<3;col++){if((i+row+col)%3===0)continue;const wy=roof+25+row*18;if(wy<base-8)c.fillRect(x+bw*.22+col*bw*.23,wy,2,4);}
-}
-c.restore();
-}
-for(let i=0;i<3;i++){c.save();c.globalAlpha*=.35;c.beginPath();c.moveTo(0,ground+9+i*13);c.bezierCurveTo(w*.26,ground-10+i*10,w*.63,ground+24+i*11,w,ground+2+i*18);c.stroke();c.restore();}
-for(let i=0;i<65;i++){const p=phase(t,10+i%8,i/65),x=((i*131+p*220)%(w+180))-90,y=p*h;line(c,x,y,x+3,y+1);}
-for(let i=0;i<3;i++){const y=h*.18+i*h*.22+Math.sin(t*.2+i)*12;c.save();c.globalAlpha*=.2;c.beginPath();c.moveTo(-20,y);c.bezierCurveTo(w*.3,y-60,w*.6,y+60,w+20,y-30);c.stroke();c.restore();}
-},
+// 헤세드의 도시·눈보라는 chapter-scenes.js가 그립니다. 여기서도 그리면 도시가 두 겹으로 겹쳐 보입니다
+chesed(){},
 gevurah(c,w,h,t){
 const r=Math.min(190,w*.21);cog(c,-r*.13,h*.33,r,t*.04);cog(c,w+r*.25,h*.73,r*1.2,-t*.035);
 for(let side=0;side<2;side++){const x=side?w-30:30;line(c,x,h*.12,x,h*.8);for(let j=0;j<6;j++)line(c,x-4,h*.12+j*40,x+4,h*.12+j*40);}
