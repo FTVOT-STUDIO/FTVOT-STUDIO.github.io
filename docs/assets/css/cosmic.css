@@ -101,7 +101,6 @@
 .hero-tree.is-diving .ht-tree .node, .hero-tree.is-diving .ht-tree .path-badge > *, .hero-tree.is-diving .ht-tree .path, .hero-tree.is-diving .ht-tree svg line, .hero-tree.is-diving .ht-tree svg path:not([data-seph="1"] path), .hero-tree.is-diving .ht-tree .veil { opacity: var(--others, 1) !important; }
 /* 케테르 원은 날아가는 원이 대신하므로 즉시 숨깁니다 */
 .hero-tree.is-diving .ht-tree .node[data-seph="1"] { opacity: 0 !important; }
-/* 케테르 이어짐 원: 나무의 케테르와 같은 모양(보라 테두리 + 문양)으로 다음 장의 캐릭터 원 자리까지 날아갑니다 */
-.k-handoff { position: fixed; left: 0; top: 0; z-index: 40; pointer-events: none; opacity: 0; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--c1); background: color-mix(in oklab, var(--c1) 10%, var(--bg, #0b0b0e)); color: var(--c1); will-change: transform, width, height, opacity; }
-.k-handoff span { font-size: 28px; line-height: 1; }
-@media (prefers-reduced-motion: reduce) { .k-handoff { display: none; } }
+/* 케테르 장으로 넘어가는 빛 막: 아래에서 위로 옅은 보라가 차오릅니다 */
+.k-wash { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0; background: linear-gradient(to top, color-mix(in oklab, var(--c1) 22%, transparent) 0%, color-mix(in oklab, var(--c1) 8%, transparent) 45%, transparent 80%); will-change: transform, opacity; }
+@media (prefers-reduced-motion: reduce) { .k-wash { display: none; } }
