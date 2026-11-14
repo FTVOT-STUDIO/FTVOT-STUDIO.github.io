@@ -15,6 +15,21 @@ const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', '
 const audioCache = new Map();
 const buffers = new Map();
 const loadingSounds = new Map();
+// PCM 캐시는 압축 음원보다 커지므로 개수와 바이트를 함께 제한합니다.
+const MAX_SOUND_BYTES = 12 * 1024 * 1024;
+const MAX_SOUND_COUNT = 3;
+let soundBytes = 0, releaseTimer = 0;
+function cacheSound(sid, value) {
+const bytes = value.buffer.length * value.buffer.numberOfChannels * 4;
+if (bytes > MAX_SOUND_BYTES) return;
+while (buffers.size && (buffers.size >= MAX_SOUND_COUNT || soundBytes + bytes > MAX_SOUND_BYTES)) {
+const oldest = buffers.keys().next().value;
+soundBytes -= buffers.get(oldest).bytes;
+buffers.delete(oldest);
+}
+buffers.set(sid, { ...value, bytes });
+soundBytes += bytes;
+}
 let audioContext = null, masterGain = null, activeSource = null, playing = null;
 let soundOn = true;
 
@@ -34,7 +49,7 @@ return audioContext;
 function prepareFallback(sid) {
 if (!audioCache.has(sid)) {
 const audio = new Audio(`${SFX_PATH}/${sid}.mp3`);
-audio.preload = 'auto';
+audio.preload = 'metadata';
 audio.volume = SFX_VOLUME;
 audio.load();
 audioCache.set(sid, audio);
@@ -65,7 +80,7 @@ if (Math.abs(data[i]) > 0.0005) { first = i; break; }
 }
 }
 const offset = Math.max(0, first / buffer.sampleRate - 0.004);
-buffers.set(sid, { buffer, offset });
+if (!document.hidden && soundOn) cacheSound(sid, { buffer, offset });
 } catch { prepareFallback(sid); }
 finally { window.clearTimeout(timeout); loadingSounds.delete(sid); }
 })();
@@ -74,10 +89,8 @@ return promise;
 }
 
 function warmSfx(priority = '') {
-const queue = [...new Set([priority, ...SFX_IDS])].filter((sid) => SFX_IDS.includes(sid));
-// 첫 클릭 전에 미리 복호화하고 동시 요청은 세 개로 제한합니다.
-const worker = async () => { while (queue.length && soundOn) await prepareSfx(queue.shift()); };
-for (let i = 0; i < 3; i += 1) worker();
+// 열 개를 일괄 디코딩하지 않고 현재 선택한 소리만 준비합니다.
+if (SFX_IDS.includes(priority)) prepareSfx(priority);
 }
 
 function stopSfx() {
@@ -95,6 +108,7 @@ stopSfx();
 const context = getAudioContext();
 if (context?.state === 'suspended') context.resume().catch(() => {});
 const prepared = buffers.get(sid);
+if (prepared) { buffers.delete(sid); buffers.set(sid, prepared); }
 if (context && prepared) {
 const source = context.createBufferSource();
 source.buffer = prepared.buffer;
@@ -164,7 +178,7 @@ toggle.textContent = soundOn ? '효과음 끄기' : '효과음 켜기';
 sync();
 toggle?.addEventListener('click', () => {
 soundOn = !soundOn;
-if (!soundOn) stopSfx();
+if (!soundOn) { stopSfx(); buffers.clear(); soundBytes = 0; }
 else warmSfx(location.hash.slice(1));
 try {
 localStorage.setItem(SOUND_KEY, soundOn ? 'on' : 'off');
@@ -324,8 +338,15 @@ act(orb);
 });
 
 document.addEventListener('visibilitychange', () => {
-if (!document.hidden) return;
+window.clearTimeout(releaseTimer);
+if (!document.hidden) { warmSfx(location.hash.slice(1)); return; }
 stopSfx();
+// 장시간 다른 탭에 머물면 재생용 캐시를 비웁니다.
+releaseTimer = window.setTimeout(() => {
+buffers.clear(); soundBytes = 0;
+audioCache.forEach((audio) => { audio.pause(); audio.removeAttribute('src'); audio.load(); });
+audioCache.clear();
+}, 30000);
 audioContext?.suspend().catch(() => {});
 window.clearTimeout(navigationActTimer);
 document.querySelectorAll('[data-orb]').forEach((orb) => {
