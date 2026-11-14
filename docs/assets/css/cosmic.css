@@ -63,7 +63,7 @@
 /* 지도는 별도로 회전시키고 노드의 등장 효과가 복귀마다 재시작되지 않게 합니다. */
 .ht-tree { transform-origin: 50% 50%; will-change: transform; z-index: 2; }
 /* 나무를 화면에 고정한 채 눕히는 동안 다음 섹션이 올라와 겹치지 않도록 그만큼 빈 공간을 둡니다 (sephirot.js PIN_RATIO와 같은 값) */
-.js #tree { margin-bottom: 0; }
+.js #tree { margin-bottom: 80svh; }
 @media (prefers-reduced-motion: reduce) { .js #tree { margin-bottom: 0; } }
 .tree-grown .ht-tree .node, .tree-grown .ht-tree .tree-svg, .tree-grown .ht-tree .ain { animation: none; }
 .tree-grown .ht-tree .path-signal { animation: none; opacity: 0; stroke-width: 1.5; stroke-dasharray: .12 .88; }
