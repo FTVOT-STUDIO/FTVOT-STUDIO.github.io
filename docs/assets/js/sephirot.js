@@ -246,7 +246,8 @@ p.after(signal);
 // 나무 눕히기: 스크롤하는 동안 나무를 화면에 고정한 채 시계 반대 방향으로 90도 눕힙니다.
 // 케테르가 왼쪽, 말쿠트가 오른쪽에 오는 가로 배치가 최종 모양이며, 글자와 문양도 함께 눕습니다.
 // 회전량은 스크롤 위치로만 계산해서, 위로 되돌아가면 같은 경로로 다시 일어섭니다.
-const PIN_RATIO = 0.75;     // 나무 화면 높이의 몇 배만큼 고정한 채 눕힐지 (#tree의 margin-bottom과 같은 값)
+const ROTATE_RATIO = 0.38;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
+const PIN_RATIO = 0.75;     // 다 누운 뒤에도 점등 연출이 끝날 때까지 고정을 유지하는 전체 길이 (#tree의 margin-bottom과 같은 값)
 const SWAY_DEG = 16;        // 도는 중간에 앞뒤로 기울어지는 최대 각도. 평면 회전이 밋밋해 보이지 않게
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -313,7 +314,7 @@ const update = () => {
 pending = 0;
 const pin = heroHeight * PIN_RATIO;
 const distance = Math.max(0, scrollY - heroTop);
-const progress = Math.min(1, distance / pin);
+const progress = Math.min(1, distance / (heroHeight * ROTATE_RATIO));
 const e = easeInOut(progress);
 // 다 누웠을 때 / 다시 섰을 때 경로에 빛을 한 번 흘립니다
 if (progress >= 1 && !laid) { laid = true; trace(); arrive(); }
