@@ -1420,3 +1420,13 @@ summary:hover .arka-expand { color: var(--sc); }
 .chapter { padding-bottom: 90px; }
 }
 @media (prefers-reduced-motion: reduce) { .chapter-atmosphere * { animation: none !important; } }
+
+/* 거대한 상시 합성 레이어 대신 화면 크기에 맞춘 정적 성운을 사용합니다. */
+.sky::before, .sky::after { inset: 0; rotate: none; scale: none; animation: none; }
+.deep-nebula span { width: min(85vw, 1100px); height: min(65vh, 700px); animation: none; }
+.deep-nebula span:nth-child(2) { width: min(70vw, 900px); }
+.celestial-halo { width: min(95vw, 1000px); height: min(95vw, 1000px); left: -45%; top: -25%; box-shadow: none; animation: none; }
+/* 화면 밖 장식은 일시정지에 그치지 않고 합성 대상에서도 제외합니다. */
+.js .chapter:not(.is-in-view) .chapter-atmosphere { visibility: hidden; }
+.js .chapter:not(.is-in-view) :is(.chapter-sigil *, .boundary-orbit::before, .orb .p-idle, .contact-satellite, .contact-core),
+.js .hero-tree:not(.is-in-view) :is(.cosmic-orbits span, .path-signal, .node-echo, .node-ring, .node-aura) { animation: none; }
