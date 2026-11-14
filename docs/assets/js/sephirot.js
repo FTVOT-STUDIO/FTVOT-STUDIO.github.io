@@ -259,15 +259,21 @@ traceTimer = setTimeout(() => hero.classList.remove('is-tracing'), 2400);
 const update = () => {
 pending = 0;
 const distance = Math.max(0, scrollY - heroTop);
-const progress = Math.min(1, distance / (heroHeight * 0.42));
-const eased = progress * progress * (3 - 2 * progress);
+// 나무 화면의 60% 구간에 걸쳐 천천히 눕습니다. 짧은 구간에서 돌면 급하게 꺾여 보입니다
+const progress = Math.min(1, distance / (heroHeight * 0.6));
+// 끝으로 갈수록 부드럽게 멈추는 곡선 (easeOutCubic)
+const eased = 1 - Math.pow(1 - progress, 3);
 if (distance > heroHeight * 0.7) leftHero = true;
 if (leftHero && progress < 0.28 && previous >= 0.28) { trace(); leftHero = false; }
 previous = progress;
-if (reduceMotion.matches) { tree.style.transform = ''; return; }
-const targetScale = Math.min(1, (innerWidth - 48) / treeHeight);
-const scale = 1 + (targetScale - 1) * eased;
-tree.style.transform = `translate3d(0, ${Math.min(distance, heroHeight) * 0.55}px, 0) rotate(${-90 * eased}deg) scale(${scale})`;
+if (reduceMotion.matches) { tree.style.transform = ''; tree.style.opacity = ''; return; }
+// 화면 위에서 90도 돌리는 대신, 아래쪽을 축으로 뒤로 젖혀 바닥에 눕는 3D 기울기
+// 최대 62도: 그 이상 젖히면 선이 한 줄로 겹쳐 형태를 잃습니다
+const tilt = 62 * eased;
+const scale = 1 - 0.12 * eased;
+const lift = Math.min(distance, heroHeight) * 0.32;
+tree.style.transform = `translate3d(0, ${lift.toFixed(1)}px, 0) perspective(1400px) rotateX(${tilt.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+tree.style.opacity = String((1 - 0.55 * eased).toFixed(3));
 };
 const schedule = () => { if (!pending) pending = requestAnimationFrame(update); };
 const measure = () => {

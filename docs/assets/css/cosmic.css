@@ -61,7 +61,7 @@
 }
 
 /* 지도는 별도로 회전시키고 노드의 등장 효과가 복귀마다 재시작되지 않게 합니다. */
-.ht-tree { transform-origin: 50% 50%; }
+.ht-tree { transform-origin: 50% 92%; will-change: transform, opacity; }   /* 아래쪽(말쿠트)을 축으로 뒤로 눕습니다 */
 .tree-grown .ht-tree .node, .tree-grown .ht-tree .tree-svg, .tree-grown .ht-tree .ain { animation: none; }
 .tree-grown .ht-tree .path-signal { animation: none; opacity: 0; stroke-width: 1.5; stroke-dasharray: .12 .88; }
 @media (prefers-reduced-motion: no-preference) {
