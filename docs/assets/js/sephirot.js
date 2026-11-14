@@ -273,13 +273,19 @@ if (tbNow && chapter) tbNow.setAttribute('href', `#${chapter.id}`);
 sky?.style.setProperty('--sky-tint', `var(--c${num})`);
 };
 
-// 화면 가운데 띠에 들어온 세피라를 "현재"로 봅니다
-const currentObserver = new IntersectionObserver((entries) => {
-entries.forEach((entry) => {
-if (entry.isIntersecting) setCurrent(entry.target.dataset.seph);
-});
-}, { rootMargin: '-40% 0px -50% 0px' });
-chapters.forEach((c) => currentObserver.observe(c));
+// 교차 이벤트 순서 대신 화면의 같은 위치를 기준으로 현재 장을 결정합니다.
+let trackingFrame = 0;
+const trackCurrent = () => {
+trackingFrame = 0;
+const line = innerHeight * 0.4;
+const chapter = chapters.find((item) => { const rect = item.getBoundingClientRect(); return rect.top <= line && rect.bottom > line; });
+if (chapter) setCurrent(chapter.dataset.seph);
+};
+const scheduleTracking = () => { if (!trackingFrame) trackingFrame = requestAnimationFrame(trackCurrent); };
+window.addEventListener('scroll', scheduleTracking, { passive: true });
+window.addEventListener('resize', scheduleTracking);
+new ResizeObserver(scheduleTracking).observe(document.body);
+scheduleTracking();
 
 // 조금이라도 보이기 시작하면 내용을 엽니다
 const openObserver = new IntersectionObserver((entries) => {
@@ -300,7 +306,6 @@ minimap?.classList.toggle('is-shown', away);
 }, { threshold: 0.15 }).observe(hero);
 }
 
-let navigationActTimer = 0;
 // 노드 클릭: 효과음 + 파동 + 이동 + 캐릭터 동작
 nodes.forEach((node) => {
 const sid = byNum.get(node.dataset.seph)?.id;
@@ -313,10 +318,6 @@ if (!chapter) return;
 pulse(node);
 chapter.classList.add('is-open');
 nav.scrollTo(chapter);
-window.clearTimeout(navigationActTimer);
-navigationActTimer = window.setTimeout(() => {
-if (!document.hidden && location.hash === `#${chapter.id}`) act(chapter.querySelector('.orb'));
-}, reduceMotion.matches ? 0 : 650);
 chapter.focus({ preventScroll: true });
 history.replaceState(null, '', `#${chapter.id}`);
 });
@@ -348,7 +349,6 @@ audioCache.forEach((audio) => { audio.pause(); audio.removeAttribute('src'); aud
 audioCache.clear();
 }, 30000);
 audioContext?.suspend().catch(() => {});
-window.clearTimeout(navigationActTimer);
 document.querySelectorAll('[data-orb]').forEach((orb) => {
 window.clearTimeout(Number(orb.dataset.actTimer ?? 0));
 orb.classList.remove('is-acting');

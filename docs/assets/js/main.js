@@ -2,8 +2,7 @@
 // 빌드 없는 ES 모듈입니다. 모든 기능은 JS가 실패해도 기본 HTML이 동작하도록 "덧붙이는" 방식입니다.
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
-import { initSephirot } from './sephirot.js?v=20261114u';
-import { initChapterScenes } from './chapter-scenes.js?v=20261114u';
+import { initSephirot } from './sephirot.js?v=20261114v';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
 document.documentElement.classList.add('js');
@@ -44,7 +43,7 @@ history.scrollRestoration = 'manual';
 history.replaceState(history.state, '', location.pathname + location.search);
 const resetTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 resetTop();
-window.addEventListener('pageshow', () => requestAnimationFrame(resetTop), { once: true });
+// 초기 위치만 정렬하며 사용자가 이동한 뒤 늦게 다시 끌어올리지 않습니다.
 }
 
 let enhancementFailed = false;
@@ -62,9 +61,7 @@ console.error('화면 연출을 기본 표시로 전환했습니다.', error);
 }
 };
 enhance(initSky);
-enhance(initChapterScenes);
 enhance(initAmbientAudio);
-enhance(initPointerAtmosphere);
 enhance(() => initSephirot({ scrollTo: scrollToEl }));
 enhance(initAnchors);
 enhance(initArkaReader);
@@ -172,22 +169,6 @@ fit();
 
 
 function initPresentation() {
-const targets = [...document.querySelectorAll('.project-entry, .stack-list > div, .ho-list > li, .bi-rings > li, .arka-part > h3, .contact-stage, .contact-address, .contact-links > li')];
-if (!reduceMotion.matches && 'IntersectionObserver' in window) {
-const observer = new IntersectionObserver((entries) => {
-entries.forEach((entry) => {
-if (!entry.isIntersecting) return;
-entry.target.classList.add('is-visible');
-observer.unobserve(entry.target);
-});
-}, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
-targets.forEach((target, i) => {
-target.classList.add('reveal-target');
-target.style.setProperty('--reveal-delay', `${i % 3 * 60}ms`);
-observer.observe(target);
-});
-document.documentElement.classList.add('motion-ready');
-}
 let pending = false;
 const progress = () => {
 const range = document.documentElement.scrollHeight - innerHeight;
@@ -569,71 +550,3 @@ sync();
 start();
 }
 
-function initPointerAtmosphere() {
-const pointer = matchMedia('(hover: hover) and (pointer: fine)');
-const halo = document.createElement('span');
-halo.className = 'pointer-aura';
-halo.setAttribute('aria-hidden', 'true');
-document.body.append(halo);
-let frame = 0, x = 0, y = 0, active = null, bounds = null;
-const enabled = () => pointer.matches && !reduceMotion.matches && !document.hidden;
-const resetTarget = () => {
-active?.classList.remove('is-pointer-near');
-active?.style.removeProperty('--pointer-rx');
-active?.style.removeProperty('--pointer-ry');
-active = bounds = null;
-};
-const reset = () => {
-cancelAnimationFrame(frame); frame = 0;
-halo.classList.remove('is-visible');
-resetTarget();
-};
-const paint = () => {
-frame = 0;
-if (!enabled()) return;
-halo.style.transform = `translate(${x - 70}px, ${y - 70}px)`;
-halo.classList.add('is-visible');
-if (active && bounds) {
-const dx = Math.max(-1, Math.min(1, (x - bounds.left) / bounds.width * 2 - 1));
-const dy = Math.max(-1, Math.min(1, (y - bounds.top) / bounds.height * 2 - 1));
-active.style.setProperty('--pointer-rx', `${-dy * 3}deg`);
-active.style.setProperty('--pointer-ry', `${dx * 3}deg`);
-}
-};
-// 입력이 있을 때 한 프레임만 갱신해 유휴 상태의 반복 루프를 만들지 않습니다.
-document.addEventListener('pointermove', (event) => {
-if (!enabled() || event.pointerType !== 'mouse') return;
-x = event.clientX; y = event.clientY;
-if (!frame) frame = requestAnimationFrame(paint);
-}, { passive: true });
-document.addEventListener('pointerover', (event) => {
-if (!enabled() || !(event.target instanceof Element)) return;
-const target = event.target.closest('.chapter-sigil, .project-cover, .artwork-card > a');
-if (target === active) return;
-resetTarget();
-if (!target) return;
-active = target; bounds = target.getBoundingClientRect();
-active.classList.add('is-pointer-near');
-});
-document.addEventListener('pointerdown', (event) => {
-if (!enabled() || event.pointerType !== 'mouse' || event.button !== 0) return;
-// 클릭 파동은 세 개까지만 유지하고 끝나는 즉시 DOM에서 제거합니다.
-const ripples = document.querySelectorAll('.pointer-ripple');
-if (ripples.length >= 3) ripples[0].remove();
-const ripple = document.createElement('span');
-ripple.className = 'pointer-ripple';
-ripple.setAttribute('aria-hidden', 'true');
-ripple.style.left = `${event.clientX}px`;
-ripple.style.top = `${event.clientY}px`;
-document.body.append(ripple);
-const animation = ripple.animate([{ opacity: 0.55, transform: 'translate(-50%, -50%) scale(0.12)' }, { opacity: 0, transform: 'translate(-50%, -50%) scale(1)' }], { duration: 700, easing: 'ease-out' });
-animation.onfinish = () => ripple.remove();
-});
-document.documentElement.addEventListener('pointerleave', reset);
-window.addEventListener('blur', reset);
-window.addEventListener('scroll', resetTarget, { passive: true });
-window.addEventListener('resize', reset);
-document.addEventListener('visibilitychange', reset);
-reduceMotion.addEventListener('change', reset);
-pointer.addEventListener('change', reset);
-}
