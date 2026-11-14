@@ -283,7 +283,7 @@ const ring = node.querySelector('.node-ring'); if (!ring) return;
 const x = Number(ring.getAttribute('cx')), y = Number(ring.getAttribute('cy'));
 nodeInfo.set(node.dataset.seph, { node, x, y, tx: CX + (y - CY), ty: CY - (x - CX), cx: x, cy: y, lit: false });
 });
-const lines = [...tree.querySelectorAll('line.path')].map((el) => ({ el, a: el.dataset.a, b: el.dataset.b }));
+const lines = [...tree.querySelectorAll('line.path, line.path-signal')].map((el) => ({ el, a: el.dataset.a, b: el.dataset.b }));
 const badges = [...tree.querySelectorAll('.path-badge')].map((el) => {
 const c = el.querySelector('circle'), A = nodeInfo.get(el.dataset.a), B = nodeInfo.get(el.dataset.b);
 const bx = Number(c.getAttribute('cx')), by = Number(c.getAttribute('cy'));
