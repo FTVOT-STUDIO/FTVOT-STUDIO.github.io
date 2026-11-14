@@ -89,10 +89,10 @@
 @media (prefers-reduced-motion: reduce) { .ht-dial { display: none; } }
 /* 도착 점등: 세피라마다 80ms씩 늦게 원이 채워졌다 빠지고, 파문 고리 두 겹이 퍼지며, 글자가 살짝 튀어 오릅니다 */
 .ht-tree .node-ripple { fill: none; stroke: var(--sc, currentColor); stroke-width: 1.5; opacity: 0; pointer-events: none; transform-box: fill-box; transform-origin: center; }
-.hero-tree.is-arrived .ht-tree .node-ripple { animation: node-ripple 1.1s cubic-bezier(.16,1,.3,1) calc(var(--i) * 80ms) both; }
-.hero-tree.is-arrived .ht-tree .node-ripple.r1 { animation-delay: calc(var(--i) * 80ms + 160ms); }
-.hero-tree.is-arrived .ht-tree .node-ring { animation: node-flash .9s cubic-bezier(.34,1.56,.64,1) calc(var(--i) * 80ms) both; }
-.hero-tree.is-arrived .ht-tree .node-name, .hero-tree.is-arrived .ht-tree .node-sym { animation: node-pop .7s cubic-bezier(.34,1.56,.64,1) calc(var(--i) * 80ms + 60ms) both; }
+.ht-tree .node.is-lit .node-ripple { animation: node-ripple 1.1s cubic-bezier(.16,1,.3,1) both; }
+.ht-tree .node.is-lit .node-ripple.r1 { animation-delay: 160ms; }
+.ht-tree .node.is-lit .node-ring { animation: node-flash .9s cubic-bezier(.34,1.56,.64,1) both; }
+.ht-tree .node.is-lit .node-name, .ht-tree .node.is-lit .node-sym { animation: node-pop .7s cubic-bezier(.34,1.56,.64,1) 60ms both; }
 @keyframes node-ripple { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.9); stroke-width: .3; } }
 @keyframes node-flash { 0% { fill: transparent; stroke-width: 1.5; } 35% { fill: color-mix(in oklab, var(--sc, #fff) 38%, transparent); stroke-width: 3.5; } 100% { stroke-width: 1.5; } }
 @keyframes node-pop { 0% { opacity: .2; } 40% { opacity: 1; } 100% { opacity: 1; } }
@@ -104,3 +104,4 @@
 /* 케테르 장으로 넘어가는 빛 막: 아래에서 위로 옅은 보라가 차오릅니다 */
 .k-wash { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0; background: linear-gradient(to top, color-mix(in oklab, var(--c1) 22%, transparent) 0%, color-mix(in oklab, var(--c1) 8%, transparent) 45%, transparent 80%); will-change: transform, opacity; }
 @media (prefers-reduced-motion: reduce) { .k-wash { display: none; } }
+.ht-tree svg { overflow: visible; } /* 가로 배치로 옮겨 간 세피라가 viewBox 밖으로 나가도 보이게 */

@@ -272,6 +272,51 @@ const dot = badge.querySelector('circle'), text = badge.querySelector('text'); i
 upright.push([text, dot.getAttribute('cx'), dot.getAttribute('cy')]);
 });
 let lastAngle = -1;
+// ── 가로 배치로 '변형'하기 ─────────────────────────────────────────────
+// 실제로 돌리지 않습니다. 각 세피라의 목표 좌표 = 세로 배치를 가로로 눕힌 좌표이고,
+// 케테르→말쿠트 순서로 하나씩 출발해 호를 그리며 그 자리로 옮겨 가고, 도착하는 순간 불이 켜집니다.
+// 경로선과 히브리 배지는 양 끝 세피라를 따라 다시 그려집니다. 글자는 돌지 않으므로 항상 정방향입니다.
+const CX = 200, CY = 320; // viewBox 중심
+const nodeInfo = new Map();
+tree.querySelectorAll('.node').forEach((node) => {
+const ring = node.querySelector('.node-ring'); if (!ring) return;
+const x = Number(ring.getAttribute('cx')), y = Number(ring.getAttribute('cy'));
+nodeInfo.set(node.dataset.seph, { node, x, y, tx: CX + (y - CY), ty: CY - (x - CX), cx: x, cy: y, lit: false });
+});
+const lines = [...tree.querySelectorAll('line.path')].map((el) => ({ el, a: el.dataset.a, b: el.dataset.b }));
+const badges = [...tree.querySelectorAll('.path-badge')].map((el) => {
+const c = el.querySelector('circle'), A = nodeInfo.get(el.dataset.a), B = nodeInfo.get(el.dataset.b);
+const bx = Number(c.getAttribute('cx')), by = Number(c.getAttribute('cy'));
+// 배지가 선분 위 어느 비율에 있는지 기억해 두고, 선이 움직여도 같은 비율 위치에 둡니다
+const dx = B.x - A.x, dy = B.y - A.y, len2 = dx * dx + dy * dy || 1;
+return { el, A, B, bx, by, t: ((bx - A.x) * dx + (by - A.y) * dy) / len2 };
+});
+let lastMorph = -1;
+const ain = tree.querySelector('.ain'), veil = tree.querySelector('.veil');
+const morph = (e) => {
+const m = Math.round(e * 1000) / 1000; if (m === lastMorph) return; lastMorph = m;
+for (const info of nodeInfo.values()) {
+const i = Number(info.node.dataset.seph) - 1;
+const raw = Math.min(1, Math.max(0, e * 1.6 - i * .0667));
+const k = easeInOut(raw);
+// 직선이 아니라 바깥쪽으로 부풀었다 들어오는 호
+const mx = info.tx - info.x, my = info.ty - info.y, len = Math.hypot(mx, my) || 1;
+const bulge = Math.sin(Math.PI * k) * Math.min(60, len * .25);
+info.cx = info.x + mx * k + (-my / len) * bulge;
+info.cy = info.y + my * k + (mx / len) * bulge;
+info.node.setAttribute('transform', k ? `translate(${(info.cx - info.x).toFixed(2)} ${(info.cy - info.y).toFixed(2)})` : '');
+// 도착 = 점등
+const lit = raw >= 1;
+if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit); }
+}
+// 케테르 위의 아인 호(세 겹 반원)는 케테르를 따라가며 바깥쪽(왼쪽)을 향하도록 방향만 바꿉니다
+const K = nodeInfo.get('1');
+if (ain && K) { const kk = easeInOut(Math.min(1, Math.max(0, e * 1.6))); ain.setAttribute('transform', e ? `translate(${(K.cx - K.x).toFixed(2)} ${(K.cy - K.y).toFixed(2)}) rotate(${(-90 * kk).toFixed(2)} ${K.x} ${K.y})` : ''); }
+// 심연의 장막: 위 삼각과 아래를 가르는 가로선이 세로선으로 서서히 바뀝니다
+if (veil) veil.setAttribute('transform', e ? `rotate(${(-90 * easeInOut(e)).toFixed(2)} ${CX} ${CY})` : '');
+for (const { el, a, b } of lines) { const A = nodeInfo.get(a), B = nodeInfo.get(b); if (!A || !B) continue; el.setAttribute('x1', A.cx.toFixed(1)); el.setAttribute('y1', A.cy.toFixed(1)); el.setAttribute('x2', B.cx.toFixed(1)); el.setAttribute('y2', B.cy.toFixed(1)); }
+for (const bd of badges) { const x = bd.A.cx + (bd.B.cx - bd.A.cx) * bd.t, y = bd.A.cy + (bd.B.cy - bd.A.cy) * bd.t; bd.el.setAttribute('transform', `translate(${(x - bd.bx).toFixed(2)} ${(y - bd.by).toFixed(2)})`); }
+};
 // 회전 연출용 다이얼: 나무 뒤에 눈금 고리와 각도 표시가 떠올라 나무와 반대로 돌며 회전량을 읽어 줍니다
 const NS = 'http://www.w3.org/2000/svg';
 const dial = document.createElementNS(NS, 'svg');
@@ -285,7 +330,8 @@ add(inner, 'circle', { r: 72, class: 'dial-line dial-dash' });
 add(inner, 'line', { x1: 0, y1: 0, x2: 0, y2: -72, class: 'dial-line dial-arm' });
 const readout = add(dial, 'text', { x: 0, y: 92, class: 'dial-text dial-readout' });
 dial.prepend(inner); dial.prepend(outer);
-hero.append(dial);
+// 회전 다이얼은 더 이상 쓰지 않습니다 (실제 회전이 없으므로)
+
 // 세피라 원: 회전 중 케테르부터 말쿠트까지 순서대로 한 번씩 부풀었다 돌아오는 파동
 const rings = [...tree.querySelectorAll('.node-ring')].map((ring) => [ring, Number(ring.getAttribute('r'))]);
 let dialBox = { x: 0, y: 0 };
@@ -328,21 +374,21 @@ const distance = Math.max(0, scrollY - heroTop);
 const progress = Math.min(1, distance / (heroHeight * ROTATE_RATIO));
 const e = easeInOut(progress);
 // 다 누웠을 때 / 다시 섰을 때 경로에 빛을 한 번 흘립니다
-if (progress >= 1 && !laid) { laid = true; trace(); arrive(); }
+if (progress >= 1 && !laid) { laid = true; trace(); }
 if (progress < 0.02 && laid) { laid = false; trace(); }
 previous = progress;
-if (reduceMotion.matches) { tree.style.transform = ''; setUpright(0); dial.style.opacity = '0'; return; }
+if (reduceMotion.matches) { tree.style.transform = ''; morph(1); return; }
 // 누운 나무가 화면 너비(누운 뒤의 가로 = 원래 세로)와 높이 안에 들어오도록 크기를 맞춥니다
 const fit = Math.min((innerWidth - 64) / treeH, (innerHeight * 0.78) / treeW, 1.25);
 const scale = 1 + (fit - 1) * e;
 // 고정: 스크롤한 만큼 아래로 밀어 화면 같은 자리에 머물게 합니다
 const hold = Math.min(distance, pin);
 // 원근 흔들림: 회전 중간에 가장 크게, 시작과 끝에서는 0
-const sway = Math.sin(Math.PI * e) * SWAY_DEG;
+
 // 나무는 눕지만 이름·문양·히브리 글자는 각자 제자리에서 반대로 돌아 항상 똑바로 읽히게 합니다
-setUpright(90 * e);
+morph(e); // 회전 대신 각 세피라가 차례로 제자리를 찾아 이동하며 가로 배치가 됩니다
 const lift = `translate3d(0, ${hold.toFixed(1)}px, 0)`;
-const spin = `perspective(1600px) rotateX(${sway.toFixed(2)}deg) rotate(${(-90 * e).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+const spin = `scale(${scale.toFixed(3)})`;
 // 케테르 장으로 이어짐: 물체를 옮기지 않고 장면 자체를 넘깁니다.
 // 나무는 뒤로 물러나듯 살짝 작아지며 위로 흩어지고, 그 사이 케테르의 보라 빛이 아래에서 차올라 다음 장의 배경과 이어집니다
 const zRaw = Math.min(1, Math.max(0, (distance - pin * .6) / (pin * .4 + innerHeight * .4)));
@@ -355,14 +401,14 @@ wash.style.transform = `translate3d(0, ${((1 - z) * 30).toFixed(1)}%, 0)`;
 // 다이얼: 회전 중간에 가장 진하고, 시작과 끝에서는 사라집니다. 바깥 고리는 반대로, 안쪽 바늘은 빠르게 돕니다
 const presence = Math.sin(Math.PI * e);
 const diameter = Math.max(treeW, treeH) * scale * .86;
-dial.style.width = dial.style.height = `${diameter.toFixed(0)}px`;
-dial.style.transform = `translate3d(${(dialBox.x - diameter / 2).toFixed(1)}px, ${(dialBox.y - diameter / 2 + hold).toFixed(1)}px, 0) scale(${(.92 + presence * .08).toFixed(3)})`;
-dial.style.opacity = (presence * .9).toFixed(3);
-outer.setAttribute('transform', `rotate(${(90 * e * .6).toFixed(2)})`);
-inner.setAttribute('transform', `rotate(${(-90 * e * 4).toFixed(2)})`);
-readout.textContent = `${String(Math.round(90 * e)).padStart(3, '0')}°`;
-// 파동: 각 원이 순서대로 최대 12% 부풀었다 돌아옵니다
-rings.forEach(([ring, r], i) => { const k = Math.min(1, Math.max(0, e * 1.5 - i * .05)); ring.setAttribute('r', (r * (1 + Math.sin(Math.PI * k) * .12)).toFixed(2)); });
+
+
+
+
+
+
+
+
 // 왼쪽 소개 글은 나무가 눕는 동안 함께 고정되며 천천히 사라집니다
 if (copy) {
 copy.style.transform = `translate3d(0, ${hold.toFixed(1)}px, 0)`;
