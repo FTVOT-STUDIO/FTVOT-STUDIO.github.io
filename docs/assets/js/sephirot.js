@@ -11,7 +11,7 @@ const SFX_VOLUME = 0.06;
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
 const GROW_STEP = 120;
 
-const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth'];
+const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click'];
 const audioCache = new Map();
 const buffers = new Map();
 const loadingSounds = new Map();
@@ -46,9 +46,11 @@ return audioContext;
 } catch { return null; }
 }
 
+function soundPath(sid) { return sid === 'ui-click' ? './assets/ui-click.mp3' : `${SFX_PATH}/${sid}.mp3`; }
+
 function prepareFallback(sid) {
 if (!audioCache.has(sid)) {
-const audio = new Audio(`${SFX_PATH}/${sid}.mp3`);
+const audio = new Audio(soundPath(sid));
 audio.preload = 'metadata';
 audio.volume = SFX_VOLUME;
 audio.load();
@@ -67,7 +69,7 @@ const controller = new AbortController();
 const timeout = window.setTimeout(() => controller.abort(), 10000);
 const promise = (async () => {
 try {
-const response = await fetch(`${SFX_PATH}/${sid}.mp3`, { signal: controller.signal, credentials: 'omit' });
+const response = await fetch(soundPath(sid), { signal: controller.signal, credentials: 'omit' });
 if (!response.ok) throw new Error('Sound unavailable');
 const buffer = await context.decodeAudioData(await response.arrayBuffer());
 // 파일 앞의 거의 무음인 구간만 건너뛰며 최대 0.35초까지만 보정합니다.
@@ -142,6 +144,33 @@ if (event.detail !== 0 && mouseStarted) { mouseStarted = false; return; }
 mouseStarted = false;
 playSfx(sid);
 });
+}
+
+// 공통 버튼 소리는 기존 효과음 설정과 캐시를 공유하며 세피라 전용 소리와 중복하지 않습니다.
+function initButtonSound() {
+const control = (event) => {
+if (!(event.target instanceof Element)) return null;
+const target = event.target.closest('button, summary, [role="button"], a[href]');
+if (!target || target.closest('.node, [data-orb]') || target.matches(':disabled') || target.getAttribute('aria-disabled') === 'true') return null;
+return target;
+};
+let pointerTarget = null;
+document.addEventListener('pointerover', (event) => { if (control(event)) prepareSfx('ui-click'); }, { passive: true });
+document.addEventListener('pointerdown', (event) => {
+pointerTarget = null;
+const target = control(event);
+if (!target || target.hasAttribute('data-sound-toggle') || event.pointerType !== 'mouse' || event.button !== 0) return;
+pointerTarget = target;
+playSfx('ui-click');
+}, { passive: true });
+document.addEventListener('pointercancel', () => { pointerTarget = null; });
+document.addEventListener('click', (event) => {
+const target = control(event);
+const alreadyPlayed = target && pointerTarget === target && event.detail !== 0;
+pointerTarget = null;
+if (target && !alreadyPlayed) playSfx('ui-click');
+});
+prepareSfx('ui-click');
 }
 
 /** 세피라 캐릭터를 공격 프레임으로 잠깐 바꿉니다 */
@@ -355,6 +384,7 @@ orb.classList.remove('is-acting');
 });
 });
 initSoundToggle();
+initButtonSound();
 warmSfx(location.hash.slice(1));
 const fromHash = chapters.find((c) => `#${c.id}` === location.hash);
 setCurrent((fromHash ?? chapters[0]).dataset.seph);
