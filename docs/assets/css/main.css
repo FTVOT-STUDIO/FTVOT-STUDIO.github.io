@@ -1062,3 +1062,55 @@ body { overflow-x: clip; }
 .arka-part.is-reading .arka-story { padding-bottom: 24px; }
 @media (prefers-reduced-motion: no-preference) { .arka-part.is-reading { animation: archive-materialize 0.45s var(--ease-out-expo) both; } }
 @media (max-width: 600px) { .arka-nav.is-reader-nav { gap: 0 18px; font-size: 11px; } }
+
+/* 경계는 내용 열의 위치와 무관하게 정렬해 세피라가 바뀌는 지점을 명확히 합니다. */
+.seph-boundary { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: min(1120px, calc(100% - 64px)); display: flex; align-items: center; justify-content: center; gap: 18px; min-height: 48px; color: var(--sc); pointer-events: none; }
+.seph-boundary::before, .seph-boundary::after { content: ''; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--sc) 55%, transparent)); }
+.seph-boundary::after { transform: scaleX(-1); }
+.boundary-index { font-size: 10px; letter-spacing: 0.1em; }
+.boundary-name { font-size: 10px; letter-spacing: 0.2em; color: var(--text-2); }
+.boundary-orbit { position: relative; display: grid; place-items: center; width: 38px; height: 38px; font: 18px var(--font-sym); }
+.boundary-orbit::before { content: ''; position: absolute; inset: 0; border: 1px solid color-mix(in oklab, var(--sc) 40%, transparent); border-radius: 50%; transform: rotate(-30deg) scaleY(0.48); }
+.boundary-orbit::after { content: ''; position: absolute; width: 3px; height: 3px; top: 8px; right: 3px; border-radius: 50%; background: var(--sc); }
+.chapter::before { content: ''; position: absolute; pointer-events: none; top: 24px; left: 10%; right: 10%; height: 160px; background: radial-gradient(ellipse at 50% 0%, color-mix(in oklab, var(--sc) 6%, transparent), transparent 70%); }
+.deep-nebula { position: absolute; inset: 0; opacity: 0.65; }
+.deep-nebula span { position: absolute; width: 100vmax; height: 60vmax; left: -38%; top: -25%; border-radius: 50%; background: radial-gradient(ellipse, rgb(134 94 148 / 0.13), rgb(75 62 110 / 0.055) 38%, transparent 65%); transform: rotate(-24deg); }
+.deep-nebula span:nth-child(2) { left: 35%; top: 38%; width: 85vmax; background: radial-gradient(ellipse, rgb(145 115 151 / 0.09), transparent 64%); }
+.celestial-halo { position: absolute; width: 130vmax; height: 130vmax; left: -85vmax; top: -65vmax; border: 1px solid rgb(193 172 216 / 0.07); border-radius: 50%; box-shadow: 0 0 0 90px rgb(193 172 216 / 0.012), 0 0 0 91px rgb(193 172 216 / 0.035); transform: rotate(-25deg) scaleY(0.7); }
+:where(a, button, summary) { -webkit-tap-highlight-color: rgb(198 173 209 / 0.15); }
+:where(button, .ext, .text-btn, .contact-links a, .arka-nav a, .ht-links a, .project-entry > summary, .arka-sephira > summary, .arka-faction-group > summary) { transition: color 0.25s ease, border-color 0.3s ease, background-color 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease; }
+:where(.ext, .ht-links a, .contact-links a) { text-decoration-thickness: 1px; text-underline-offset: 6px; }
+:where(.ext, .ht-links a, .contact-links a):hover { color: var(--sc, var(--c1)); }
+:where(.arka-sephira, .arka-faction-group) > summary:hover { background: linear-gradient(90deg, color-mix(in oklab, var(--sc) 6%, transparent), transparent); }
+.arka-expand { transition: transform 0.35s var(--ease-out-expo), color 0.25s; }
+summary:hover .arka-expand { color: var(--sc); }
+.project-entry > summary:focus-visible, .arka-sephira > summary:focus-visible, .arka-faction-group > summary:focus-visible { outline-width: 1px; outline-offset: 5px; }
+@media (prefers-reduced-motion: no-preference) {
+.deep-nebula span { animation: nebula-tide 42s ease-in-out infinite alternate; }
+.deep-nebula span:nth-child(2) { animation-duration: 57s; animation-delay: -22s; animation-direction: alternate-reverse; }
+.sky::after { animation: distant-stars 70s ease-in-out infinite alternate; }
+.celestial-halo { animation: halo-drift 90s ease-in-out infinite alternate; }
+.boundary-orbit::before { animation: boundary-revolve 24s linear infinite; }
+.chapter.is-open .seph-boundary::before, .chapter.is-open .seph-boundary::after { animation: boundary-light 1.2s ease both; }
+:where(.ext, .ht-links a, .contact-links a, .artwork-upload, .gallery-toolbar button, .project-pagination button, .artwork-toolbar button, .contact-address button) { transition: translate 0.3s var(--ease-out-expo), color 0.25s, border-color 0.3s, background-color 0.3s; }
+:where(.ext, .ht-links a, .artwork-upload, .gallery-toolbar button, .project-pagination button, .artwork-toolbar button, .contact-address button):hover { translate: 0 -2px; }
+.contact-links a:hover { translate: 4px 0; }
+:where(button:not(.orb), summary):active { translate: 0 1px; }
+:where(.arka-sephira, .arka-faction-group) > summary:hover .arka-person { translate: 3px 0; }
+.arka-person { transition: translate 0.3s var(--ease-out-expo); }
+}
+@keyframes nebula-tide { to { translate: 5vw 4vh; rotate: 9deg; scale: 1.12; } }
+@keyframes distant-stars { to { translate: -18px 14px; opacity: 0.3; } }
+@keyframes halo-drift { to { translate: 4vw 5vh; rotate: 12deg; } }
+@keyframes boundary-revolve { to { rotate: 360deg; } }
+@keyframes boundary-light { from { opacity: 0.2; } to { opacity: 1; } }
+@media (max-width: 600px) {
+.seph-boundary { width: calc(100% - 40px); gap: 10px; }
+.boundary-name { font-size: 8px; letter-spacing: 0.12em; }
+.boundary-orbit { width: 30px; height: 30px; font-size: 16px; }
+.deep-nebula { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+.deep-nebula *, .celestial-halo, .seph-boundary *, .sky::after { animation: none !important; }
+:where(a, button, summary, .arka-person, .arka-expand) { transition-duration: 0s !important; }
+}
