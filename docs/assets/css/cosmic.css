@@ -59,3 +59,18 @@
 .project-filters button { gap: 5px; }
 .chapter-statement { font-weight: 500; }
 }
+
+/* 지도는 별도로 회전시키고 노드의 등장 효과가 복귀마다 재시작되지 않게 합니다. */
+.ht-tree { transform-origin: 50% 50%; }
+.tree-grown .ht-tree .node, .tree-grown .ht-tree .tree-svg, .tree-grown .ht-tree .ain { animation: none; }
+.tree-grown .ht-tree .path-signal { animation: none; opacity: 0; stroke-width: 1.5; stroke-dasharray: .12 .88; }
+@media (prefers-reduced-motion: no-preference) {
+.hero-tree.is-tracing .ht-tree .path-signal { animation: constellation-flow 1.15s cubic-bezier(.25,.1,.25,1) calc(var(--d,0) * .65ms) both; }
+}
+@keyframes constellation-flow {
+0% { stroke-dashoffset: 1.12; opacity: 0; }
+16% { opacity: .85; }
+75% { opacity: .5; }
+100% { stroke-dashoffset: -.12; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .ht-tree { transform: none !important; } }
