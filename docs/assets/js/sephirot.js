@@ -250,7 +250,9 @@ p.after(signal);
 // 케테르가 왼쪽, 말쿠트가 오른쪽에 오는 가로 배치가 최종 모양이며, 글자와 문양도 함께 눕습니다.
 // 회전량은 스크롤 위치로만 계산해서, 위로 되돌아가면 같은 경로로 다시 일어섭니다.
 const ROTATE_RATIO = 0.1;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
-const PIN_RATIO = 0.1;     // 다 누운 뒤에도 점등 연출이 끝날 때까지 고정을 유지하는 전체 길이 (#tree의 margin-bottom과 같은 값)
+const PIN_RATIO = 0;       // 고정 없음: 나무는 일반 스크롤로 올라갑니다
+const MORPH_SECONDS = 0.9; // 가로로 바뀌는 데 걸리는 시간
+let anim = 0, lastTime = 0;     // 다 누운 뒤에도 점등 연출이 끝날 때까지 고정을 유지하는 전체 길이 (#tree의 margin-bottom과 같은 값)
 const SWAY_DEG = 16;        // 도는 중간에 앞뒤로 기울어지는 최대 각도. 평면 회전이 밋밋해 보이지 않게
 const lerp = (a, b, k) => a + (b - a) * k;
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -371,8 +373,15 @@ const update = () => {
 pending = 0;
 const pin = heroHeight * PIN_RATIO;
 const distance = Math.max(0, scrollY - heroTop);
-const progress = Math.min(1, distance / (heroHeight * ROTATE_RATIO));
+// 스크롤 양에 묶지 않고 시간으로 재생합니다: 조금이라도 내리면 0.9초 동안 가로로 바뀌고, 맨 위로 돌아오면 다시 섭니다.
+// 휠을 세게 당겨도 연출이 한 프레임에 뛰지 않습니다
+const target = distance > 8 ? 1 : 0;
+const now = performance.now();
+const dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 0; lastTime = now;
+anim += Math.sign(target - anim) * Math.min(Math.abs(target - anim), dt / MORPH_SECONDS);
+const progress = anim;
 const e = easeInOut(progress);
+if (anim !== target) schedule(); else lastTime = 0;
 // 다 누웠을 때 / 다시 섰을 때 경로에 빛을 한 번 흘립니다
 if (progress >= 1 && !laid) { laid = true; trace(); }
 if (progress < 0.02 && laid) { laid = false; trace(); }
@@ -391,7 +400,7 @@ const lift = `translate3d(0, ${hold.toFixed(1)}px, 0)`;
 const spin = `scale(${scale.toFixed(3)})`;
 // 다 바뀌면 고정을 풀고 페이지와 함께 자연스럽게 올라가며, 바로 아래 케테르 장이 이어집니다.
 // 떠나는 동안만 살짝 옅어져 다음 장으로 시선이 넘어가게 합니다
-const leave = Math.min(1, Math.max(0, (distance - pin) / (innerHeight * .35)));
+const leave = Math.min(1, Math.max(0, distance / (innerHeight * .8)));
 tree.style.transform = `${lift} ${spin}`;
 tree.style.opacity = (1 - leave * .6).toFixed(3);
 // 다이얼: 회전 중간에 가장 진하고, 시작과 끝에서는 사라집니다. 바깥 고리는 반대로, 안쪽 바늘은 빠르게 돕니다
