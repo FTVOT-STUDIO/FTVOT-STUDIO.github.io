@@ -524,8 +524,9 @@ if (!button) return;
 const audio = new Audio('./assets/space-ambient.mp3');
 audio.preload = 'metadata';
 audio.loop = true;
-audio.volume = 0;
-let enabled = true, fadeFrame = 0, generation = 0;
+// 배경음은 볼륨 변화 없이 작은 소리로 계속 반복합니다.
+audio.volume = 0.08;
+let enabled = true;
 try { enabled = localStorage.getItem('ambient-music') !== 'off'; } catch {}
 const sync = () => {
 const playing = !audio.paused && !audio.ended;
@@ -534,29 +535,16 @@ button.classList.toggle('is-playing', playing);
 button.querySelector('[data-music-label]').textContent = playing ? '배경음 끄기' : '배경음 켜기';
 };
 const stop = () => {
-generation += 1;
-cancelAnimationFrame(fadeFrame);
-fadeFrame = 0;
 audio.pause();
-audio.volume = 0;
 sync();
 };
 const start = () => {
 if (!enabled || document.hidden || !audio.paused) return;
-const attempt = ++generation;
 // 자동 재생이 차단되면 다음 실제 입력에서 다시 시도합니다.
 audio.play().then(() => {
-if (attempt !== generation || !enabled || document.hidden) { if (!enabled || document.hidden) stop(); return; }
+if (!enabled || document.hidden) { stop(); return; }
 sync();
-const beginning = performance.now();
-const fade = (now) => {
-if (attempt !== generation || audio.paused) return;
-const amount = Math.min(1, (now - beginning) / 1400);
-audio.volume = 0.08 * amount;
-fadeFrame = amount < 1 ? requestAnimationFrame(fade) : 0;
-};
-fadeFrame = requestAnimationFrame(fade);
-}).catch(() => { if (attempt === generation) sync(); });
+}).catch(sync);
 };
 const unlock = (event) => {
 if (event.target instanceof Element && event.target.closest('[data-music-toggle]')) return;
