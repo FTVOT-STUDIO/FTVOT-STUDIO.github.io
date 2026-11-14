@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261115a';
-import { initSephirot } from './sephirot.js?v=20261116n';
+import { initSephirot } from './sephirot.js?v=20261116q';
 import { initChapterScenes } from './chapter-scenes.js?v=20261116a';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
@@ -15,7 +15,7 @@ const TOPBAR = 56;
 /** 섹션으로 부드럽게 이동 (모션 축소 설정이면 즉시) */
 function scrollToEl(el) {
 const top = el.id === 'tree' ? 0 : el.getBoundingClientRect().top + window.scrollY - TOPBAR;
-window.scrollTo({ top, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+if (window.__glideTo) window.__glideTo(top); else window.scrollTo({ top, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
 }
 
 /** 일반 앵커(#tree, #tiferet 등)도 같은 방식으로 이동합니다. 나무 노드는 sephirot.js가 처리합니다 */
@@ -604,12 +604,9 @@ animation.onfinish = () => ripple.remove();
 }, { passive: true });
 })();
 
-// 장 넘김 자동 스크롤: 한 장 안에서는 자유롭게 스크롤하고, 장의 끝에 닿아 다음 장이 화면 아래로 들어오는 순간
-// 아래로 더 스크롤하면 입력을 잠그고 다음 장 맨 위까지 일정한 속도로 미끄러져 내려갑니다 (나무 → 케테르와 같은 느낌)
+// 세피라 바로가기 이동: 링크를 누르면 입력을 잠그고 애플식 쫀득한 곡선으로 목표 위치까지 미끄러집니다 (스크롤로는 실행되지 않음)
 (() => {
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-const chapters = [...document.querySelectorAll('section.chapter')];
-if (!chapters.length) return;
 let gliding = false;
 // 애플식 '쫀득한' 이징: cubic-bezier(0.65, 0, 0.15, 1). 출발은 살짝 머뭇이고 가운데서 힘 있게 가속한 뒤, 길고 매끈하게 감속합니다
 const bezier = (p1x, p1y, p2x, p2y) => (x) => {
@@ -627,12 +624,10 @@ const block = (event) => { if ((gliding || holding()) && event.cancelable) event
 window.addEventListener('wheel', block, { passive: false, capture: true });
 window.addEventListener('touchmove', block, { passive: false, capture: true });
 window.addEventListener('keydown', (event) => { if ((gliding || holding()) && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Spacebar', 'Home', 'End'].includes(event.key)) event.preventDefault(); }, { capture: true });
-// 다음 장이 화면 아래 가장자리에 걸쳐 있으면 그 장을 돌려줍니다
-const upcoming = () => chapters.find((ch) => { const top = ch.getBoundingClientRect().top; return top > 2 && top < innerHeight + 4; });
-const glideTo = (chapter) => {
+const glideTo = (to) => {
 gliding = true;
-const from = scrollY, to = chapter.getBoundingClientRect().top + scrollY, start = performance.now();
-const duration = Math.min(1600, Math.max(1050, Math.abs(to - from) * .9));
+const from = scrollY, start = performance.now();
+const duration = Math.min(1700, Math.max(900, 700 + Math.sqrt(Math.abs(to - from)) * 12)); // 먼 거리도 지루하지 않게
 const step = (now) => {
 const x = Math.min(1, (now - start) / duration);
 scrollTo(0, Math.round(from + (to - from) * silky(x)));
@@ -640,15 +635,5 @@ if (x < 1) requestAnimationFrame(step); else { gliding = false; holdFor(500); }
 };
 requestAnimationFrame(step);
 };
-const tryGlide = (event) => {
-if (gliding || holding() || reduce.matches) return;
-const next = upcoming(); if (!next) return;
-if (event.cancelable) event.preventDefault();
-glideTo(next);
-};
-window.addEventListener('wheel', (event) => { if (event.deltaY > 0) tryGlide(event); }, { passive: false });
-let touchY = 0;
-window.addEventListener('touchstart', (event) => { touchY = event.touches[0]?.clientY ?? 0; }, { passive: true });
-window.addEventListener('touchmove', (event) => { const y = event.touches[0]?.clientY ?? 0; if (touchY - y > 4) tryGlide(event); touchY = y; }, { passive: false });
-window.addEventListener('keydown', (event) => { if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(event.key) && !(event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)) tryGlide(event); });
+window.__glideTo = (top) => { if (reduce.matches) { scrollTo(0, top); return; } if (!gliding) glideTo(top); };
 })();

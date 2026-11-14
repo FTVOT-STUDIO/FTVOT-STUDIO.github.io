@@ -300,9 +300,9 @@ p.after(signal);
 // 케테르가 왼쪽, 말쿠트가 오른쪽에 오는 가로 배치가 최종 모양이며, 글자와 문양도 함께 눕습니다.
 // 회전량은 스크롤 위치로만 계산해서, 위로 되돌아가면 같은 경로로 다시 일어섭니다.
 const ROTATE_RATIO = 0.1;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
-const PIN_RATIO = 0.8;     // 가로로 다 바뀔 때까지 나무를 화면에 붙잡아 두는 스크롤 길이 (#tree margin-bottom과 같은 값)
+const PIN_RATIO = 0.44;     // 가로로 다 바뀔 때까지 나무를 화면에 붙잡아 두는 스크롤 길이 (#tree margin-bottom과 같은 값)
 const MORPH_SECONDS = 1.8; // 가로로 바뀌는 데 걸리는 시간
-let reversing = false, anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0, tension = 0, snapping = false;
+let wantDown = false, wantUp = false, lockDir = -1, glideAnim = 0, reversing = false, anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0, tension = 0, snapping = false;
 
 const LOCK_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar']);
 
@@ -465,24 +465,29 @@ traceTimer = setTimeout(() => hero.classList.remove('is-tracing'), 2400);
 const update = () => {
 pending = 0;
 const pin = heroHeight * PIN_RATIO;
-const distance = Math.max(0, scrollY - heroTop);
-// 스크롤 양에 묶지 않고 시간으로 재생합니다: 조금이라도 내리면 0.9초 동안 가로로 바뀌고, 맨 위로 돌아오면 다시 섭니다.
-// 휠을 세게 당겨도 연출이 한 프레임에 뛰지 않습니다
-const target = distance > 8 ? 1 : 0;
+const raw0 = Math.max(0, scrollY - heroTop);
+// 방향 결정: 위로 스크롤 의사(wantUp)가 있으면 세로로, 조금이라도 내려와 있으면 가로로
+const target = wantUp ? 0 : (wantDown || raw0 > 8) ? 1 : 0;
 const now = performance.now();
 const dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 0; lastTime = now;
 anim += Math.sign(target - anim) * Math.min(Math.abs(target - anim), dt / MORPH_SECONDS);
 const progress = anim;
-// 가로로 바뀌는 중에는 스크롤을 막아 연출을 끝까지 보여줍니다 (되돌아갈 때는 막지 않습니다)
-if (target === 0 && anim >= 1 && !reversing) { reversing = true; playLayer('tree-off'); }
-if (anim <= 0) reversing = false;
-// 나무 구간을 벗어난 곳(링크로 점프 등)에서는 잠그지 않고 즉시 완료 상태로 둡니다
-const inHero = distance < heroHeight * PIN_RATIO;
-if (!inHero && target === 1) anim = 1;
-const shouldLock = inHero && target === 1 && anim < 1 && !reduceMotion.matches;
-if (shouldLock !== scrollLocked) { if (!shouldLock) holdFor(500); setScrollLock(shouldLock); glideFrom = scrollY; if (shouldLock && anim < .05) { playLayer('tree-on'); prepareSfx('node-lit'); } }
-// 멈춰 세우지 않고, 연출 진행에 맞춰 페이지를 고정 구간 한가운데까지 부드럽게 미끄러뜨립니다
-if (scrollLocked) { const to = heroTop + heroHeight * PIN_RATIO * .55; scrollTo(0, glideFrom + (to - glideFrom) * easeInOut(anim)); }
+if (target === 0 && anim < 1 && !reversing && raw0 > 8) { reversing = true; playLayer('tree-off'); }
+if (anim <= 0) { reversing = false; wantUp = false; }
+if (anim >= 1) wantDown = false;
+const inHero = raw0 <= pin + 2;
+if (!inHero && target === 1) anim = 1; // 링크로 멀리 점프한 경우: 잠그지 않고 즉시 완료
+// 변형 중에는 양방향 모두 입력을 잠그고, 연출 진행에 맞춰 페이지를 목적지(가로=고정 끝 / 세로=맨 위)로 미끄러뜨립니다
+const shouldLock = inHero && anim !== target && !reduceMotion.matches;
+if (shouldLock && (!scrollLocked || lockDir !== target)) { glideFrom = scrollY; glideAnim = anim; lockDir = target; if (target === 1 && anim < .05) { playLayer('tree-on'); prepareSfx('node-lit'); } }
+if (shouldLock !== scrollLocked) { if (!shouldLock) holdFor(500); setScrollLock(shouldLock); }
+if (scrollLocked) {
+const to = target ? heroTop + pin : heroTop;
+const span = Math.abs(target - glideAnim) || 1, k = Math.min(1, Math.abs(anim - glideAnim) / span);
+scrollTo(0, Math.round(glideFrom + (to - glideFrom) * easeInOut(k)));
+}
+// 스크롤을 옮긴 '뒤'의 위치로 나무 위치를 계산해야 한 프레임 어긋남(떨림)이 없습니다
+const distance = Math.max(0, scrollY - heroTop);
 const e = easeInOut(progress);
 if (anim !== target) schedule(); else lastTime = 0;
 // 다 누웠을 때 / 다시 섰을 때 경로에 빛을 한 번 흘립니다
@@ -533,7 +538,7 @@ const TENSION_PX = 520;      // 이만큼 당겨야 넘어갑니다
 const SNAP_MS = 950;         // 케테르까지 내려가는 시간
 // 시작·끝만 살짝 부드럽고 가운데는 거의 일정한 속도 (튕김 없음)
 const autoEase = (x) => (x < .15 ? (x * x) / .3 : x > .85 ? 1 - ((1 - x) * (1 - x)) / .3 : (x - .075) / .85);
-const inTensionZone = () => !holding() && laid && !snapping && !scrollLocked && !reduceMotion.matches && scrollY - heroTop < heroHeight * PIN_RATIO * .95;
+const inTensionZone = () => false && laid && !snapping && !scrollLocked && !reduceMotion.matches && scrollY - heroTop < heroHeight * PIN_RATIO * .95;
 const release = () => {
 cancelAnimationFrame(tensionFrame);
 const step = () => { tension *= .8; if (tension < .005) tension = 0; schedule(); if (tension) tensionFrame = requestAnimationFrame(step); };
@@ -556,6 +561,17 @@ requestAnimationFrame(step);
 };
 // 활성 상태에서 아래로 스크롤하면 당김 없이 바로 자동 스크롤을 시작합니다 (입력 크기와 무관)
 const pull = () => { if (!snapping) snapToKether(); };
+// 가로 나무 구간에서 위로 스크롤하면 바로 세로로 돌아가는 연출을 시작합니다 (네이티브 스크롤과 섞이며 떨리는 것 방지)
+const upIntent = (event) => { if (!laid || scrollLocked || holding() || reduceMotion.matches) return; if (scrollY - heroTop > heroHeight * PIN_RATIO + 2) return; if (event.cancelable) event.preventDefault(); wantUp = true; schedule(); };
+window.addEventListener('wheel', (event) => { if (event.deltaY < 0) upIntent(event); }, { passive: false });
+// 맨 위 세로 나무에서 첫 아래 스크롤은 네이티브로 흘려보내지 않고 바로 연출로 넘깁니다 (첫 프레임 튐 방지)
+const downIntent = (event) => { if (laid || anim > 0 || scrollLocked || holding() || reduceMotion.matches) return; if (scrollY - heroTop > 8) return; if (event.cancelable) event.preventDefault(); wantDown = true; schedule(); };
+window.addEventListener('wheel', (event) => { if (event.deltaY > 0) downIntent(event); }, { passive: false });
+window.addEventListener('keydown', (event) => { if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(event.key)) downIntent(event); });
+let upTouchY = 0;
+window.addEventListener('touchstart', (event) => { upTouchY = event.touches[0]?.clientY ?? 0; }, { passive: true });
+window.addEventListener('touchmove', (event) => { const y = event.touches[0]?.clientY ?? 0; if (y - upTouchY > 4) upIntent(event); else if (upTouchY - y > 4) downIntent(event); upTouchY = y; }, { passive: false });
+window.addEventListener('keydown', (event) => { if (['ArrowUp', 'PageUp', 'Home'].includes(event.key)) upIntent(event); });
 window.addEventListener('wheel', (event) => { if (event.deltaY > 0 && inTensionZone()) { event.preventDefault(); pull(); } }, { passive: false });
 let touchY = 0;
 window.addEventListener('touchstart', (event) => { touchY = event.touches[0]?.clientY ?? 0; }, { passive: true });
