@@ -10,6 +10,7 @@ const ctx = canvas.getContext('2d', { alpha: true });
 if (!ctx) { canvas.remove(); return; }
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 const visible = new Set();
+const fades = new Map(); // 장면별 현재 불투명도 (0~1)
 let width = 0, height = 0, frame = 0, last = 0, time = 0;
 const resize = () => {
 width = innerWidth; height = innerHeight;
@@ -23,37 +24,44 @@ const draw = (now) => {
 frame = 0;
 if (document.hidden) { last = 0; return; }
 if (!reduce.matches && last && now - last < 1000 / 24) { frame = requestAnimationFrame(draw); return; }
-if (last && !reduce.matches) time += Math.min((now - last) / 1000, 0.1);
+const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+if (!reduce.matches) time += dt;
 last = now;
 ctx.clearRect(0, 0, width, height);
-let selected = null, nearest = Infinity, rect = null;
+let selected = null, nearest = Infinity;
 for (const chapter of visible) {
 const bounds = chapter.getBoundingClientRect();
 const distance = Math.abs(Math.max(bounds.top, 0) + Math.min(bounds.bottom, height) - height);
-if (bounds.bottom > 0 && bounds.top < height && distance < nearest) { selected = chapter; nearest = distance; rect = bounds; }
+if (bounds.bottom > 0 && bounds.top < height && distance < nearest) { selected = chapter; nearest = distance; }
 }
-if (!selected) { last = 0; return; }
-const color = getComputedStyle(selected).getPropertyValue('--sc').trim();
+// 장면 전환: 화면 경계로 자르지 않고, 이전 장면은 서서히 사라지고 다음 장면은 서서히 떠오르게 섞습니다
+const step = reduce.matches ? 1 : Math.min(1, dt * 1.6);
+if (selected) fades.set(selected, fades.get(selected) ?? 0);
+let active = false;
+for (const [chapter, value] of fades) {
+const next = value + ((chapter === selected ? 1 : 0) - value) * step;
+if (next < 0.01 && chapter !== selected) { fades.delete(chapter); continue; }
+fades.set(chapter, next); active = true;
+const scene = scenes[chapter.id]; if (!scene) continue;
+const color = getComputedStyle(chapter).getPropertyValue('--sc').trim();
 ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.1;
-ctx.save();
-ctx.beginPath(); ctx.rect(0, Math.max(0, rect.top), width, Math.min(height, rect.bottom) - Math.max(0, rect.top)); ctx.clip();
 const mobile = width < 768;
 const size = mobile ? Math.min(width * 0.46, 180) : Math.min(width * 0.26, 340);
 const scale = size / 300;
 const panelHeight = 480 * scale;
 const top = Math.max(50, Math.min(height - panelHeight - 20, (height - panelHeight) / 2));
-const scene = scenes[selected.id];
-if (scene) {
+const ease = next * next * (3 - 2 * next);
 for (let side = 0; side < 2; side += 1) {
 ctx.save();
-ctx.translate(side ? width - size + (mobile ? 40 : 20) : (mobile ? -40 : -20), top + (side ? 0 : 50));
+// 떠오를 때 살짝 아래에서 올라오고, 사라질 때 살짝 가라앉습니다
+ctx.translate(side ? width - size + (mobile ? 40 : 20) : (mobile ? -40 : -20), top + (side ? 0 : 50) + (1 - ease) * 24);
 ctx.scale(scale, scale);
-ctx.globalAlpha = mobile ? 0.22 : 0.43;
+ctx.globalAlpha = (mobile ? 0.22 : 0.43) * ease;
 scene(ctx, reduce.matches ? 6 : time + side * 3.7, side);
 ctx.restore();
 }
 }
-ctx.restore();
+if (!active) { last = 0; return; }
 if (!reduce.matches) frame = requestAnimationFrame(draw);
 };
 function request() { if (!frame && !document.hidden) frame = requestAnimationFrame(draw); }

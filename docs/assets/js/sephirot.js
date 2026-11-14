@@ -273,7 +273,7 @@ const e = easeInOut(progress);
 if (progress >= 1 && !laid) { laid = true; trace(); }
 if (progress < 0.02 && laid) { laid = false; trace(); }
 previous = progress;
-if (reduceMotion.matches) { tree.style.transform = ''; return; }
+if (reduceMotion.matches) { tree.style.transform = ''; tree.style.removeProperty('--upright'); return; }
 // 누운 나무가 화면 너비(누운 뒤의 가로 = 원래 세로)와 높이 안에 들어오도록 크기를 맞춥니다
 const fit = Math.min((innerWidth - 64) / treeH, (innerHeight * 0.78) / treeW, 1.25);
 const scale = 1 + (fit - 1) * e;
@@ -281,6 +281,8 @@ const scale = 1 + (fit - 1) * e;
 const hold = Math.min(distance, pin);
 // 원근 흔들림: 회전 중간에 가장 크게, 시작과 끝에서는 0
 const sway = Math.sin(Math.PI * e) * SWAY_DEG;
+// 나무는 눕지만 이름·문양·히브리 글자는 각자 제자리에서 반대로 돌아 항상 똑바로 읽히게 합니다
+tree.style.setProperty('--upright', `${(90 * e).toFixed(2)}deg`);
 tree.style.transform = `translate3d(0, ${hold.toFixed(1)}px, 0) perspective(1600px) rotateX(${sway.toFixed(2)}deg) rotate(${(-90 * e).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
 // 왼쪽 소개 글은 나무가 눕는 동안 함께 고정되며 천천히 사라집니다
 if (copy) {
