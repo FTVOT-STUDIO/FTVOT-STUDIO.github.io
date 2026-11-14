@@ -174,6 +174,12 @@ window.addEventListener('resize', progress);
 new ResizeObserver(progress).observe(document.body);
 progress();
 document.addEventListener('visibilitychange', () => document.documentElement.classList.toggle('is-page-hidden', document.hidden));
+document.querySelectorAll('.project-content').forEach((content) => {
+if (content.querySelectorAll('.project-gallery figure').length < 2) {
+const arrows = content.querySelector('.gallery-toolbar > div');
+if (arrows) arrows.hidden = true;
+}
+});
 document.querySelectorAll('[data-gallery-step]').forEach((button) => {
 button.addEventListener('click', () => {
 const gallery = button.closest('.project-content').querySelector('.project-gallery');
@@ -272,6 +278,12 @@ page = Math.min(page, total - 1);
 entries.forEach((entry) => {
 const index = matches.indexOf(entry);
 entry.hidden = index < page * pageSize || index >= (page + 1) * pageSize;
+entry.classList.remove('is-filter-arriving');
+if (!entry.hidden && !reduceMotion.matches) {
+entry.style.setProperty('--entry-delay', `${index % pageSize * 45}ms`);
+void entry.offsetWidth;
+entry.classList.add('is-filter-arriving');
+}
 if (entry.hidden) entry.open = false;
 });
 pager.replaceChildren();
