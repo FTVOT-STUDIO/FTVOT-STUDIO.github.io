@@ -1,0 +1,61 @@
+/* 장면은 가장자리에서 선명하고 본문 뒤에서는 잦아들어 읽기 축을 지킵니다. */
+.cosmos-stage { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; contain: strict; opacity: .82; mask-image: linear-gradient(90deg,#000, rgb(0 0 0 / .18) 30%, rgb(0 0 0 / .18) 70%,#000); }
+.chapter { background: linear-gradient(110deg,color-mix(in oklab,var(--sc) 2%,transparent),transparent 46%); border-top-color: color-mix(in oklab,var(--sc) 16%,transparent); }
+.chapter::before { display: block; position: absolute; inset: 0 auto auto 50%; width: min(900px,100%); height: 160px; translate: -50% 0; background: radial-gradient(ellipse at 50% 0,color-mix(in oklab,var(--sc) 7%,transparent),transparent 70%); pointer-events: none; }
+.chapter::after { display: block; content: ''; position: absolute; top: -3px; left: 50%; width: 5px; height: 5px; rotate: 45deg; background: var(--sc); box-shadow: 0 0 14px color-mix(in oklab,var(--sc) 18%,transparent); }
+.chapter-opening { position: relative; }
+.chapter-kicker { letter-spacing: .06em; }
+.chapter-kicker .chapter-index { color: var(--sc); }
+.chapter-meaning { border-bottom: 1px solid color-mix(in oklab,var(--sc) 45%,transparent); padding-bottom: 3px; }
+.chapter-statement { font-weight: 450; letter-spacing: -.05em; }
+.chapter-role { letter-spacing: .1em; }
+.chapter-emblem { position: relative; isolation: isolate; }
+.chapter-emblem::before, .chapter-emblem::after { content: ''; position: absolute; top: -20px; width: 190px; height: 190px; border: 1px solid color-mix(in oklab,var(--sc) 22%,transparent); border-radius: 50%; pointer-events: none; z-index: -1; }
+.chapter-emblem::before { transform: rotate(-28deg) scaleY(.52); }
+.chapter-emblem::after { transform: rotate(53deg) scaleY(.72); border-style: dotted; opacity: .7; }
+.chapter .chapter-emblem .orb { background: radial-gradient(circle at 50% 55%,color-mix(in oklab,var(--sc) 12%,transparent),transparent 70%); border-color: color-mix(in oklab,var(--sc) 55%,transparent); }
+.emblem-caption { color: color-mix(in oklab,var(--sc) 55%,var(--text-2)); letter-spacing: .18em; }
+.chapter-epigraph { position: relative; border-color: color-mix(in oklab,var(--sc) 20%,transparent); }
+.chapter-epigraph::before { content: ''; position: absolute; top: -1px; left: 0; width: 42px; height: 1px; background: var(--sc); }
+.chapter-epigraph .b-ref { letter-spacing: .08em; }
+.section-label { color: var(--sc) !important; }
+.tb-num { border-color: var(--sc); color: var(--sc); }
+.topbar { background: linear-gradient(90deg,rgb(8 8 13 / .96),rgb(15 12 22 / .96),rgb(8 8 13 / .96)); }
+.minimap { opacity: .88; }
+.audio-controls { border-bottom-color: rgb(180 160 208 / .3); background: rgb(8 8 13 / .88); }
+.project-filters { gap: 28px; }
+.project-filters button { display: inline-flex; align-items: center; gap: 8px; }
+.project-filters button::before { content: ''; width: 4px; height: 4px; border-radius: 50%; border: 1px solid var(--text-2); }
+.project-filters button[aria-pressed='true']::before { background: var(--sc); border-color: var(--sc); box-shadow: 0 0 8px color-mix(in oklab,var(--sc) 35%,transparent); }
+.project-pagination { position: relative; }
+.project-pagination button { min-width: 32px; }
+.project-pagination button[aria-current] { border-color: var(--sc); }
+.project-entry { position: relative; }
+.unified-projects .project-entry > summary { transition: background .35s; }
+.unified-projects .project-entry > summary:hover { background: linear-gradient(90deg,color-mix(in oklab,var(--sc) 4%,transparent),transparent); }
+.project-cover { padding: 7px 0; border-bottom: 1px solid color-mix(in oklab,var(--sc) 30%,transparent); }
+.project-year { letter-spacing: .08em; color: color-mix(in oklab,var(--sc) 65%,var(--text-2)); }
+.project-heading b { transition: color .25s; }
+.project-entry > summary:hover .project-heading b { color: var(--sc); }
+.project-gallery figure > a { border-bottom: 1px solid color-mix(in oklab,var(--sc) 30%,transparent); padding-bottom: 10px; }
+.artwork-frame { position: relative; padding-bottom: 12px; }
+.artwork-frame::before { content: ''; position: absolute; left: 0; bottom: 0; width: 36px; border-bottom: 1px solid var(--sc); }
+.artwork-card figcaption { border-top-color: color-mix(in oklab,var(--sc) 25%,transparent); }
+.arka-nav.is-reader-nav { border-color: color-mix(in oklab,var(--sc) 28%,transparent); }
+.arka-nav a[aria-current] { color: var(--sc); }
+.arka-index { color: var(--sc); }
+.contact-address { border-color: color-mix(in oklab,var(--sc) 25%,transparent); }
+.contact-links a:hover { color: var(--sc); }
+@media (prefers-reduced-motion: no-preference) {
+.chapter.is-in-view .chapter-emblem::before { animation: seal-orbit 65s linear infinite; }
+.chapter.is-in-view .chapter-emblem::after { animation: seal-orbit-back 85s linear infinite; }
+}
+@keyframes seal-orbit { from { transform: rotate(-28deg) scaleY(.52); } to { transform: rotate(332deg) scaleY(.52); } }
+@keyframes seal-orbit-back { from { transform: rotate(53deg) scaleY(.72); } to { transform: rotate(-307deg) scaleY(.72); } }
+@media(max-width:767px) {
+.cosmos-stage { opacity: .65; mask-image: linear-gradient(90deg,#000,rgb(0 0 0 / .12) 24%,rgb(0 0 0 / .12) 76%,#000); }
+.chapter-emblem::before, .chapter-emblem::after { width: 110px; height: 110px; top: -14px; }
+.project-filters { gap: 20px; }
+.project-filters button { gap: 5px; }
+.chapter-statement { font-weight: 500; }
+}
