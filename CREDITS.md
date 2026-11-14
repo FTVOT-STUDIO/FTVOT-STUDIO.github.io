@@ -28,7 +28,8 @@
 
 - 버튼 클릭음 `docs/assets/ui-click.mp3`: Moodmode, "button" (Pixabay #198922로 추정, 사용자 제공 파일). Pixabay Content License
 - 세피라 점등음 `docs/assets/node-lit.mp3`: Universfield, "Interface Click" (Pixabay #124476로 추정, 사용자 제공 파일). Pixabay Content License
-- 나무 변형 소리: Web Audio API로 직접 합성 (외부 파일 없음)
+- 나무 활성 `docs/assets/tree-on.mp3`: yodguard, "Fire Magic 3" (Pixabay #378640로 추정, 사용자 제공 파일). Pixabay Content License
+- 나무 비활성 `docs/assets/tree-off.mp3`: yodguard, "Wind Magic 5" (Pixabay #378630로 추정, 사용자 제공 파일). Pixabay Content License
 
 ## 작업 방식
 

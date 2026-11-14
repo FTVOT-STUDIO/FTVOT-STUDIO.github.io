@@ -13,7 +13,7 @@ const volumeOf = (sid) => Math.min(1, SFX_VOLUME * (SFX_BOOST[sid] || 1));
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
 const GROW_STEP = 120;
 
-const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click', 'node-lit'];
+const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click', 'node-lit', 'tree-on', 'tree-off'];
 const audioCache = new Map();
 const buffers = new Map();
 const loadingSounds = new Map();
@@ -74,9 +74,22 @@ o.connect(g); g.connect(out); o.start(at); o.stop(at + 1.5);
 setTimeout(() => out.disconnect(), (duration + 1.6) * 1000);
 }
 
+// 겹쳐 울려도 되는 소리: 다른 효과음을 끊지 않고 위에 얹어 재생합니다 (나무 활성 소리 위로 점등음이 겹치도록)
+function playLayer(sid) {
+if (!soundOn || !SFX_IDS.includes(sid)) return;
+const ctx = getAudioContext(), prepared = buffers.get(sid);
+prepareSfx(sid);
+if (ctx && prepared && ctx.state === 'running') {
+try { const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = prepared.buffer; g.gain.value = volumeOf(sid); src.connect(g); g.connect(masterGain); src.onended = () => { src.disconnect(); g.disconnect(); }; src.start(0, prepared.offset); return; } catch { /* 아래 기본 플레이어로 */ }
+}
+if (ctx?.state === 'suspended') ctx.resume().catch(() => {});
+const audio = new Audio(soundPath(sid)); audio.volume = volumeOf(sid); audio.play().catch(() => {});
+}
+
 function soundPath(sid) {
 if (sid === 'ui-click') return './assets/ui-click.mp3?v=2';
 if (sid === 'node-lit') return './assets/node-lit.mp3'; // 나무에서 세피라가 켜질 때
+if (sid === 'tree-on' || sid === 'tree-off') return `./assets/${sid}.mp3`; // 나무 활성/비활성
 return `${SFX_PATH}/${sid}.mp3`;
 }
 
@@ -210,7 +223,7 @@ const alreadyPlayed = target && pointerTarget === target && event.detail !== 0;
 pointerTarget = null;
 if (target && !alreadyPlayed) { /* 버튼 클릭음은 사용자 요청으로 끔 */ }
 });
-prepareSfx('ui-click');
+['tree-on', 'tree-off', 'node-lit'].forEach(prepareSfx); // 나무 소리를 미리 받아 첫 재생 지연을 없앱니다
 }
 
 /** 세피라 캐릭터를 공격 프레임으로 잠깐 바꿉니다 */
@@ -282,7 +295,7 @@ p.after(signal);
 const ROTATE_RATIO = 0.1;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
 const PIN_RATIO = 0.8;     // 가로로 다 바뀔 때까지 나무를 화면에 붙잡아 두는 스크롤 길이 (#tree margin-bottom과 같은 값)
 const MORPH_SECONDS = 1.8; // 가로로 바뀌는 데 걸리는 시간
-let anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0, tension = 0, snapping = false;
+let reversing = false, anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0, tension = 0, snapping = false;
 
 const LOCK_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar']);
 const blockScroll = (event) => { if (event.cancelable) event.preventDefault(); };
@@ -366,7 +379,7 @@ info.cy -= ls * (40 + i * 22);
 info.node.setAttribute('transform', k ? `translate(${(info.cx - info.x).toFixed(2)} ${(info.cy - info.y).toFixed(2)})` : '');
 // 도착 = 점등
 const lit = raw >= .999; // 부동소수 오차로 말쿠트(마지막)가 1에 못 미쳐 켜지지 않던 문제 방지
-if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit); if (lit) playSfx('node-lit'); }
+if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit); if (lit) playLayer('node-lit'); }
 }
 // 케테르 위의 아인 호(세 겹 반원)는 케테르를 따라가며 바깥쪽(왼쪽)을 향하도록 방향만 바꿉니다
 const K = nodeInfo.get('1');
@@ -440,8 +453,10 @@ const dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 0; lastTime = no
 anim += Math.sign(target - anim) * Math.min(Math.abs(target - anim), dt / MORPH_SECONDS);
 const progress = anim;
 // 가로로 바뀌는 중에는 스크롤을 막아 연출을 끝까지 보여줍니다 (되돌아갈 때는 막지 않습니다)
+if (target === 0 && anim >= 1 && !reversing) { reversing = true; playLayer('tree-off'); }
+if (anim <= 0) reversing = false;
 const shouldLock = target === 1 && anim < 1 && !reduceMotion.matches;
-if (shouldLock !== scrollLocked) { setScrollLock(shouldLock); glideFrom = scrollY; if (shouldLock && anim < .05) { playMorphSweep(MORPH_SECONDS); prepareSfx('node-lit'); } }
+if (shouldLock !== scrollLocked) { setScrollLock(shouldLock); glideFrom = scrollY; if (shouldLock && anim < .05) { playLayer('tree-on'); prepareSfx('node-lit'); } }
 // 멈춰 세우지 않고, 연출 진행에 맞춰 페이지를 고정 구간 한가운데까지 부드럽게 미끄러뜨립니다
 if (scrollLocked) { const to = heroTop + heroHeight * PIN_RATIO * .55; scrollTo(0, glideFrom + (to - glideFrom) * easeInOut(anim)); }
 const e = easeInOut(progress);
