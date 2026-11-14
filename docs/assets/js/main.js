@@ -39,6 +39,7 @@ if (el) el.textContent = String(new Date().getFullYear());
 initSky();
 initAnchors();
 initSephirot({ scrollTo: scrollToEl });
+initArkaReader();
 initDetails();
 initPortraits();
 initYear();
@@ -75,7 +76,7 @@ details.style.height = '';
 const end = open ? details.getBoundingClientRect().height : summary.getBoundingClientRect().height;
 details.style.overflow = 'hidden';
 animation = details.animate({ height: [`${start}px`, `${end}px`] }, { duration: open ? 380 : 280, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
-animation.onfinish = () => finish(open);
+animation.onfinish = () => finish(open && details.open);
 });
 reduceMotion.addEventListener('change', () => {
 if (!animation || !reduceMotion.matches) return;
@@ -420,4 +421,41 @@ load();
 }, { rootMargin: '240px' });
 observer.observe(grid.closest('section'));
 } else load();
+}
+
+function initArkaReader() {
+const nav = document.querySelector('.arka-nav');
+if (!nav) return;
+const links = [...nav.querySelectorAll('a')];
+const panels = links.map((link) => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+const select = (id, move = false) => {
+const chosen = panels.find((panel) => panel.id === id) || panels[0];
+panels.forEach((panel) => {
+panel.hidden = panel !== chosen;
+panel.classList.toggle('is-reading', panel === chosen);
+});
+links.forEach((link) => {
+if (link.hash === `#${chosen.id}`) link.setAttribute('aria-current', 'location');
+else link.removeAttribute('aria-current');
+});
+if (move && nav.getBoundingClientRect().top < TOPBAR) {
+window.scrollTo({ top: nav.getBoundingClientRect().top + scrollY - TOPBAR - 8, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+}
+};
+links.forEach((link) => {
+link.addEventListener('click', (event) => {
+event.preventDefault();
+event.stopPropagation();
+select(link.hash.slice(1), true);
+history.replaceState(null, '', link.hash);
+});
+});
+// JS가 실행될 때만 한 챕터씩 보여 본문을 잃지 않고 스크롤 길이를 줄입니다.
+nav.classList.add('is-reader-nav');
+select(location.hash.slice(1));
+window.addEventListener('hashchange', () => {
+if (panels.some((panel) => `#${panel.id}` === location.hash)) select(location.hash.slice(1));
+});
+document.querySelectorAll('.arka-sephira').forEach((details) => details.name = 'arka-sephira');
+document.querySelectorAll('.arka-faction-group').forEach((details) => details.name = 'arka-factions');
 }
