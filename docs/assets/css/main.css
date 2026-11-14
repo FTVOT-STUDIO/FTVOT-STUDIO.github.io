@@ -1047,3 +1047,5 @@ body { overflow-x: clip; }
 .project-pagination::before { font-size: 8px; letter-spacing: 0.1em; }
 .project-filters { gap: 22px; }
 }
+/* 모바일의 이전 단일 열 규칙이 썸네일 옆 제목을 아래로 밀지 않게 합니다. */
+.project-entry > summary > .project-info { grid-column: 2; min-width: 0; width: 100%; }
