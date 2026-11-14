@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261115a';
-import { initSephirot } from './sephirot.js?v=20261116f';
+import { initSephirot } from './sephirot.js?v=20261116h';
 import { initChapterScenes } from './chapter-scenes.js?v=20261116a';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
@@ -533,7 +533,7 @@ const audio = new Audio();
 audio.preload = 'none';
 audio.loop = true;
 // 배경음은 볼륨 변화 없이 작은 소리로 계속 반복합니다.
-audio.volume = 0.08;
+audio.volume = 0.3; // 배경음 (예전 0.08은 거의 안 들려서 올림)
 let enabled = true;
 try { enabled = localStorage.getItem('ambient-music') !== 'off'; } catch {}
 const sync = () => {
@@ -584,3 +584,22 @@ if (document.readyState === 'complete') afterLoad();
 else window.addEventListener('load', afterLoad, { once: true });
 }
 
+
+// 클릭 위치 파동 (이전 버전 복원): 마우스로 누른 자리에 원이 퍼지며 사라집니다. 최대 3개만 유지합니다
+(() => {
+const fine = matchMedia('(hover: hover) and (pointer: fine)');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+document.addEventListener('pointerdown', (event) => {
+if (!fine.matches || reduce.matches || event.pointerType !== 'mouse' || event.button !== 0) return;
+const ripples = document.querySelectorAll('.pointer-ripple');
+if (ripples.length >= 3) ripples[0].remove();
+const ripple = document.createElement('span');
+ripple.className = 'pointer-ripple';
+ripple.setAttribute('aria-hidden', 'true');
+ripple.style.left = `${event.clientX}px`;
+ripple.style.top = `${event.clientY}px`;
+document.body.append(ripple);
+const animation = ripple.animate([{ opacity: 0.55, transform: 'translate(-50%, -50%) scale(0.12)' }, { opacity: 0, transform: 'translate(-50%, -50%) scale(1)' }], { duration: 700, easing: 'ease-out' });
+animation.onfinish = () => ripple.remove();
+}, { passive: true });
+})();

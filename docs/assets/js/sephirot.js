@@ -201,14 +201,14 @@ pointerTarget = null;
 const target = control(event);
 if (!target || target.hasAttribute('data-sound-toggle') || event.pointerType !== 'mouse' || event.button !== 0) return;
 pointerTarget = target;
-playSfx('ui-click');
+/* 버튼 클릭음은 사용자 요청으로 끔 */
 }, { passive: true });
 document.addEventListener('pointercancel', () => { pointerTarget = null; });
 document.addEventListener('click', (event) => {
 const target = control(event);
 const alreadyPlayed = target && pointerTarget === target && event.detail !== 0;
 pointerTarget = null;
-if (target && !alreadyPlayed) playSfx('ui-click');
+if (target && !alreadyPlayed) { /* 버튼 클릭음은 사용자 요청으로 끔 */ }
 });
 prepareSfx('ui-click');
 }
@@ -282,7 +282,8 @@ p.after(signal);
 const ROTATE_RATIO = 0.1;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
 const PIN_RATIO = 0.8;     // 가로로 다 바뀔 때까지 나무를 화면에 붙잡아 두는 스크롤 길이 (#tree margin-bottom과 같은 값)
 const MORPH_SECONDS = 1.8; // 가로로 바뀌는 데 걸리는 시간
-let anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0;
+let anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0, tension = 0, snapping = false;
+
 const LOCK_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar']);
 const blockScroll = (event) => { if (event.cancelable) event.preventDefault(); };
 const blockKeys = (event) => { if (LOCK_KEYS.has(event.key)) event.preventDefault(); };
@@ -460,7 +461,7 @@ const hold = Math.min(distance, pin);
 // 나무는 눕지만 이름·문양·히브리 글자는 각자 제자리에서 반대로 돌아 항상 똑바로 읽히게 합니다
 const leave = Math.min(1, Math.max(0, (distance - pin) / (innerHeight * .6)));
 morph(e, leave); // 회전 대신 각 세피라가 차례로 제자리를 찾아 이동하며 가로 배치가 됩니다
-const lift = `translate3d(0, ${hold.toFixed(1)}px, 0)`;
+const lift = `translate3d(0, ${(hold - tension * 48).toFixed(1)}px, 0)`; // tension: 당겨질 때 살짝 끌려 올라가는 저항감
 const spin = `scale(${scale.toFixed(3)})`;
 // 다 바뀌면 고정을 풀고 페이지와 함께 자연스럽게 올라가며, 바로 아래 케테르 장이 이어집니다.
 // 떠나는 동안만 살짝 옅어져 다음 장으로 시선이 넘어가게 합니다
@@ -485,6 +486,44 @@ copy.style.opacity = String(Math.max(0, 1 - progress * 1.6).toFixed(3));
 }
 };
 const schedule = () => { if (!pending) pending = requestAnimationFrame(update); };
+// ── 텐션 스크롤 ───────────────────────────────────────────────
+// 가로 나무가 활성인 상태에서 아래로 스크롤하면 바로 내려가지 않고 고무줄처럼 버팁니다(tension 0→1).
+// 끝까지 당기면 스크롤을 잠근 채 케테르 장으로 탄력 있게 내려가고, 중간에 놓으면 제자리로 튕겨 돌아옵니다
+let tensionTimer = 0, tensionFrame = 0;
+const TENSION_PX = 520;      // 이만큼 당겨야 넘어갑니다
+const SNAP_MS = 950;         // 케테르까지 내려가는 시간
+const easeOutBack = (x) => { const c1 = 1.25, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); }; // 살짝 지나쳤다 자리 잡는 '찰진' 착지
+const inTensionZone = () => laid && !snapping && !scrollLocked && !reduceMotion.matches && scrollY - heroTop < heroHeight * PIN_RATIO * .95;
+const release = () => {
+cancelAnimationFrame(tensionFrame);
+const step = () => { tension *= .8; if (tension < .005) tension = 0; schedule(); if (tension) tensionFrame = requestAnimationFrame(step); };
+tensionFrame = requestAnimationFrame(step);
+};
+const snapToKether = () => {
+const kether = document.getElementById('kether'); if (!kether) return;
+snapping = true; setScrollLock(true); cancelAnimationFrame(tensionFrame); clearTimeout(tensionTimer);
+const from = scrollY, to = kether.getBoundingClientRect().top + scrollY, start = performance.now(), t0 = tension;
+const step = (now) => {
+const x = Math.min(1, (now - start) / SNAP_MS);
+scrollTo(0, from + (to - from) * easeOutBack(x));
+tension = t0 * (1 - Math.min(1, x * 3)); // 출발하면서 당겨졌던 긴장이 풀립니다
+schedule();
+if (x < 1) requestAnimationFrame(step); else { snapping = false; tension = 0; setScrollLock(false); }
+};
+requestAnimationFrame(step);
+};
+const pull = (delta) => {
+cancelAnimationFrame(tensionFrame); clearTimeout(tensionTimer);
+// 당길수록 점점 무거워지는 저항 (남은 거리에 비례해서만 늘어남)
+tension = Math.min(1, tension + (delta / TENSION_PX) * (1 - tension * .55));
+schedule();
+if (tension >= 1) snapToKether(); else tensionTimer = setTimeout(release, 160);
+};
+window.addEventListener('wheel', (event) => { if (event.deltaY > 0 && inTensionZone()) { event.preventDefault(); pull(event.deltaY); } }, { passive: false });
+let touchY = 0;
+window.addEventListener('touchstart', (event) => { touchY = event.touches[0]?.clientY ?? 0; }, { passive: true });
+window.addEventListener('touchmove', (event) => { const y = event.touches[0]?.clientY ?? 0, d = touchY - y; touchY = y; if (d > 0 && inTensionZone()) { event.preventDefault(); pull(d * 1.6); } }, { passive: false });
+window.addEventListener('keydown', (event) => { if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(event.key) && inTensionZone()) { event.preventDefault(); pull(event.key === 'ArrowDown' ? 140 : 340); } });
 const measure = () => {
 heroTop = hero.getBoundingClientRect().top + scrollY;
 heroHeight = hero.offsetHeight;
