@@ -61,6 +61,8 @@ console.error('화면 연출을 기본 표시로 전환했습니다.', error);
 }
 };
 enhance(initSky);
+enhance(initAmbientAudio);
+enhance(initPointerAtmosphere);
 enhance(() => initSephirot({ scrollTo: scrollToEl }));
 enhance(initAnchors);
 enhance(initArkaReader);
@@ -512,4 +514,136 @@ if (panels.some((panel) => `#${panel.id}` === location.hash)) select(location.ha
 });
 document.querySelectorAll('.arka-sephira').forEach((details) => details.name = 'arka-sephira');
 document.querySelectorAll('.arka-faction-group').forEach((details) => details.name = 'arka-factions');
+}
+
+
+function initAmbientAudio() {
+const button = document.querySelector('[data-music-toggle]');
+if (!button) return;
+// 긴 곡을 PCM으로 전부 풀지 않고 브라우저의 미디어 스트림으로 재생합니다.
+const audio = new Audio('./assets/space-ambient.mp3');
+audio.preload = 'metadata';
+audio.loop = true;
+audio.volume = 0;
+let enabled = true, fadeFrame = 0, generation = 0;
+try { enabled = localStorage.getItem('ambient-music') !== 'off'; } catch {}
+const sync = () => {
+const playing = !audio.paused && !audio.ended;
+button.setAttribute('aria-pressed', String(playing));
+button.classList.toggle('is-playing', playing);
+button.querySelector('[data-music-label]').textContent = playing ? '배경음 끄기' : '배경음 켜기';
+};
+const stop = () => {
+generation += 1;
+cancelAnimationFrame(fadeFrame);
+fadeFrame = 0;
+audio.pause();
+audio.volume = 0;
+sync();
+};
+const start = () => {
+if (!enabled || document.hidden || !audio.paused) return;
+const attempt = ++generation;
+// 자동 재생이 차단되면 다음 실제 입력에서 다시 시도합니다.
+audio.play().then(() => {
+if (attempt !== generation || !enabled || document.hidden) { if (!enabled || document.hidden) stop(); return; }
+sync();
+const beginning = performance.now();
+const fade = (now) => {
+if (attempt !== generation || audio.paused) return;
+const amount = Math.min(1, (now - beginning) / 1400);
+audio.volume = 0.08 * amount;
+fadeFrame = amount < 1 ? requestAnimationFrame(fade) : 0;
+};
+fadeFrame = requestAnimationFrame(fade);
+}).catch(() => { if (attempt === generation) sync(); });
+};
+const unlock = (event) => {
+if (event.target instanceof Element && event.target.closest('[data-music-toggle]')) return;
+start();
+};
+document.addEventListener('pointerdown', unlock, { passive: true });
+document.addEventListener('keydown', unlock);
+button.addEventListener('click', () => {
+// 자동 재생 대기 상태에서는 첫 클릭을 재생 요청으로 해석합니다.
+enabled = audio.paused;
+try { localStorage.setItem('ambient-music', enabled ? 'on' : 'off'); } catch {}
+if (enabled) start(); else stop();
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); });
+window.addEventListener('pagehide', stop);
+audio.addEventListener('play', sync);
+audio.addEventListener('pause', sync);
+audio.addEventListener('error', () => { stop(); button.hidden = true; });
+sync();
+start();
+}
+
+function initPointerAtmosphere() {
+const pointer = matchMedia('(hover: hover) and (pointer: fine)');
+const halo = document.createElement('span');
+halo.className = 'pointer-aura';
+halo.setAttribute('aria-hidden', 'true');
+document.body.append(halo);
+let frame = 0, x = 0, y = 0, active = null, bounds = null;
+const enabled = () => pointer.matches && !reduceMotion.matches && !document.hidden;
+const resetTarget = () => {
+active?.classList.remove('is-pointer-near');
+active?.style.removeProperty('--pointer-rx');
+active?.style.removeProperty('--pointer-ry');
+active = bounds = null;
+};
+const reset = () => {
+cancelAnimationFrame(frame); frame = 0;
+halo.classList.remove('is-visible');
+resetTarget();
+};
+const paint = () => {
+frame = 0;
+if (!enabled()) return;
+halo.style.transform = `translate(${x - 70}px, ${y - 70}px)`;
+halo.classList.add('is-visible');
+if (active && bounds) {
+const dx = Math.max(-1, Math.min(1, (x - bounds.left) / bounds.width * 2 - 1));
+const dy = Math.max(-1, Math.min(1, (y - bounds.top) / bounds.height * 2 - 1));
+active.style.setProperty('--pointer-rx', `${-dy * 3}deg`);
+active.style.setProperty('--pointer-ry', `${dx * 3}deg`);
+}
+};
+// 입력이 있을 때 한 프레임만 갱신해 유휴 상태의 반복 루프를 만들지 않습니다.
+document.addEventListener('pointermove', (event) => {
+if (!enabled() || event.pointerType !== 'mouse') return;
+x = event.clientX; y = event.clientY;
+if (!frame) frame = requestAnimationFrame(paint);
+}, { passive: true });
+document.addEventListener('pointerover', (event) => {
+if (!enabled() || !(event.target instanceof Element)) return;
+const target = event.target.closest('.chapter-sigil, .project-cover, .artwork-card > a');
+if (target === active) return;
+resetTarget();
+if (!target) return;
+active = target; bounds = target.getBoundingClientRect();
+active.classList.add('is-pointer-near');
+});
+document.addEventListener('pointerdown', (event) => {
+if (!enabled() || event.pointerType !== 'mouse' || event.button !== 0) return;
+// 클릭 파동은 세 개까지만 유지하고 끝나는 즉시 DOM에서 제거합니다.
+const ripples = document.querySelectorAll('.pointer-ripple');
+if (ripples.length >= 3) ripples[0].remove();
+const ripple = document.createElement('span');
+ripple.className = 'pointer-ripple';
+ripple.setAttribute('aria-hidden', 'true');
+ripple.style.left = `${event.clientX}px`;
+ripple.style.top = `${event.clientY}px`;
+document.body.append(ripple);
+const animation = ripple.animate([{ opacity: 0.55, transform: 'translate(-50%, -50%) scale(0.12)' }, { opacity: 0, transform: 'translate(-50%, -50%) scale(1)' }], { duration: 700, easing: 'ease-out' });
+animation.onfinish = () => ripple.remove();
+});
+document.documentElement.addEventListener('pointerleave', reset);
+window.addEventListener('blur', reset);
+window.addEventListener('scroll', resetTarget, { passive: true });
+window.addEventListener('resize', reset);
+document.addEventListener('visibilitychange', reset);
+reduceMotion.addEventListener('change', reset);
+pointer.addEventListener('change', reset);
 }
