@@ -1128,3 +1128,43 @@ summary:hover .arka-expand { color: var(--sc); }
 .artwork-frame > img { max-width: min(100%, 260px); max-height: 260px; }
 .artwork-grid { row-gap: 32px; }
 }
+
+/* 빛은 한 번만 흐르게 해 첫 등장에 깊이를 주고 읽는 동안은 잔잔하게 둡니다. */
+.path-signal { fill: none; stroke: var(--signal-color, var(--c1)); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 0.055 0.945; stroke-dashoffset: 1; opacity: 0; pointer-events: none; }
+.node-echo { fill: none; stroke: var(--sc); stroke-width: 0.8; opacity: 0; pointer-events: none; }
+.orb { isolation: isolate; }
+.orb::before { content: ''; position: absolute; inset: -2px; border: 1px solid var(--sc); border-radius: 50%; opacity: 0; pointer-events: none; z-index: -1; }
+.orb.is-acting:not(.is-frame-ready) .p-idle { opacity: 1; }
+.orb.is-acting:not(.is-frame-ready) .p-act { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+.js .ht-tree .node { transform-box: fill-box; transform-origin: center; }
+.tree-grown .ht-tree .node { animation: sephira-condense 1s var(--ease-out-expo) calc(var(--d, 0) * 1ms) both; }
+.tree-grown .ht-tree .path-signal { animation: path-awaken 1.35s cubic-bezier(0.22, 0.65, 0.35, 1) calc(var(--d, 0) * 1ms) both; }
+.tree-grown .ht-tree .node-echo { animation: node-awaken 1.2s ease-out calc(var(--d, 0) * 1ms + 180ms) both; }
+.tree-grown .ht-tree .ain { animation: crown-reveal 1.6s ease-out both; }
+.tree-grown .ht-tree .path-badge { transition-delay: calc(var(--d, 0) * 1ms + 550ms); }
+.tree-grown .ht-tree .tree-svg { animation: tree-depth 2.4s var(--ease-out-expo) both; transform-origin: 50% 30%; }
+.orb.is-acting { animation: orb-recoil 0.72s var(--ease-out-expo) both; }
+.orb.is-acting .orb-art { animation: character-strike 0.78s linear both; transform-origin: 50% 76%; }
+.orb.is-acting::before { animation: strike-ring 0.65s ease-out 0.08s both; }
+.orb.is-acting.is-frame-ready .p-act { animation: attack-frame 0.82s linear both; }
+.orb.is-acting.is-frame-ready .p-idle { animation: idle-frame 0.82s linear both; }
+.orb.is-acting::after { animation: sigil-kick 0.7s var(--ease-out-expo) both; }
+}
+@keyframes sephira-condense { 0% { opacity: 0; transform: scale(0.68); filter: blur(2px); } 60% { opacity: 1; transform: scale(1.055); filter: blur(0); } 100% { opacity: 1; transform: scale(1); filter: blur(0); } }
+@keyframes path-awaken { 0% { stroke-dashoffset: 1; opacity: 0; } 12% { opacity: 0.8; } 82% { opacity: 0.65; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes node-awaken { 0% { r: 32px; opacity: 0; } 18% { opacity: 0.6; } 100% { r: 61px; opacity: 0; } }
+@keyframes crown-reveal { from { opacity: 0; translate: 0 -9px; } to { opacity: 1; translate: 0 0; } }
+@keyframes tree-depth { from { transform: scale(0.96); } to { transform: scale(1); } }
+/* 준비→타격 정지→반동→복귀를 나눠 단순 흔들림보다 무게를 느끼게 합니다. */
+@keyframes character-strike { 0% { transform: translate(0, 0) scale(1) rotate(0); } 10% { transform: translate(-4px, 4px) scale(1.07, 0.88) rotate(-5deg); } 18%, 25% { transform: translate(6px, -7px) scale(0.95, 1.13) rotate(5deg); } 34% { transform: translate(-4px, 1px) scale(1.04, 0.96) rotate(-3deg); } 47% { transform: translate(2px, -2px) scale(0.99, 1.025) rotate(1deg); } 70%, 100% { transform: translate(0, 0) scale(1) rotate(0); } }
+@keyframes orb-recoil { 0%, 10%, 100% { translate: 0 0; } 22% { translate: -2px 1px; } 30% { translate: 2px 0; } 43% { translate: -1px 0; } 64% { translate: 0 0; } }
+@keyframes strike-ring { 0% { opacity: 0; scale: 0.93; } 12% { opacity: 0.55; } 100% { opacity: 0; scale: 1.48; } }
+@keyframes sigil-kick { 0%, 100% { rotate: 0deg; } 20% { rotate: 12deg; } 45% { rotate: -5deg; } }
+@keyframes attack-frame { 0%, 9% { opacity: 0; } 10%, 81% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes idle-frame { 0%, 9% { opacity: 1; } 10%, 81% { opacity: 0; } 96%, 100% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+.path-signal, .node-echo, .orb::before { display: none; }
+.tree-grown .ht-tree .node, .tree-grown .ht-tree .tree-svg, .orb.is-acting, .orb.is-acting *, .orb.is-acting::after { animation: none !important; }
+}
+@media (prefers-reduced-motion: no-preference) { .ht-tree .node.is-pulse .node-ring { animation: node-pulse 0.6s var(--ease-out-expo); } }
