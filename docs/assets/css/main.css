@@ -1371,3 +1371,5 @@ summary:hover .arka-expand { color: var(--sc); }
 .js .hero-tree:not(.is-in-view) .path-signal,
 .js .hero-tree:not(.is-in-view) .node-echo,
 .js .hero-tree:not(.is-in-view) .node-ring { animation-play-state: paused; }
+/* 배경 문양만 구간 안에 머물게 하며 sticky 목차의 스크롤 기준은 유지합니다. */
+.chapter { overflow: clip; }
