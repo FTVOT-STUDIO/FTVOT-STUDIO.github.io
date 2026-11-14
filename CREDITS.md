@@ -24,6 +24,12 @@
 - GitHub는 GitHub, Inc.의 상표입니다.
 - Raspberry Pi는 Raspberry Pi Ltd의 상표입니다.
 
+## 효과음 추가분
+
+- 버튼 클릭음 `docs/assets/ui-click.mp3`: Moodmode, "button" (Pixabay #198922로 추정, 사용자 제공 파일). Pixabay Content License
+- 세피라 점등음 `docs/assets/node-lit.mp3`: Universfield, "Interface Click" (Pixabay #124476로 추정, 사용자 제공 파일). Pixabay Content License
+- 나무 변형 소리: Web Audio API로 직접 합성 (외부 파일 없음)
+
 ## 작업 방식
 
 - 디자인 필터: antislop (MIT) https://github.com/miqdadbadjuber/anti-slop

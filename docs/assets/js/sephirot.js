@@ -13,7 +13,7 @@ const volumeOf = (sid) => Math.min(1, SFX_VOLUME * (SFX_BOOST[sid] || 1));
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
 const GROW_STEP = 120;
 
-const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click'];
+const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click', 'node-lit'];
 const audioCache = new Map();
 const buffers = new Map();
 const loadingSounds = new Map();
@@ -48,7 +48,37 @@ return audioContext;
 } catch { return null; }
 }
 
-function soundPath(sid) { return sid === 'ui-click' ? './assets/ui-click.mp3?v=2' : `${SFX_PATH}/${sid}.mp3`; }
+// 나무가 가로로 바뀔 때의 소리: 파일 없이 Web Audio로 직접 합성합니다.
+// 낮은 곳에서 높은 곳으로 쓸려 올라가는 바람 소리(필터를 건 노이즈)와, 그 위에 얇게 깔리는 상승 화음(5도 쌓기)으로 '열림'을 표현합니다
+function playMorphSweep(duration = 1.8) {
+if (!soundOn) return;
+const ctx = getAudioContext(); if (!ctx) return;
+if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+const now = ctx.currentTime, out = ctx.createGain();
+out.gain.value = .55; out.connect(masterGain);
+// 1) 바람: 화이트 노이즈 → 대역 필터 주파수를 300Hz에서 3.2kHz까지 올림
+const len = Math.floor(ctx.sampleRate * duration), buf = ctx.createBuffer(1, len, ctx.sampleRate), data = buf.getChannelData(0);
+for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+const noise = ctx.createBufferSource(); noise.buffer = buf;
+const band = ctx.createBiquadFilter(); band.type = 'bandpass'; band.Q.value = 1.4;
+band.frequency.setValueAtTime(300, now); band.frequency.exponentialRampToValueAtTime(3200, now + duration * .85);
+const ng = ctx.createGain(); ng.gain.setValueAtTime(0, now); ng.gain.linearRampToValueAtTime(.22, now + duration * .35); ng.gain.linearRampToValueAtTime(0, now + duration);
+noise.connect(band); band.connect(ng); ng.connect(out); noise.start(now); noise.stop(now + duration);
+// 2) 화음: A3 → E4 → B4 → F#5 순서로 하나씩 겹쳐 올라가는 사인파 (세피라가 차례로 켜지는 리듬과 맞춤)
+[220, 329.63, 493.88, 739.99].forEach((f, k) => {
+const o = ctx.createOscillator(), g = ctx.createGain(), at = now + k * duration * .18;
+o.type = 'sine'; o.frequency.setValueAtTime(f, at); o.frequency.linearRampToValueAtTime(f * 1.005, at + 1.2);
+g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(.07, at + .08); g.gain.exponentialRampToValueAtTime(.0001, at + 1.4);
+o.connect(g); g.connect(out); o.start(at); o.stop(at + 1.5);
+});
+setTimeout(() => out.disconnect(), (duration + 1.6) * 1000);
+}
+
+function soundPath(sid) {
+if (sid === 'ui-click') return './assets/ui-click.mp3?v=2';
+if (sid === 'node-lit') return './assets/node-lit.mp3'; // 나무에서 세피라가 켜질 때
+return `${SFX_PATH}/${sid}.mp3`;
+}
 
 function prepareFallback(sid) {
 if (!audioCache.has(sid)) {
@@ -335,7 +365,7 @@ info.cy -= ls * (40 + i * 22);
 info.node.setAttribute('transform', k ? `translate(${(info.cx - info.x).toFixed(2)} ${(info.cy - info.y).toFixed(2)})` : '');
 // 도착 = 점등
 const lit = raw >= .999; // 부동소수 오차로 말쿠트(마지막)가 1에 못 미쳐 켜지지 않던 문제 방지
-if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit); }
+if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit); if (lit) playSfx('node-lit'); }
 }
 // 케테르 위의 아인 호(세 겹 반원)는 케테르를 따라가며 바깥쪽(왼쪽)을 향하도록 방향만 바꿉니다
 const K = nodeInfo.get('1');
@@ -410,7 +440,7 @@ anim += Math.sign(target - anim) * Math.min(Math.abs(target - anim), dt / MORPH_
 const progress = anim;
 // 가로로 바뀌는 중에는 스크롤을 막아 연출을 끝까지 보여줍니다 (되돌아갈 때는 막지 않습니다)
 const shouldLock = target === 1 && anim < 1 && !reduceMotion.matches;
-if (shouldLock !== scrollLocked) { setScrollLock(shouldLock); glideFrom = scrollY; }
+if (shouldLock !== scrollLocked) { setScrollLock(shouldLock); glideFrom = scrollY; if (shouldLock && anim < .05) { playMorphSweep(MORPH_SECONDS); prepareSfx('node-lit'); } }
 // 멈춰 세우지 않고, 연출 진행에 맞춰 페이지를 고정 구간 한가운데까지 부드럽게 미끄러뜨립니다
 if (scrollLocked) { const to = heroTop + heroHeight * PIN_RATIO * .55; scrollTo(0, glideFrom + (to - glideFrom) * easeInOut(anim)); }
 const e = easeInOut(progress);
