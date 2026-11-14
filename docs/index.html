@@ -24,8 +24,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400..600&display=swap">
-<link rel="stylesheet" href="./assets/css/main.css?v=20261114r">
-<script type="module" src="./assets/js/main.js?v=20261114r"></script>
+<link rel="stylesheet" href="./assets/css/main.css?v=20261114s">
+<script type="module" src="./assets/js/main.js?v=20261114s"></script>
 </head>
 <body>
 <a class="skip-link" href="#kether">본문으로 건너뛰기</a>
@@ -542,9 +542,6 @@
 
 <footer class="footer">
 <p>© <span data-year>2026</span> FTVOT_STUDIO · 김연우</p>
-<div class="footer-actions">
-<button class="text-btn" type="button" data-sound-toggle aria-pressed="true">효과음 끄기</button>
-</div>
 <p class="fineprint">성경 구절: 개역한글판 · 글꼴: Pretendard, Geist Mono (SIL OFL 1.1) · 인트로 연출: STUDIO NAS 게이트웨이 · Unity는 Unity Technologies, Geometry Dash는 RobTop Games의 상표입니다.</p>
 </footer>
 </main>
@@ -668,7 +665,7 @@
 </a>
 </g></svg>
 </nav>
-<button class="music-control" type="button" data-music-toggle aria-pressed="false"><span class="music-wave" aria-hidden="true"><i></i><i></i><i></i></span><span data-music-label>배경음 켜기</span></button>
+<div class="audio-controls" role="group" aria-label="소리 설정"><button class="music-control" type="button" data-music-toggle aria-pressed="false"><span class="music-wave" aria-hidden="true"><i></i><i></i><i></i></span><span data-music-label>배경음 켜기</span></button><button class="sound-control" type="button" data-sound-toggle aria-pressed="true">효과음 끄기</button></div>
 </body>
 </html>
 
