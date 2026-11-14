@@ -251,7 +251,7 @@ p.after(signal);
 // 회전량은 스크롤 위치로만 계산해서, 위로 되돌아가면 같은 경로로 다시 일어섭니다.
 const ROTATE_RATIO = 0.1;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
 const PIN_RATIO = 0;       // 고정 없음: 나무는 일반 스크롤로 올라갑니다
-const MORPH_SECONDS = 0.9; // 가로로 바뀌는 데 걸리는 시간
+const MORPH_SECONDS = 1.8; // 가로로 바뀌는 데 걸리는 시간
 let anim = 0, lastTime = 0;     // 다 누운 뒤에도 점등 연출이 끝날 때까지 고정을 유지하는 전체 길이 (#tree의 margin-bottom과 같은 값)
 const SWAY_DEG = 16;        // 도는 중간에 앞뒤로 기울어지는 최대 각도. 평면 회전이 밋밋해 보이지 않게
 const lerp = (a, b, k) => a + (b - a) * k;
@@ -383,8 +383,8 @@ const progress = anim;
 const e = easeInOut(progress);
 if (anim !== target) schedule(); else lastTime = 0;
 // 다 누웠을 때 / 다시 섰을 때 경로에 빛을 한 번 흘립니다
-if (progress >= 1 && !laid) { laid = true; trace(); }
-if (progress < 0.02 && laid) { laid = false; trace(); }
+if (progress >= 1 && !laid) { laid = true; hero.classList.add('is-laid'); trace(); }
+if (progress < 0.02 && laid) { laid = false; hero.classList.remove('is-laid'); trace(); }
 previous = progress;
 if (reduceMotion.matches) { tree.style.transform = ''; morph(1); return; }
 // 누운 나무가 화면 너비(누운 뒤의 가로 = 원래 세로)와 높이 안에 들어오도록 크기를 맞춥니다

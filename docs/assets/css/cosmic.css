@@ -105,3 +105,10 @@
 .k-wash { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0; background: linear-gradient(to top, color-mix(in oklab, var(--c1) 22%, transparent) 0%, color-mix(in oklab, var(--c1) 8%, transparent) 45%, transparent 80%); will-change: transform, opacity; }
 @media (prefers-reduced-motion: reduce) { .k-wash { display: none; } }
 .ht-tree svg { overflow: visible; } /* 가로 배치로 옮겨 간 세피라가 viewBox 밖으로 나가도 보이게 */
+/* 첫 화면의 세로 나무는 흰 실루엣으로만 보이고 누를 수 없습니다.
+   가로로 바뀌며 세피라가 하나씩 도착(is-lit)하는 순간 자기 색을 되찾고 클릭할 수 있게 됩니다 */
+.js .ht-tree .node { transition: filter .6s var(--ease-smooth, ease-out), opacity .6s var(--ease-smooth, ease-out); }
+.js .ht-tree .node:not(.is-lit) { filter: grayscale(1) brightness(1.6); opacity: .7; pointer-events: none; }
+.js .ht-tree .path-badge { transition: opacity .6s ease-out; }
+.js .hero-tree:not(.is-laid) .ht-tree .path-badge { opacity: .45; }
+@media (prefers-reduced-motion: reduce) { .js .ht-tree .node:not(.is-lit) { filter: none; opacity: 1; pointer-events: auto; } }
