@@ -107,24 +107,31 @@ if (playing) { playing.pause(); playing = null; }
 function playSfx(sid) {
 if (!soundOn || !SFX_IDS.includes(sid)) return;
 stopSfx();
+const fallback = () => {
+if (!soundOn) return;
+const audio = prepareFallback(sid);
+try { audio.currentTime = 0; } catch { /* 메타데이터가 오기 전에도 첫 재생은 허용합니다. */ }
+playing = audio;
+audio.play().catch(() => { if (playing === audio) playing = null; });
+};
 const context = getAudioContext();
-if (context?.state === 'suspended') context.resume().catch(() => {});
 const prepared = buffers.get(sid);
-if (prepared) { buffers.delete(sid); buffers.set(sid, prepared); }
-if (context && prepared) {
+prepareSfx(sid);
+// 중단된 오디오 컨텍스트에서는 무음으로 끝내지 않고 기본 플레이어로 재생합니다.
+if (!context || !prepared || context.state !== 'running') {
+if (context?.state === 'suspended') context.resume().catch(() => {});
+fallback();
+return;
+}
+buffers.delete(sid); buffers.set(sid, prepared);
+try {
 const source = context.createBufferSource();
 source.buffer = prepared.buffer;
 source.connect(masterGain);
 source.onended = () => { source.disconnect(); if (activeSource === source) activeSource = null; };
 activeSource = source;
 source.start(0, prepared.offset);
-return;
-}
-prepareSfx(sid);
-const audio = prepareFallback(sid);
-audio.currentTime = 0;
-playing = audio;
-audio.play().catch(() => {});
+} catch { fallback(); }
 }
 
 function bindSoundInput(element, sid) {

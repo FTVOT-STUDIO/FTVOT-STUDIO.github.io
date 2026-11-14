@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261114w';
-import { initSephirot } from './sephirot.js?v=20261114x';
+import { initSephirot } from './sephirot.js?v=20261114y';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
 document.documentElement.classList.add('js');
@@ -163,7 +163,17 @@ img.style.left = `${frame.clientWidth / 2 - centerX * scale}px`;
 img.style.top = `${frame.clientHeight / 2 - b.centerY * scale}px`;
 });
 };
-frame.querySelectorAll('img').forEach((img) => img.addEventListener('load', fit));
+frame.querySelectorAll('img').forEach((img) => {
+img.addEventListener('load', fit);
+// 일시적인 전송 실패는 한 번만 다시 요청하며 대기 프레임은 숨기지 않습니다.
+img.addEventListener('error', () => {
+if (img.dataset.retried) return;
+img.dataset.retried = 'true';
+const source = new URL(img.getAttribute('src'), location.href);
+source.searchParams.set('retry', '1');
+img.src = source.href;
+}, { once: true });
+});
 new ResizeObserver(fit).observe(frame);
 fit();
 });
