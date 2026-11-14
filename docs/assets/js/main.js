@@ -1,7 +1,7 @@
 // FTVOT_STUDIO — main.js
 // 빌드 없는 ES 모듈입니다. 모든 기능은 JS가 실패해도 기본 HTML이 동작하도록 "덧붙이는" 방식입니다.
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
-import { initIntro, initSky } from './intro.js?v=20261114b';
+import { initIntro, initSky } from './intro.js?v=20261114j';
 import { initSephirot } from './sephirot.js';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
@@ -34,6 +34,16 @@ history.replaceState(null, '', id === 'tree' ? location.pathname : `#${id}`);
 function initYear() {
 const el = document.querySelector('[data-year]');
 if (el) el.textContent = String(new Date().getFullYear());
+}
+
+// 새로고침에서는 브라우저의 이전 스크롤·해시 복원보다 첫 화면을 우선합니다.
+const reloading = performance.getEntriesByType('navigation')[0]?.type === 'reload';
+if (reloading) {
+history.scrollRestoration = 'manual';
+history.replaceState(history.state, '', location.pathname + location.search);
+const resetTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+resetTop();
+window.addEventListener('pageshow', () => requestAnimationFrame(resetTop), { once: true });
 }
 
 initSky();
@@ -350,6 +360,10 @@ image.src = url;
 image.alt = title;
 image.loading = 'lazy';
 image.decoding = 'async';
+// 반사도 실제로 줄어든 그림 폭을 따라가야 세로 그림 옆으로 번지지 않습니다.
+const syncArtWidth = () => figure.style.setProperty('--art-width', `${image.getBoundingClientRect().width}px`);
+image.addEventListener('load', syncArtWidth);
+new ResizeObserver(syncArtWidth).observe(image);
 link.append(image);
 const pending = document.createElement('span');
 pending.className = 'artwork-pending';

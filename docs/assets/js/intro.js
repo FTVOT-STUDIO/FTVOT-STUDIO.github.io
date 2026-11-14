@@ -1,14 +1,11 @@
 // 같은 우주 지도에 진입하는 느낌을 유지하며 임의의 문구는 사용하지 않습니다.
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-const SEEN_KEY = 'archive-intro-seen';
 
 export function initIntro(onDone) {
 const intro = document.querySelector('[data-intro]');
 const state = document.querySelector('[data-intro-state]');
-let seen = false;
-try { seen = sessionStorage.getItem(SEEN_KEY) === '1'; } catch { /* 저장이 막혀도 진입할 수 있습니다. */ }
-if (!intro || seen || reduceMotion.matches) {
+if (!intro || reduceMotion.matches) {
 intro?.remove();
 onDone();
 return;
@@ -20,7 +17,6 @@ if (closed) return;
 closed = true;
 intro.classList.add('is-leaving');
 document.body.classList.remove('is-intro');
-try { sessionStorage.setItem(SEEN_KEY, '1'); } catch { /* 현재 방문의 진입은 계속합니다. */ }
 window.removeEventListener('keydown', close);
 window.removeEventListener('wheel', close);
 window.removeEventListener('touchstart', close);
