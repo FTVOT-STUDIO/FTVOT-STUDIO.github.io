@@ -243,11 +243,18 @@ p.after(signal);
 });
 }
 
-// 나무의 회전은 스크롤 위치로만 계산해 복귀할 때도 같은 자세를 지나갑니다.
+// 나무 눕히기: 스크롤하는 동안 나무를 화면에 고정한 채 시계 반대 방향으로 90도 눕힙니다.
+// 케테르가 왼쪽, 말쿠트가 오른쪽에 오는 가로 배치가 최종 모양이며, 글자와 문양도 함께 눕습니다.
+// 회전량은 스크롤 위치로만 계산해서, 위로 되돌아가면 같은 경로로 다시 일어섭니다.
+const PIN_RATIO = 0.75;     // 나무 화면 높이의 몇 배만큼 고정한 채 눕힐지 (#tree의 margin-bottom과 같은 값)
+const SWAY_DEG = 16;        // 도는 중간에 앞뒤로 기울어지는 최대 각도. 평면 회전이 밋밋해 보이지 않게
+const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
 function initTreeScroll(hero, tree) {
 if (!hero || !tree) return;
-let pending = 0, previous = 0, leftHero = false, traceTimer = 0;
-let heroTop = 0, heroHeight = 1, treeHeight = 1;
+let pending = 0, previous = 0, traceTimer = 0, laid = false;
+let heroTop = 0, heroHeight = 1, treeW = 1, treeH = 1;
+const copy = hero.querySelector('.ht-copy, .hero-copy');
 const trace = () => {
 if (reduceMotion.matches) return;
 clearTimeout(traceTimer);
@@ -258,34 +265,41 @@ traceTimer = setTimeout(() => hero.classList.remove('is-tracing'), 2400);
 };
 const update = () => {
 pending = 0;
+const pin = heroHeight * PIN_RATIO;
 const distance = Math.max(0, scrollY - heroTop);
-// 나무 화면의 60% 구간에 걸쳐 천천히 눕습니다. 짧은 구간에서 돌면 급하게 꺾여 보입니다
-const progress = Math.min(1, distance / (heroHeight * 0.6));
-// 끝으로 갈수록 부드럽게 멈추는 곡선 (easeOutCubic)
-const eased = 1 - Math.pow(1 - progress, 3);
-if (distance > heroHeight * 0.7) leftHero = true;
-if (leftHero && progress < 0.28 && previous >= 0.28) { trace(); leftHero = false; }
+const progress = Math.min(1, distance / pin);
+const e = easeInOut(progress);
+// 다 누웠을 때 / 다시 섰을 때 경로에 빛을 한 번 흘립니다
+if (progress >= 1 && !laid) { laid = true; trace(); }
+if (progress < 0.02 && laid) { laid = false; trace(); }
 previous = progress;
-if (reduceMotion.matches) { tree.style.transform = ''; tree.style.opacity = ''; return; }
-// 화면 위에서 90도 돌리는 대신, 아래쪽을 축으로 뒤로 젖혀 바닥에 눕는 3D 기울기
-// 최대 62도: 그 이상 젖히면 선이 한 줄로 겹쳐 형태를 잃습니다
-const tilt = 62 * eased;
-const scale = 1 - 0.12 * eased;
-const lift = Math.min(distance, heroHeight) * 0.32;
-tree.style.transform = `translate3d(0, ${lift.toFixed(1)}px, 0) perspective(1400px) rotateX(${tilt.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
-tree.style.opacity = String((1 - 0.55 * eased).toFixed(3));
+if (reduceMotion.matches) { tree.style.transform = ''; return; }
+// 누운 나무가 화면 너비(누운 뒤의 가로 = 원래 세로)와 높이 안에 들어오도록 크기를 맞춥니다
+const fit = Math.min((innerWidth - 64) / treeH, (innerHeight * 0.78) / treeW, 1.25);
+const scale = 1 + (fit - 1) * e;
+// 고정: 스크롤한 만큼 아래로 밀어 화면 같은 자리에 머물게 합니다
+const hold = Math.min(distance, pin);
+// 원근 흔들림: 회전 중간에 가장 크게, 시작과 끝에서는 0
+const sway = Math.sin(Math.PI * e) * SWAY_DEG;
+tree.style.transform = `translate3d(0, ${hold.toFixed(1)}px, 0) perspective(1600px) rotateX(${sway.toFixed(2)}deg) rotate(${(-90 * e).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+// 왼쪽 소개 글은 나무가 눕는 동안 함께 고정되며 천천히 사라집니다
+if (copy) {
+copy.style.transform = `translate3d(0, ${hold.toFixed(1)}px, 0)`;
+copy.style.opacity = String(Math.max(0, 1 - progress * 1.6).toFixed(3));
+}
 };
 const schedule = () => { if (!pending) pending = requestAnimationFrame(update); };
 const measure = () => {
 heroTop = hero.getBoundingClientRect().top + scrollY;
 heroHeight = hero.offsetHeight;
-treeHeight = tree.querySelector('svg')?.clientHeight || tree.clientHeight;
+const svg = tree.querySelector('svg');
+treeW = svg?.clientWidth || tree.clientWidth;
+treeH = svg?.clientHeight || tree.clientHeight;
 schedule();
 };
 window.addEventListener('scroll', schedule, { passive: true });
 window.addEventListener('resize', measure);
 reduceMotion.addEventListener('change', schedule);
-// 첫 등장과 충분히 내려갔다 돌아온 때만 빛을 흘려 경계의 반복 점멸을 막습니다.
 const ready = new MutationObserver(() => {
 if (!document.documentElement.classList.contains('tree-grown')) return;
 ready.disconnect();
