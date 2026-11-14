@@ -44,6 +44,8 @@ initPortraits();
 initYear();
 initPresentation();
 initImageViewer();
+initProjectFilters();
+initArtworkGallery();
 // 인트로가 걷히면 첫 화면의 나무가 자라납니다
 initIntro(() => document.documentElement.classList.add('tree-grown'));
 
@@ -172,11 +174,10 @@ window.setTimeout(() => { copy.textContent = '주소 복사'; }, 2000);
 }
 
 function initImageViewer() {
-const links = [...document.querySelectorAll('.project-gallery figure a')];
-if (!links.length || !('HTMLDialogElement' in window)) return;
+if (!('HTMLDialogElement' in window)) return;
 const dialog = document.createElement('dialog');
 dialog.className = 'image-viewer';
-dialog.setAttribute('aria-label', '프로젝트 이미지 확대 보기');
+dialog.setAttribute('aria-label', '이미지 확대 보기');
 dialog.innerHTML = '<div class="viewer-toolbar"><span class="mono" data-viewer-count></span><button type="button" data-viewer-close aria-label="확대 보기 닫기">닫기 <span aria-hidden="true">×</span></button></div><div class="viewer-stage"><button type="button" data-viewer-prev aria-label="이전 이미지">←</button><img alt=""><button type="button" data-viewer-next aria-label="다음 이미지">→</button></div><p class="viewer-caption"></p><p class="viewer-hint mono">← → 이동 · ESC 닫기</p>';
 document.body.append(dialog);
 const image = dialog.querySelector('img');
@@ -194,15 +195,19 @@ dialog.querySelector('[data-viewer-next]').disabled = galleryLinks.length < 2;
 if (!reduceMotion.matches) image.animate([{ opacity: 0, transform: 'scale(0.98)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 260, easing: 'ease-out' });
 };
 const step = (direction) => { current = (current + direction + galleryLinks.length) % galleryLinks.length; render(); };
-links.forEach((link) => link.addEventListener('click', (event) => {
+document.addEventListener('click', (event) => {
+const link = event.target instanceof Element ? event.target.closest('.project-gallery figure > a, .artwork-grid .artwork-card > a') : null;
+if (!link) return;
+if (link.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return; }
+if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
 event.preventDefault();
-galleryLinks = [...link.closest('.project-gallery').querySelectorAll('figure a')];
+galleryLinks = [...link.closest('.project-gallery, .artwork-grid').querySelectorAll('figure > a')].filter((item) => item.getAttribute('aria-disabled') !== 'true');
 current = galleryLinks.indexOf(link);
 trigger = link;
 render();
 dialog.showModal();
 document.body.classList.add('viewer-open');
-}));
+});
 dialog.querySelector('[data-viewer-close]').addEventListener('click', () => dialog.close());
 dialog.querySelector('[data-viewer-prev]').addEventListener('click', () => step(-1));
 dialog.querySelector('[data-viewer-next]').addEventListener('click', () => step(1));
@@ -215,4 +220,137 @@ dialog.addEventListener('close', () => {
 document.body.classList.remove('viewer-open');
 trigger?.focus({ preventScroll: true });
 });
+}
+
+function initProjectFilters() {
+const controls = document.querySelector('.project-filters');
+if (!controls) return;
+controls.hidden = false;
+const entries = [...document.querySelectorAll('.unified-projects .project-entry')];
+const status = document.querySelector('[data-project-filter-status]');
+controls.querySelectorAll('button').forEach((button) => {
+button.addEventListener('click', () => {
+const value = button.dataset.projectFilter;
+let count = 0;
+entries.forEach((entry) => {
+const show = value === 'all' || (value === 'selected' ? entry.dataset.selected === 'true' : entry.dataset.status === value);
+entry.hidden = !show;
+if (show) count += 1;
+});
+controls.querySelectorAll('button').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+if (status) status.textContent = `${button.textContent} 프로젝트 ${count}개를 표시합니다.`;
+});
+});
+}
+
+function initArtworkGallery() {
+const grid = document.querySelector('[data-artwork-grid]');
+const state = document.querySelector('[data-artwork-state]');
+const count = document.querySelector('[data-artwork-count]');
+const refresh = document.querySelector('[data-artwork-refresh]');
+if (!grid || !state) return;
+const endpoint = 'https://api.github.com/repos/FTVOT-STUDIO/FTVOT-STUDIO.github.io/contents/docs/assets/gallery?ref=main';
+const cacheKey = 'ftvot-artwork-gallery-v1';
+let loading = false;
+const showState = (title, detail) => {
+state.hidden = false;
+state.querySelector('p').textContent = title;
+state.querySelector('span:last-child').textContent = detail;
+};
+const render = (files) => {
+grid.replaceChildren();
+if (count) count.textContent = `ART COLLECTION / ${String(files.length).padStart(2, '0')}`;
+if (!files.length) {
+showState('첫 작품을 전시해 주세요.', '그림 업로드 버튼에서 작품을 올릴 수 있습니다.');
+return;
+}
+state.hidden = true;
+const fragment = document.createDocumentFragment();
+files.forEach((file, i) => {
+const title = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
+const url = `./assets/gallery/${encodeURIComponent(file.name)}?v=${encodeURIComponent(file.sha)}`;
+const figure = document.createElement('figure');
+figure.className = 'artwork-card';
+figure.style.setProperty('--art-delay', `${Math.min(i, 6) * 60}ms`);
+const link = document.createElement('a');
+link.className = 'artwork-frame';
+link.href = url;
+link.target = '_blank';
+link.rel = 'noopener';
+const image = document.createElement('img');
+image.src = url;
+image.alt = title;
+image.loading = 'lazy';
+image.decoding = 'async';
+link.append(image);
+const pending = document.createElement('span');
+pending.className = 'artwork-pending';
+pending.hidden = true;
+pending.textContent = '배포가 끝나면 그림이 표시됩니다.';
+link.append(pending);
+image.addEventListener('error', () => {
+figure.classList.add('is-pending');
+link.setAttribute('aria-disabled', 'true');
+link.tabIndex = -1;
+pending.hidden = false;
+});
+const mirror = document.createElement('span');
+mirror.className = 'image-mirror';
+mirror.setAttribute('aria-hidden', 'true');
+const reflection = document.createElement('img');
+reflection.src = url;
+reflection.alt = '';
+reflection.loading = 'lazy';
+mirror.append(reflection);
+const caption = document.createElement('figcaption');
+const number = document.createElement('span');
+number.className = 'mono';
+number.textContent = String(i + 1).padStart(2, '0');
+const name = document.createElement('span');
+// 파일명을 HTML로 삽입하지 않아 업로드한 이름이 코드로 해석되지 않습니다.
+name.textContent = title;
+caption.append(number, name);
+figure.append(link, mirror, caption);
+fragment.append(figure);
+});
+grid.append(fragment);
+};
+const load = async (force = false) => {
+if (loading) return;
+loading = true;
+refresh.disabled = true;
+let cached = null;
+try { cached = JSON.parse(sessionStorage.getItem(cacheKey) || 'null'); } catch { /* 캐시를 읽지 못해도 서버에서 불러옵니다. */ }
+try {
+if (!force && cached && Array.isArray(cached.files) && Date.now() - cached.time < 120000) {
+render(cached.files);
+return;
+}
+if (!grid.children.length) showState('그림을 불러오고 있습니다.', '잠시만 기다려 주세요.');
+const response = await fetch(endpoint, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
+if (!response.ok) throw new Error('Gallery unavailable');
+const data = await response.json();
+if (!Array.isArray(data)) throw new Error('Invalid gallery listing');
+const files = data.filter((item) => item.type === 'file' && !/^[._]/.test(item.name) && /\.(png|jpe?g|webp|gif|avif)$/i.test(item.name)).map(({ name, sha }) => ({ name, sha })).sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
+render(files);
+try { sessionStorage.setItem(cacheKey, JSON.stringify({ files, time: Date.now() })); } catch { /* 저장이 막혀도 작품은 표시됩니다. */ }
+} catch {
+if (cached && Array.isArray(cached.files) && cached.files.length) render(cached.files);
+showState('그림 목록을 새로 불러오지 못했습니다.', '잠시 후 새로고침해 주세요. 방금 올린 작품은 배포가 끝난 뒤 표시됩니다.');
+} finally {
+loading = false;
+refresh.disabled = false;
+}
+};
+refresh.hidden = false;
+refresh.addEventListener('click', () => load(true));
+// 갤러리를 열 때만 요청해 불필요한 네트워크 호출을 줄입니다.
+if ('IntersectionObserver' in window) {
+const observer = new IntersectionObserver((entries) => {
+if (!entries.some((entry) => entry.isIntersecting)) return;
+observer.disconnect();
+load();
+}, { rootMargin: '240px' });
+observer.observe(grid.closest('section'));
+} else load();
 }
