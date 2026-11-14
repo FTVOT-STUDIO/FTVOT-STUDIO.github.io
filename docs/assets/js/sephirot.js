@@ -11,30 +11,119 @@ const SFX_VOLUME = 0.15;
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
 const GROW_STEP = 120;
 
-/** @type {Map<string, HTMLAudioElement>} 처음 누를 때 만들어서 재사용합니다 */
+const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth'];
 const audioCache = new Map();
-/** @type {HTMLAudioElement | null} */
-let playing = null;
+const buffers = new Map();
+const loadingSounds = new Map();
+let audioContext = null, masterGain = null, activeSource = null, playing = null;
 let soundOn = true;
 
-function playSfx(sid) {
-if (!soundOn) return;
-let audio = audioCache.get(sid);
-if (!audio) {
-audio = new Audio(`${SFX_PATH}/${sid}.mp3`);
+function getAudioContext() {
+if (audioContext) return audioContext;
+const Context = window.AudioContext || window.webkitAudioContext;
+if (!Context) return null;
+try {
+audioContext = new Context({ latencyHint: 'interactive' });
+masterGain = audioContext.createGain();
+masterGain.gain.value = SFX_VOLUME;
+masterGain.connect(audioContext.destination);
+return audioContext;
+} catch { return null; }
+}
+
+function prepareFallback(sid) {
+if (!audioCache.has(sid)) {
+const audio = new Audio(`${SFX_PATH}/${sid}.mp3`);
 audio.preload = 'auto';
 audio.volume = SFX_VOLUME;
+audio.load();
 audioCache.set(sid, audio);
 }
-// 이전 효과음이 끝나기 전에 다른 세피라를 누르면 이전 것을 끊고 새로 재생합니다
-if (playing && playing !== audio) {
-playing.pause();
-playing.currentTime = 0;
+return audioCache.get(sid);
 }
+
+function prepareSfx(sid) {
+if (!soundOn || !SFX_IDS.includes(sid)) return Promise.resolve();
+if (buffers.has(sid)) return Promise.resolve();
+if (loadingSounds.has(sid)) return loadingSounds.get(sid);
+const context = getAudioContext();
+if (!context) { prepareFallback(sid); return Promise.resolve(); }
+const controller = new AbortController();
+const timeout = window.setTimeout(() => controller.abort(), 10000);
+const promise = (async () => {
+try {
+const response = await fetch(`${SFX_PATH}/${sid}.mp3`, { signal: controller.signal, credentials: 'omit' });
+if (!response.ok) throw new Error('Sound unavailable');
+const buffer = await context.decodeAudioData(await response.arrayBuffer());
+// 파일 앞의 거의 무음인 구간만 건너뛰며 최대 0.35초까지만 보정합니다.
+const limit = Math.min(buffer.length - 1, Math.floor(buffer.sampleRate * 0.35));
+let first = limit;
+for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
+const data = buffer.getChannelData(channel);
+for (let i = 0; i < first; i += 1) {
+if (Math.abs(data[i]) > 0.0005) { first = i; break; }
+}
+}
+const offset = Math.max(0, first / buffer.sampleRate - 0.004);
+buffers.set(sid, { buffer, offset });
+} catch { prepareFallback(sid); }
+finally { window.clearTimeout(timeout); loadingSounds.delete(sid); }
+})();
+loadingSounds.set(sid, promise);
+return promise;
+}
+
+function warmSfx(priority = '') {
+const queue = [...new Set([priority, ...SFX_IDS])].filter((sid) => SFX_IDS.includes(sid));
+// 첫 클릭 전에 미리 복호화하고 동시 요청은 세 개로 제한합니다.
+const worker = async () => { while (queue.length && soundOn) await prepareSfx(queue.shift()); };
+for (let i = 0; i < 3; i += 1) worker();
+}
+
+function stopSfx() {
+if (activeSource) {
+try { activeSource.stop(); } catch { /* 이미 끝난 소리여도 다음 입력을 처리합니다. */ }
+activeSource.disconnect();
+activeSource = null;
+}
+if (playing) { playing.pause(); playing = null; }
+}
+
+function playSfx(sid) {
+if (!soundOn || !SFX_IDS.includes(sid)) return;
+stopSfx();
+const context = getAudioContext();
+if (context?.state === 'suspended') context.resume().catch(() => {});
+const prepared = buffers.get(sid);
+if (context && prepared) {
+const source = context.createBufferSource();
+source.buffer = prepared.buffer;
+source.connect(masterGain);
+source.onended = () => { source.disconnect(); if (activeSource === source) activeSource = null; };
+activeSource = source;
+source.start(0, prepared.offset);
+return;
+}
+prepareSfx(sid);
+const audio = prepareFallback(sid);
 audio.currentTime = 0;
 playing = audio;
-audio.play().catch(() => {
-// 자동재생 정책 등으로 막혀도 화면 동작은 계속합니다
+audio.play().catch(() => {});
+}
+
+function bindSoundInput(element, sid) {
+let lastMousePress = -Infinity;
+const prime = () => prepareSfx(sid);
+element.addEventListener('pointerenter', prime, { once: true });
+element.addEventListener('focus', prime, { once: true });
+element.addEventListener('pointerdown', (event) => {
+// 마우스는 누르는 순간 재생하고 터치는 스크롤 오작동을 피하려고 클릭에서 재생합니다.
+if (event.pointerType !== 'mouse' || event.button !== 0) return;
+lastMousePress = performance.now();
+playSfx(sid);
+});
+element.addEventListener('click', (event) => {
+if (event.detail === 0 || performance.now() - lastMousePress > 700) playSfx(sid);
 });
 }
 
@@ -72,7 +161,8 @@ toggle.textContent = soundOn ? '효과음 끄기' : '효과음 켜기';
 sync();
 toggle?.addEventListener('click', () => {
 soundOn = !soundOn;
-if (!soundOn && playing) playing.pause();
+if (!soundOn) stopSfx();
+else warmSfx(location.hash.slice(1));
 try {
 localStorage.setItem(SOUND_KEY, soundOn ? 'on' : 'off');
 } catch (error) {
@@ -196,12 +286,13 @@ minimap?.classList.toggle('is-shown', away);
 let navigationActTimer = 0;
 // 노드 클릭: 효과음 + 파동 + 이동 + 캐릭터 동작
 nodes.forEach((node) => {
+const sid = byNum.get(node.dataset.seph)?.id;
+if (sid) bindSoundInput(node, sid);
 node.addEventListener('click', (event) => {
 event.preventDefault();
 const num = node.dataset.seph;
 const chapter = byNum.get(num);
 if (!chapter) return;
-playSfx(chapter.id);
 pulse(node);
 chapter.classList.add('is-open');
 nav.scrollTo(chapter);
@@ -216,6 +307,7 @@ history.replaceState(null, '', `#${chapter.id}`);
 
 // 세피라 캐릭터를 직접 눌러도 효과음과 동작이 나옵니다
 document.querySelectorAll('[data-orb]').forEach((orb) => {
+bindSoundInput(orb, orb.dataset.orb);
 const prepareAttack = () => {
 const img = orb.querySelector('.p-act');
 if (img) img.loading = 'eager';
@@ -224,14 +316,14 @@ orb.addEventListener('pointerenter', prepareAttack, { once: true });
 orb.addEventListener('focus', prepareAttack, { once: true });
 orb.addEventListener('pointerdown', prepareAttack, { once: true });
 orb.addEventListener('click', () => {
-playSfx(orb.dataset.orb);
 act(orb);
 });
 });
 
 document.addEventListener('visibilitychange', () => {
 if (!document.hidden) return;
-playing?.pause();
+stopSfx();
+audioContext?.suspend().catch(() => {});
 window.clearTimeout(navigationActTimer);
 document.querySelectorAll('[data-orb]').forEach((orb) => {
 window.clearTimeout(Number(orb.dataset.actTimer ?? 0));
@@ -239,6 +331,7 @@ orb.classList.remove('is-acting');
 });
 });
 initSoundToggle();
+warmSfx(location.hash.slice(1));
 const fromHash = chapters.find((c) => `#${c.id}` === location.hash);
 setCurrent((fromHash ?? chapters[0]).dataset.seph);
 // 첫 화면에서는 아직 아무 세피라도 지나지 않은 상태로 보여줍니다
