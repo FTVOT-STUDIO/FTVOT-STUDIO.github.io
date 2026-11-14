@@ -79,5 +79,3 @@
 @media (prefers-reduced-motion: reduce) { .ht-tree { transform: none !important; } }
 /* 고정된 나무가 히어로 경계 밖으로 내려가도 잘리지 않고 다음 섹션 위에 그려지도록 합니다 (가로 넘침은 body가 막습니다) */
 .js .hero-tree { overflow: visible; position: relative; z-index: 3; }
-/* 나무가 누울 때 각 세피라와 경로 글자는 자기 중심에서 반대로 돌아 정방향을 유지합니다 (값은 sephirot.js가 스크롤로 갱신) */
-.ht-tree .node, .ht-tree .path-badge { transform-box: fill-box; transform-origin: center; rotate: var(--upright, 0deg); }

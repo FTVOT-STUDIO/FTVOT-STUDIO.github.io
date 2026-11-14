@@ -255,6 +255,22 @@ if (!hero || !tree) return;
 let pending = 0, previous = 0, traceTimer = 0, laid = false;
 let heroTop = 0, heroHeight = 1, treeW = 1, treeH = 1;
 const copy = hero.querySelector('.ht-copy, .hero-copy');
+// 반대 회전 대상: 각 세피라의 문양·이름·번호, 경로 배지의 히브리 글자, 장막 글자. 기준점은 자기 원의 중심입니다
+const upright = [];
+tree.querySelectorAll('.node').forEach((node) => {
+const ring = node.querySelector('.node-ring'); if (!ring) return;
+const cx = ring.getAttribute('cx'), cy = ring.getAttribute('cy');
+node.querySelectorAll('text, .node-num-bg').forEach((el) => upright.push([el, cx, cy]));
+});
+tree.querySelectorAll('.path-badge').forEach((badge) => {
+const dot = badge.querySelector('circle'), text = badge.querySelector('text'); if (!dot || !text) return;
+upright.push([text, dot.getAttribute('cx'), dot.getAttribute('cy')]);
+});
+let lastAngle = -1;
+const setUpright = (angle) => {
+const a = Math.round(angle * 10) / 10; if (a === lastAngle) return; lastAngle = a;
+for (const [el, cx, cy] of upright) { if (a) el.setAttribute('transform', `rotate(${a} ${cx} ${cy})`); else el.removeAttribute('transform'); }
+};
 const trace = () => {
 if (reduceMotion.matches) return;
 clearTimeout(traceTimer);
@@ -273,7 +289,7 @@ const e = easeInOut(progress);
 if (progress >= 1 && !laid) { laid = true; trace(); }
 if (progress < 0.02 && laid) { laid = false; trace(); }
 previous = progress;
-if (reduceMotion.matches) { tree.style.transform = ''; tree.style.removeProperty('--upright'); return; }
+if (reduceMotion.matches) { tree.style.transform = ''; setUpright(0); return; }
 // 누운 나무가 화면 너비(누운 뒤의 가로 = 원래 세로)와 높이 안에 들어오도록 크기를 맞춥니다
 const fit = Math.min((innerWidth - 64) / treeH, (innerHeight * 0.78) / treeW, 1.25);
 const scale = 1 + (fit - 1) * e;
@@ -282,7 +298,7 @@ const hold = Math.min(distance, pin);
 // 원근 흔들림: 회전 중간에 가장 크게, 시작과 끝에서는 0
 const sway = Math.sin(Math.PI * e) * SWAY_DEG;
 // 나무는 눕지만 이름·문양·히브리 글자는 각자 제자리에서 반대로 돌아 항상 똑바로 읽히게 합니다
-tree.style.setProperty('--upright', `${(90 * e).toFixed(2)}deg`);
+setUpright(90 * e);
 tree.style.transform = `translate3d(0, ${hold.toFixed(1)}px, 0) perspective(1600px) rotateX(${sway.toFixed(2)}deg) rotate(${(-90 * e).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
 // 왼쪽 소개 글은 나무가 눕는 동안 함께 고정되며 천천히 사라집니다
 if (copy) {
