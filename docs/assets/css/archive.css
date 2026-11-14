@@ -1,0 +1,208 @@
+/* 같은 읽기 축을 유지해 장이 바뀌어도 화면이 튀지 않게 합니다. */
+:root { --column: 900px; --pillar: 0px; --bg: #08080d; --text: #f0eef3; --text-2: #bcb7c6; --text-3: #a7a1b1; --line: rgb(192 180 210 / .16); }
+body { background: var(--bg); }
+.sky { inset: -16px; background: radial-gradient(ellipse at 65% 20%, rgb(112 94 138 / .055), transparent 60%), #08080d; }
+.sky::before { opacity: .22; background-size: 260px 290px, 470px 390px; }
+.sky::after { display: none; }
+.star { box-shadow: none; }
+.star.twinkle { animation-duration: 8s; }
+.hero-tree { min-height: 740px; }
+.ht-copy { max-width: 360px; }
+.ht-kicker { color: var(--text-2); font-size: 10px; letter-spacing: .14em; }
+.ht-title { font-weight: 450; font-size: clamp(32px, 3.8vw, 60px); letter-spacing: -.07em; }
+.ht-title span { color: #a89bbd; }
+.ht-sub { color: var(--text); font-size: 17px; line-height: 1.9; }
+.ht-author { color: var(--text-2); }
+.ht-coordinate { color: var(--text-2); font-size: 10px; line-height: 2.4; letter-spacing: .08em; }
+.cosmic-orbits span { animation: none !important; border-color: rgb(182 164 205 / .1); width: min(76vw, 860px); }
+.cosmic-orbits span:nth-child(n+2) { display: none; }
+.tree-nav .path { stroke-width: 1; opacity: .52; }
+.ht-tree .node-aura-second { display: none; }
+.ht-tree .node-aura { stroke-width: .65; }
+.tree-grown .ht-tree .node-ring { animation: none; }
+.ht-tree .node-ring { transition: fill .35s, stroke .35s, stroke-width .35s; }
+.ht-tree .node:hover .node-ring, .ht-tree .node:focus-visible .node-ring { stroke-width: 1.7; }
+.ht-tree .node-echo { display: none; }
+.topbar { background: rgb(8 8 13 / .96); border-bottom: 1px solid var(--line); transition: opacity .25s, translate .35s; }
+.tb-tree { border-radius: 0; border: 0; padding-inline: 0; border-bottom: 1px solid var(--line); min-height: 36px; }
+.tb-brand { font-size: 11px; }
+.tb-now { font-size: 12px; }
+.tb-num { width: 20px; height: 20px; border-width: 1px; font-size: 9px; }
+.minimap { opacity: .72; scale: .85; transform-origin: right center; }
+.audio-controls { background: rgb(8 8 13 / .94); border-color: var(--line); }
+.audio-controls .music-control, .audio-controls .sound-control { font-size: 10px; min-height: 36px; }
+/* 배경의 서사를 멈추고, 제목과 실제 작업의 관계를 전면에 놓습니다. */
+.chapter { min-height: 0; padding: 108px 64px 100px; overflow: clip; }
+.chapter + .chapter { border-top: 1px solid var(--line); }
+.chapter::before, .chapter::after { display: none; }
+.chapter .ch-inner, .pillar-left .ch-inner, .pillar-right .ch-inner, .pillar-center .ch-inner { width: min(100%, 900px); margin-inline: auto; translate: none; }
+.chapter-opening { display: grid; grid-template-columns: minmax(0, 1fr) 170px; gap: 56px; align-items: center; margin-bottom: 36px; }
+.chapter-kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-bottom: 28px; font-size: 12px; color: var(--text); }
+.chapter-kicker .mono { font-size: 10px; letter-spacing: .1em; color: var(--text-2); }
+.chapter-kicker .chapter-index { color: var(--sc); padding-right: 16px; border-right: 1px solid var(--line); }
+.chapter-meaning { color: var(--sc); font-size: 11px; }
+.chapter-statement { max-width: 17em; font-size: clamp(32px, 3.7vw, 49px); font-weight: 520; line-height: 1.35; letter-spacing: -.055em; text-wrap: balance; }
+.chapter-role { margin-top: 28px; font-size: 11px; letter-spacing: .035em; color: var(--sc); }
+.chapter-connection { max-width: 44em; margin-top: 10px; color: var(--text-2); font-size: 14px; line-height: 1.95; text-wrap: pretty; }
+.chapter-emblem { display: grid; justify-items: center; gap: 22px; align-self: center; }
+.chapter .chapter-emblem .orb { width: 148px; height: 148px; border: 1px solid color-mix(in oklab, var(--sc) 45%, transparent); background: radial-gradient(circle, color-mix(in oklab, var(--sc) 7%, transparent), transparent 68%); }
+.chapter .chapter-emblem .orb::after { top: -9px; right: -6px; width: 36px; height: 36px; border: 0; background: var(--bg); font-size: 27px; }
+.chapter .chapter-emblem .orb:hover { scale: 1.025; box-shadow: none; }
+.emblem-caption { color: var(--text-2); font-size: 9px; letter-spacing: .16em; }
+.chapter-epigraph { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding-block: 22px; margin: 0 0 52px; }
+.chapter-epigraph .blessing { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 40px; max-width: none; align-items: center; }
+.chapter-epigraph .b-tag { display: none; }
+.chapter .chapter-epigraph .b-text { margin: 0; color: var(--text); font-size: 14px; line-height: 1.8; font-weight: 400; letter-spacing: 0; }
+.chapter .chapter-epigraph .b-verse { margin: 0; padding-left: 24px; border-left: 1px solid var(--line); font-size: 11px; line-height: 1.85; color: var(--text-2); }
+.chapter-epigraph .b-ref { color: var(--sc); display: inline; margin-right: 8px; font-size: 10px; }
+/* 스크롤 진입 시 본문을 숨기거나 지연하지 않아 이전 장과 자연스럽게 이어집니다. */
+.js .chapter .seph-body, .js .chapter.is-open .seph-body, .reveal-target, .motion-ready .reveal-target { opacity: 1; translate: none; transform: none; transition: none; }
+.chapter .seph-body { width: 100%; }
+.seph-body > .section-label { margin-bottom: 24px; font-size: 9px; color: var(--text-2); letter-spacing: .14em; }
+.seph-body .section-title { padding: 0; border: 0; margin: 0 0 28px; font-size: clamp(25px, 2.8vw, 34px); line-height: 1.5; letter-spacing: -.04em; font-weight: 500; }
+.section-title .count { font: 12px var(--font-mono); color: var(--text-2); vertical-align: middle; margin-left: 12px; }
+.section-title .nothing { color: var(--text-2); }
+.section-title .passion { color: var(--c1); }
+.k-name { font-size: 12px; color: var(--text-2); margin-bottom: 14px; }
+.k-name span { font-size: 10px; margin-left: 10px; }
+.k-lede { max-width: 52em; font-size: 14px; line-height: 2; }
+.profile-facts { margin-top: 32px; padding-block: 22px; border-top: 1px solid var(--line); gap: 32px; }
+.profile-facts > div { animation: none !important; }
+.stack-list > div { grid-template-columns: 160px minmax(0, 1fr); padding-block: 28px; }
+.stack-list dd p { max-width: 46em; font-size: 14px; }
+.bi-stats { border-top: 0; padding-top: 0; }
+.bi-stats dd { font-size: 40px; color: var(--text); }
+.bi-rings { margin-top: 34px; }
+.bi-rings li { padding-block: 18px; }
+.bi-rings p { font-size: 14px; }
+.project-filters { margin-top: 28px; gap: 24px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.project-filters button { border: 0; border-radius: 0; padding: 8px 0; background: transparent; font-size: 12px; }
+.project-filters button[aria-pressed='true'] { background: transparent; color: var(--sc); border: 0; box-shadow: inset 0 -1px var(--sc); }
+.project-pagination { margin-top: 12px; gap: 18px; }
+.project-pagination::before { content: none; }
+.project-pagination button { width: auto; height: 32px; border: 0; border-radius: 0; background: transparent; padding-inline: 4px; color: var(--text-2); font-size: 11px; }
+.project-pagination button[aria-current] { border: 0; border-bottom: 1px solid var(--sc); background: transparent; color: var(--sc); }
+.unified-projects .project-entry > summary { grid-template-columns: 144px minmax(0, 1fr); padding-block: 26px; gap: 32px; }
+.project-cover > img:first-child { max-height: 112px; }
+.project-cover .project-reflection, .image-mirror { display: none !important; }
+.unified-projects .project-heading b { font-size: 22px; font-weight: 500; }
+.project-heading > span { font-size: 12px; }
+.project-entry[open] > summary { border-bottom: 1px solid var(--line); }
+.s-chesed .project-content, .s-yesod .project-content { border: 0; margin: 0; padding: 28px 0; }
+.project-content > p { max-width: 52em; line-height: 1.95; }
+.project-entry.is-filter-arriving, .project-entry[open] .project-content, .arka-sephira[open] .arka-story, .arka-faction-group[open] > div, .project-gallery figure { animation: none !important; }
+.project-gallery { gap: 24px; padding-block: 16px; }
+.project-gallery figure { flex-basis: min(82%, 580px); }
+.project-gallery figure > a > img { max-height: 440px; object-fit: contain; object-position: left top; }
+.gallery-toolbar { margin-top: 20px; font-size: 10px; }
+.ge-ledger td { padding-block: 24px; font-size: 14px; }
+.ge-ledger th { font-size: 11px; }
+.s-tiferet .artwork-heading { border-top: 0; padding-top: 0; }
+.s-tiferet .artwork-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 48px; align-items: start; padding-top: 32px; }
+.artwork-frame, .artwork-frame > img { max-width: 100%; max-height: 300px; }
+.artwork-card figcaption { font-size: 11px; }
+.artwork-card { animation: none !important; }
+.world-masthead { border-top: 0; padding-top: 0; padding-bottom: 32px; }
+.world-masthead .arka-title { font-size: 80px; font-weight: 450; }
+.world-masthead .arka-lead { font-size: 19px; }
+.arka-nav.is-reader-nav { background: var(--bg); padding-block: 14px; border-block: 1px solid var(--line); }
+.arka-nav a { border-radius: 0; font-size: 12px; }
+.arka-part.is-reading { animation: none !important; padding-top: 30px; }
+.arka-part .arka-sephira summary { padding-block: 24px; }
+.arka-story { padding-block: 28px; }
+.arka-story p { font-size: 14px; line-height: 2; }
+.ho-list { margin-top: 0; }
+.ho-list li { padding-block: 30px; }
+.ho-list h3, .ho-list li:first-child h3 { font-size: 25px; }
+.ho-list p { max-width: 48em; font-size: 14px; }
+.ye-goals { gap: 28px; }
+.ye-goals li { font-size: 13px; }
+.contact-stage { display: block; }
+.contact-orbit { display: none; }
+.s-malkuth .contact-title { max-width: 15em; font-size: clamp(30px,3.4vw,44px); font-weight: 500; }
+.contact-lede { max-width: 38em; font-size: 14px; }
+.s-malkuth .contact-address { padding-block: 28px; }
+.s-malkuth .contact-address > a { font-size: clamp(18px,2.6vw,30px); font-weight: 400; }
+.s-malkuth .contact-links a { grid-template-columns: 140px minmax(0,1fr) 20px; }
+/* 애니메이션은 직접 조작하는 요소에 짧은 응답만 남깁니다. */
+:where(button,a,summary):focus-visible { outline: 1px solid var(--sc,var(--c1)); outline-offset: 5px; }
+.unified-projects .project-entry > summary:hover { background: rgb(255 255 255 / .018); }
+.project-entry > summary:hover .project-cover img, .artwork-frame:hover > img { transform: scale(1.015); filter: none; }
+@media (min-width: 1024px) {
+.hero-tree { grid-template-columns: minmax(210px,1fr) min(490px,44vw) minmax(170px,1fr); padding-inline: 48px; }
+.ht-copy { padding-right: 20px; justify-self: start; }
+.ht-coordinate { justify-self: start; margin-left: 36px; }
+}
+@media (max-width: 1023px) {
+.chapter { padding-inline: 40px; }
+.hero-tree { height: auto; min-height: 900px; }
+.ht-copy { max-width: 600px; }
+.ht-tree { height: 620px; }
+}
+@media (max-width: 767px) {
+.chapter { padding: 112px 24px 72px; }
+.chapter-opening { grid-template-columns: minmax(0,1fr) 82px; gap: 20px; align-items: start; margin-bottom: 28px; }
+.chapter-kicker { grid-column: 1 / -1; font-size: 11px; gap: 9px; margin-bottom: 22px; }
+.chapter-kicker .mono { font-size: 8px; }
+.chapter-kicker .chapter-index { padding-right: 9px; }
+.chapter-kicker > span:nth-child(2) .mono { display: none; }
+.chapter-statement { font-size: clamp(26px,6.8vw,38px); line-height: 1.42; }
+.chapter-role { margin-top: 20px; font-size: 10px; }
+.chapter-connection { width: calc(100% + 102px); max-width: none; margin-top: 12px; font-size: 13px; line-height: 1.95; }
+.chapter-emblem { padding-top: 58px; gap: 16px; }
+.chapter .chapter-emblem .orb { width: 80px; height: 80px; }
+.chapter .chapter-emblem .orb::after { width: 25px; height: 25px; font-size: 22px; top: -10px; right: -4px; }
+.emblem-caption { font-size: 7px; letter-spacing: .05em; }
+.chapter-epigraph { padding-block: 20px; margin-bottom: 34px; }
+.chapter-epigraph .blessing { display: block; }
+.chapter .chapter-epigraph .b-text { font-size: 12px; }
+.chapter .chapter-epigraph .b-verse { margin-top: 12px; padding-left: 0; border: 0; font-size: 10px; }
+.seph-body .section-title { font-size: 25px; margin-bottom: 22px; }
+.profile-facts { gap: 20px; }
+.profile-facts dd { font-size: 12px; }
+.stack-list > div { display: block; padding-block: 26px; }
+.stack-list dt { margin-bottom: 14px; }
+.stack-list dd p { font-size: 13px; }
+.bi-stats { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 28px; }
+.bi-stats dd { font-size: 33px; }
+.unified-projects .project-entry > summary { grid-template-columns: 88px minmax(0,1fr); gap: 20px; padding-block: 24px; }
+.unified-projects .project-heading b { font-size: 17px; }
+.project-cover > img:first-child { max-height: 84px; }
+.project-filters { gap: 20px; }
+.project-filters button { font-size: 11px; }
+.project-gallery figure > a > img { max-height: 300px; }
+.s-tiferet .artwork-grid { grid-template-columns: 1fr; }
+.world-masthead { grid-template-columns: 1fr; }
+.world-masthead .arka-title { font-size: 62px; }
+.world-masthead .arka-lead { grid-column: 1; grid-row: auto; margin-top: 28px; border: 0; padding: 0; font-size: 17px; }
+.arka-nav.is-reader-nav { gap: 4px 14px; }
+.arka-nav a { font-size: 10px; }
+.arka-story { display: block; }
+.arka-story .portrait-frame { margin-bottom: 24px; }
+.s-malkuth .contact-links a { grid-template-columns: 90px minmax(0,1fr) 16px; }
+.hero-tree { height: auto; min-height: 900px; padding: 88px 24px 32px; gap: 24px; }
+.ht-tree { height: 560px; width: min(100%,400px); }
+.ht-title { font-size: 36px; }
+.ht-title span { display: inline; }
+.ht-sub { font-size: 15px; margin-top: 18px; }
+.ht-kicker { font-size: 8px; }
+.ht-coordinate { display: none; }
+.cosmic-orbits { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+*,*::before,*::after { scroll-behavior: auto !important; }
+}
+.world-masthead .section-title { grid-column: 1; font-size: 80px; font-weight: 450; line-height: 1.15; margin: 0; }
+.world-masthead .section-title span { display: block; margin-top: 12px; font-size: 14px; letter-spacing: .02em; }
+.contact-stage .section-title { font-size: clamp(28px,3vw,40px); }
+@media (max-width: 767px) { .world-masthead .section-title { font-size: 62px; } }
+/* 좁은 화면에서는 설명을 캐릭터 아래의 독립된 행으로 내려 겹침을 막습니다. */
+@media (max-width: 767px) {
+.chapter-opening { row-gap: 16px; }
+.chapter-heading { display: contents; }
+.chapter-kicker { grid-column: 1 / -1; grid-row: 1; margin-bottom: 8px; }
+.chapter-statement { grid-column: 1; grid-row: 2; }
+.chapter-emblem { grid-column: 2; grid-row: 2; padding: 0; gap: 10px; }
+.chapter-role { grid-column: 1 / -1; grid-row: 3; margin: 0; }
+.chapter-connection { grid-column: 1 / -1; grid-row: 4; width: 100%; margin: 0; }
+}
