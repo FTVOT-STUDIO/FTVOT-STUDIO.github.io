@@ -48,7 +48,7 @@ return audioContext;
 } catch { return null; }
 }
 
-function soundPath(sid) { return sid === 'ui-click' ? './assets/ui-click.mp3' : `${SFX_PATH}/${sid}.mp3`; }
+function soundPath(sid) { return sid === 'ui-click' ? './assets/ui-click.mp3?v=2' : `${SFX_PATH}/${sid}.mp3`; }
 
 function prepareFallback(sid) {
 if (!audioCache.has(sid)) {

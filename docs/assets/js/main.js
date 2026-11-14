@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261115a';
-import { initSephirot } from './sephirot.js?v=20261116d';
+import { initSephirot } from './sephirot.js?v=20261116e';
 import { initChapterScenes } from './chapter-scenes.js?v=20261116a';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
