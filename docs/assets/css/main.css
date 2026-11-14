@@ -891,3 +891,7 @@ body.viewer-open { overflow: hidden; }
   .meteors { display: none; }
   .project-entry > summary:hover .project-cover img, .project-gallery a:hover img { transform: none; }
 }
+
+/* 움직이는 장식이 페이지 바깥의 가로 스크롤을 만들지 않게 제한합니다. */
+body { overflow-x: clip; }
+.hero-tree { overflow: clip; }
