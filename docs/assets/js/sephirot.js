@@ -462,7 +462,10 @@ const progress = anim;
 // 가로로 바뀌는 중에는 스크롤을 막아 연출을 끝까지 보여줍니다 (되돌아갈 때는 막지 않습니다)
 if (target === 0 && anim >= 1 && !reversing) { reversing = true; playLayer('tree-off'); }
 if (anim <= 0) reversing = false;
-const shouldLock = target === 1 && anim < 1 && !reduceMotion.matches;
+// 나무 구간을 벗어난 곳(링크로 점프 등)에서는 잠그지 않고 즉시 완료 상태로 둡니다
+const inHero = distance < heroHeight * PIN_RATIO;
+if (!inHero && target === 1) anim = 1;
+const shouldLock = inHero && target === 1 && anim < 1 && !reduceMotion.matches;
 if (shouldLock !== scrollLocked) { setScrollLock(shouldLock); glideFrom = scrollY; if (shouldLock && anim < .05) { playLayer('tree-on'); prepareSfx('node-lit'); } }
 // 멈춰 세우지 않고, 연출 진행에 맞춰 페이지를 고정 구간 한가운데까지 부드럽게 미끄러뜨립니다
 if (scrollLocked) { const to = heroTop + heroHeight * PIN_RATIO * .55; scrollTo(0, glideFrom + (to - glideFrom) * easeInOut(anim)); }

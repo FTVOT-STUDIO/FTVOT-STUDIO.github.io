@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261115a';
-import { initSephirot } from './sephirot.js?v=20261116l';
+import { initSephirot } from './sephirot.js?v=20261116m';
 import { initChapterScenes } from './chapter-scenes.js?v=20261116a';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
@@ -602,4 +602,42 @@ document.body.append(ripple);
 const animation = ripple.animate([{ opacity: 0.55, transform: 'translate(-50%, -50%) scale(0.12)' }, { opacity: 0, transform: 'translate(-50%, -50%) scale(1)' }], { duration: 700, easing: 'ease-out' });
 animation.onfinish = () => ripple.remove();
 }, { passive: true });
+})();
+
+// 장 넘김 자동 스크롤: 한 장 안에서는 자유롭게 스크롤하고, 장의 끝에 닿아 다음 장이 화면 아래로 들어오는 순간
+// 아래로 더 스크롤하면 입력을 잠그고 다음 장 맨 위까지 일정한 속도로 미끄러져 내려갑니다 (나무 → 케테르와 같은 느낌)
+(() => {
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+const chapters = [...document.querySelectorAll('section.chapter')];
+if (!chapters.length) return;
+let gliding = false;
+const ease = (x) => (x < .15 ? (x * x) / .3 : x > .85 ? 1 - ((1 - x) * (1 - x)) / .3 : (x - .075) / .85);
+const block = (event) => { if (gliding && event.cancelable) event.preventDefault(); };
+window.addEventListener('wheel', block, { passive: false, capture: true });
+window.addEventListener('touchmove', block, { passive: false, capture: true });
+window.addEventListener('keydown', (event) => { if (gliding && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Spacebar', 'Home', 'End'].includes(event.key)) event.preventDefault(); }, { capture: true });
+// 다음 장이 화면 아래 가장자리에 걸쳐 있으면 그 장을 돌려줍니다
+const upcoming = () => chapters.find((ch) => { const top = ch.getBoundingClientRect().top; return top > 2 && top < innerHeight + 4; });
+const glideTo = (chapter) => {
+gliding = true;
+const from = scrollY, to = chapter.getBoundingClientRect().top + scrollY, start = performance.now();
+const duration = Math.min(2200, Math.max(900, Math.abs(to - from) * 1.4));
+const step = (now) => {
+const x = Math.min(1, (now - start) / duration);
+scrollTo(0, from + (to - from) * ease(x));
+if (x < 1) requestAnimationFrame(step); else gliding = false;
+};
+requestAnimationFrame(step);
+};
+const tryGlide = (event) => {
+if (gliding || reduce.matches) return;
+const next = upcoming(); if (!next) return;
+if (event.cancelable) event.preventDefault();
+glideTo(next);
+};
+window.addEventListener('wheel', (event) => { if (event.deltaY > 0) tryGlide(event); }, { passive: false });
+let touchY = 0;
+window.addEventListener('touchstart', (event) => { touchY = event.touches[0]?.clientY ?? 0; }, { passive: true });
+window.addEventListener('touchmove', (event) => { const y = event.touches[0]?.clientY ?? 0; if (touchY - y > 4) tryGlide(event); touchY = y; }, { passive: false });
+window.addEventListener('keydown', (event) => { if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(event.key) && !(event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)) tryGlide(event); });
 })();
