@@ -6,10 +6,10 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const SFX_PATH = './assets/sfx';
 const SOUND_KEY = 'sfx';
 // 공격 프레임을 보여주는 시간. 효과음 앞부분의 타격감과 맞춘 길이입니다
-const ACT_MS = 900;
+const ACT_MS = 820;
 const SFX_VOLUME = 0.15;
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
-const GROW_STEP = 90;
+const GROW_STEP = 120;
 
 /** @type {Map<string, HTMLAudioElement>} 처음 누를 때 만들어서 재사용합니다 */
 const audioCache = new Map();
@@ -44,6 +44,9 @@ if (!orb) return;
 window.clearTimeout(Number(orb.dataset.actTimer ?? 0));
 orb.classList.remove('is-acting');
 void orb.offsetWidth; // 연타해도 애니메이션이 매번 재생되게 리셋
+const attack = orb.querySelector('.p-act');
+orb.classList.toggle('is-frame-ready', !!attack?.complete && attack.naturalWidth > 0);
+if (attack && !attack.complete) { attack.loading = 'eager'; attack.decode().then(() => { if (orb.classList.contains('is-acting')) orb.classList.add('is-frame-ready'); }).catch(() => {}); }
 orb.classList.add('is-acting');
 orb.dataset.actTimer = String(window.setTimeout(() => orb.classList.remove('is-acting'), ACT_MS));
 }
@@ -85,7 +88,15 @@ if (!tree) return;
 tree.querySelectorAll('.node').forEach((n) => n.style.setProperty('--d', String(Number(n.dataset.seph) * GROW_STEP)));
 tree.querySelectorAll('.path').forEach((p) => {
 p.setAttribute('pathLength', '1');
-p.style.setProperty('--d', String(Math.min(Number(p.dataset.a), Number(p.dataset.b)) * GROW_STEP + 60));
+const delay = Math.min(Number(p.dataset.a), Number(p.dataset.b)) * GROW_STEP + 60;
+p.style.setProperty('--d', String(delay));
+// 경로 위를 한 번 통과하는 빛으로 나무가 연결되는 순서를 보여줍니다.
+const signal = p.cloneNode(false);
+signal.setAttribute('class', 'path-signal');
+signal.setAttribute('aria-hidden', 'true');
+signal.style.setProperty('--d', String(delay));
+signal.style.setProperty('--signal-color', `var(--c${p.dataset.a})`);
+p.after(signal);
 });
 }
 
@@ -107,6 +118,14 @@ const tbName = document.querySelector('[data-tb-name]');
 const tbNow = document.querySelector('[data-tb-now]');
 
 prepareGrowth(heroTree);
+heroTree?.querySelectorAll('.node').forEach((node) => {
+const ring = node.querySelector('.node-ring');
+if (!ring) return;
+const echo = ring.cloneNode(false);
+echo.setAttribute('class', 'node-echo');
+echo.setAttribute('aria-hidden', 'true');
+node.prepend(echo);
+});
 
 const visited = new Set();
 let current = '';
@@ -186,6 +205,13 @@ history.replaceState(null, '', `#${chapter.id}`);
 
 // 세피라 캐릭터를 직접 눌러도 효과음과 동작이 나옵니다
 document.querySelectorAll('[data-orb]').forEach((orb) => {
+const prepareAttack = () => {
+const img = orb.querySelector('.p-act');
+if (img) img.loading = 'eager';
+};
+orb.addEventListener('pointerenter', prepareAttack, { once: true });
+orb.addEventListener('focus', prepareAttack, { once: true });
+orb.addEventListener('pointerdown', prepareAttack, { once: true });
 orb.addEventListener('click', () => {
 playSfx(orb.dataset.orb);
 act(orb);
@@ -203,3 +229,4 @@ nodes.forEach((n) => n.classList.remove('is-current'));
 lightPaths();
 }
 }
+
