@@ -249,6 +249,7 @@ p.after(signal);
 const ROTATE_RATIO = 0.38;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
 const PIN_RATIO = 0.75;     // 다 누운 뒤에도 점등 연출이 끝날 때까지 고정을 유지하는 전체 길이 (#tree의 margin-bottom과 같은 값)
 const SWAY_DEG = 16;        // 도는 중간에 앞뒤로 기울어지는 최대 각도. 평면 회전이 밋밋해 보이지 않게
+const lerp = (a, b, k) => a + (b - a) * k;
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 function initTreeScroll(hero, tree) {
@@ -292,6 +293,10 @@ const ring = node.querySelector('.node-ring'); if (!ring) return;
 for (let k = 0; k < 2; k++) { const ripple = document.createElementNS(NS, 'circle'); ripple.setAttribute('class', `node-ripple r${k}`); ripple.setAttribute('cx', ring.getAttribute('cx')); ripple.setAttribute('cy', ring.getAttribute('cy')); ripple.setAttribute('r', ring.getAttribute('r')); node.prepend(ripple); }
 });
 let arriveTimer = 0;
+// 케테르로 빨려 들어가는 연출용: 나무 중심(viewBox 200, 320)에서 케테르 원 중심까지의 벡터 (viewBox 단위)
+let ketherAt = null;
+const ketherRing = tree.querySelector('[data-seph="1"] .node-ring') || tree.querySelector('.node-ring');
+const kv = ketherRing ? [Number(ketherRing.getAttribute('cx')) - 200, Number(ketherRing.getAttribute('cy')) - 320] : [0, 0];
 const arrive = () => {
 if (reduceMotion.matches) return;
 clearTimeout(arriveTimer);
@@ -330,7 +335,29 @@ const hold = Math.min(distance, pin);
 const sway = Math.sin(Math.PI * e) * SWAY_DEG;
 // 나무는 눕지만 이름·문양·히브리 글자는 각자 제자리에서 반대로 돌아 항상 똑바로 읽히게 합니다
 setUpright(90 * e);
-tree.style.transform = `translate3d(0, ${hold.toFixed(1)}px, 0) perspective(1600px) rotateX(${sway.toFixed(2)}deg) rotate(${(-90 * e).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+// 케테르 줌: 다 눕고 점등이 끝난 뒤 남은 고정 구간 후반부에서 케테르를 화면 중앙으로 끌어오며 확대하고, 나머지는 사라집니다
+const zRaw = Math.min(1, Math.max(0, (distance - pin * .62) / (pin * .38)));
+const z = zRaw * zRaw * (3 - 2 * zRaw);
+const lift = `translate3d(0, ${hold.toFixed(1)}px, 0)`;
+const spin = `perspective(1600px) rotateX(${sway.toFixed(2)}deg) rotate(${(-90 * e).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+const base = `${lift} ${spin}`;
+if (z <= 0) { tree.style.transform = base; ketherAt = null; }
+else {
+// 줌 직전(z=0) 상태에서 케테르의 실제 화면 위치를 한 번 재서 기억합니다
+if (!ketherAt && ketherRing) { tree.style.transform = base; const r = ketherRing.getBoundingClientRect(); ketherAt = [r.left + r.width / 2, r.top + r.height / 2, hold]; }
+const k = ketherAt || [innerWidth / 2, innerHeight / 2];
+const zoom = 1 + z * z * 5.5;
+// 1) 화면 중심을 축으로 확대한 모습을 먼저 적용하고
+tree.style.transform = `${lift} scale(${zoom.toFixed(3)}) ${spin}`;
+// 2) 그때 케테르가 실제로 어디 있는지 재서, 목표 지점(처음 위치 → 화면 중앙)으로 화면 좌표 그대로 옮깁니다
+const r = ketherRing.getBoundingClientRect();
+const tx = lerp(k[0], innerWidth / 2, z) - (r.left + r.width / 2), ty = lerp(k[1], innerHeight / 2, z) - (r.top + r.height / 2);
+tree.style.transform = `translate(${tx.toFixed(1)}px, ${ty.toFixed(1)}px) ${lift} scale(${zoom.toFixed(3)}) ${spin}`;
+}
+tree.style.opacity = (1 - Math.max(0, (z - .75) / .25)).toFixed(3);
+tree.style.setProperty('--others', (1 - Math.min(1, z * 2.2)).toFixed(3));
+hero.classList.toggle('is-diving', z > 0);
+hero.classList.toggle('is-diving', z > 0);
 // 다이얼: 회전 중간에 가장 진하고, 시작과 끝에서는 사라집니다. 바깥 고리는 반대로, 안쪽 바늘은 빠르게 돕니다
 const presence = Math.sin(Math.PI * e);
 const diameter = Math.max(treeW, treeH) * scale * .86;

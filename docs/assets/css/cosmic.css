@@ -97,3 +97,5 @@
 @keyframes node-flash { 0% { fill: transparent; stroke-width: 1.5; } 35% { fill: color-mix(in oklab, var(--sc, #fff) 38%, transparent); stroke-width: 3.5; } 100% { stroke-width: 1.5; } }
 @keyframes node-pop { 0% { opacity: .2; } 40% { opacity: 1; } 100% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ht-tree .node-ripple { display: none; } }
+/* 케테르로 다이브하는 동안 케테르를 뺀 나머지 세피라·경로는 --others 값에 맞춰 사라집니다 */
+.hero-tree.is-diving .ht-tree .node:not([data-seph="1"]), .hero-tree.is-diving .ht-tree .path-badge > *, .hero-tree.is-diving .ht-tree .path, .hero-tree.is-diving .ht-tree svg line, .hero-tree.is-diving .ht-tree svg path:not([data-seph="1"] path), .hero-tree.is-diving .ht-tree .veil { opacity: var(--others, 1); }
