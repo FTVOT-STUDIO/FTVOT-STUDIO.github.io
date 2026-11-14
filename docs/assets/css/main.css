@@ -1317,3 +1317,57 @@ summary:hover .arka-expand { color: var(--sc); }
 }
 
 .s-kether .seph-body > .section-label:first-child { width: 100%; }
+
+/* 같은 우주 안에서도 각 세피라의 기원은 다른 문양으로 드러냅니다. */
+.chapter-sigil { position: absolute; top: 112px; right: -28px; width: min(34vw, 420px); color: var(--sc); opacity: 0.13; pointer-events: none; user-select: none; }
+.chapter-sigil svg { display: block; width: 100%; height: auto; overflow: visible; stroke: currentColor; stroke-width: 1.1; stroke-linejoin: round; stroke-linecap: round; }
+.chapter-sigil .sigil-faint { opacity: 0.38; }
+.chapter .ch-inner, .seph-boundary { position: relative; }
+.chapter .seph-boundary { position: absolute; }
+.pillar-right .chapter-sigil { right: auto; left: -18px; }
+.s-kether .chapter-sigil { top: 72px; right: -64px; width: min(39vw, 470px); opacity: 0.3; }
+.sigil-black-hole .horizon-core { fill: var(--bg); stroke-width: 0; }
+.sigil-black-hole .horizon-aura { stroke-width: 5; opacity: 0.1; }
+.sigil-black-hole svg > circle:last-of-type { stroke-width: 1.5; }
+.sigil-orbit { transform-origin: 200px 200px; }
+.s-chokmah .stack-list > div:first-child { position: relative; }
+.s-chokmah .stack-list > div:first-child::before { content: ''; position: absolute; width: 5px; height: 5px; right: 0; top: -3px; background: var(--sc); }
+.s-binah .bi-rings li::before { border-radius: 100% 0 100% 0; width: 8px; height: 5px; left: -4px; }
+.s-chesed .project-filters { border-top: 1px solid color-mix(in oklab, var(--sc) 25%, transparent); padding-top: 12px; }
+.s-gevurah .orb::after { border-radius: 5px; }
+.s-gevurah .ge-ledger { border-top: 1px solid var(--sc); }
+.s-gevurah .ge-ledger th:first-child { border-left: 1px solid var(--sc); padding-left: 10px; }
+.s-tiferet .artwork-toolbar { position: relative; }
+.s-tiferet .artwork-toolbar::after { content: '✝'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: var(--sc); opacity: 0.6; font: 18px var(--font-sym); pointer-events: none; }
+.s-netzach .arka-nav { border-top-color: color-mix(in oklab, var(--sc) 50%, transparent); }
+.s-netzach .arka-part blockquote { border-left-color: var(--sc); }
+.s-hod .ho-list li { border-bottom-color: color-mix(in oklab, var(--sc) 22%, transparent); }
+.s-yesod .chapter-sigil { opacity: 0.11; }
+.s-malkuth .chapter-sigil { width: min(36vw, 440px); top: 80px; opacity: 0.16; }
+@media (prefers-reduced-motion: no-preference) {
+.sigil-black-hole .sigil-orbit { animation: accretion-orbit 70s linear infinite; }
+.sigil-prophecy .sigil-orbit { animation: accretion-orbit 110s linear infinite reverse; }
+.chapter-sigil:not(.sigil-black-hole):not(.sigil-prophecy) svg { animation: sigil-presence 12s ease-in-out infinite alternate; }
+.sigil-snow-sanctuary svg { animation-duration: 17s; }
+.sigil-angelic-cycle svg { animation-duration: 15s; }
+}
+@keyframes accretion-orbit { to { rotate: 360deg; } }
+@keyframes sigil-presence { from { opacity: 0.65; translate: 0 0; } to { opacity: 1; translate: 0 -5px; } }
+@media (max-width: 767px) {
+.chapter-sigil, .pillar-right .chapter-sigil { top: 85px; left: auto; right: -72px; width: 220px; opacity: 0.1; }
+.s-kether .chapter-sigil { top: 64px; right: -75px; width: 240px; opacity: 0.2; }
+.s-malkuth .chapter-sigil { top: 72px; right: -65px; width: 230px; opacity: 0.12; }
+}
+@media (prefers-reduced-motion: reduce) { .chapter-sigil * { animation: none !important; } }
+
+/* 화면 밖 연출은 멈추되 현재 구간과 기본 HTML 표시는 유지합니다. */
+.chapter-sigil { contain: layout paint style; }
+.js .chapter:not(.is-in-view) .chapter-sigil *,
+.js .chapter:not(.is-in-view) .boundary-orbit::before,
+.js .chapter:not(.is-in-view) .orb .p-idle,
+.js .chapter:not(.is-in-view) .contact-satellite,
+.js .chapter:not(.is-in-view) .contact-core,
+.js .hero-tree:not(.is-in-view) .cosmic-orbits span,
+.js .hero-tree:not(.is-in-view) .path-signal,
+.js .hero-tree:not(.is-in-view) .node-echo,
+.js .hero-tree:not(.is-in-view) .node-ring { animation-play-state: paused; }
