@@ -7,7 +7,9 @@ const SFX_PATH = './assets/sfx';
 const SOUND_KEY = 'sfx';
 // 공격 프레임을 보여주는 시간. 효과음 앞부분의 타격감과 맞춘 길이입니다
 const ACT_MS = 820;
-const SFX_VOLUME = 0.06;
+const SFX_VOLUME = 0.32;   // 세피라 효과음 기본 볼륨
+const SFX_BOOST = { 'ui-click': 2.6 }; // 버튼 클릭음은 짧고 가벼워서 따로 더 키웁니다 (최종 0.83)
+const volumeOf = (sid) => Math.min(1, SFX_VOLUME * (SFX_BOOST[sid] || 1));
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
 const GROW_STEP = 120;
 
@@ -40,7 +42,7 @@ if (!Context) return null;
 try {
 audioContext = new Context({ latencyHint: 'interactive' });
 masterGain = audioContext.createGain();
-masterGain.gain.value = SFX_VOLUME;
+masterGain.gain.value = 1; // 볼륨은 소리마다 개별 gain으로 적용
 masterGain.connect(audioContext.destination);
 return audioContext;
 } catch { return null; }
@@ -52,7 +54,7 @@ function prepareFallback(sid) {
 if (!audioCache.has(sid)) {
 const audio = new Audio(soundPath(sid));
 audio.preload = 'metadata';
-audio.volume = SFX_VOLUME;
+audio.volume = volumeOf(sid);
 audio.load();
 audioCache.set(sid, audio);
 }
@@ -127,8 +129,9 @@ buffers.delete(sid); buffers.set(sid, prepared);
 try {
 const source = context.createBufferSource();
 source.buffer = prepared.buffer;
-source.connect(masterGain);
-source.onended = () => { source.disconnect(); if (activeSource === source) activeSource = null; };
+const gain = context.createGain(); gain.gain.value = volumeOf(sid);
+source.connect(gain); gain.connect(masterGain);
+source.onended = () => { source.disconnect(); gain.disconnect(); if (activeSource === source) activeSource = null; };
 activeSource = source;
 source.start(0, prepared.offset);
 } catch { fallback(); }
