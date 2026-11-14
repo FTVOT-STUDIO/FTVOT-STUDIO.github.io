@@ -988,3 +988,62 @@ body { overflow-x: clip; }
 .s-yesod .project-action { display: none; }
 .s-yesod .moon { box-shadow: inset 0 0 16px rgb(255 255 255 / 0.08); }
 @media (max-width: 600px) { .s-yesod .project-heading b { font-size: 17px; } }
+
+/* 이미지 자체가 전시물이므로 원래 비율을 보존하고 주변의 박스는 없앱니다. */
+.project-gallery { align-items: flex-start; gap: 32px; padding-block: 12px 22px; }
+.project-gallery figure { flex: 0 0 min(88%, 520px); }
+.project-gallery figure:only-child { flex-basis: min(100%, 680px); }
+.project-gallery figure > a { display: block; height: auto; min-height: 0; aspect-ratio: auto; border: 0; border-radius: 0; background: transparent; overflow: visible; }
+.project-gallery figure > a > img { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; object-position: center; border-radius: 2px; }
+.project-gallery a::after, .project-gallery a::before, .artwork-frame::after { display: none; }
+.project-gallery figure .image-mirror { height: 30px; margin-top: 5px; opacity: 0.23; }
+.project-gallery figure .image-mirror img, .artwork-card .image-mirror img { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; transform: translateY(-100%) scaleY(-1); transform-origin: center bottom; }
+.project-gallery figcaption { padding-top: 8px; font-size: 10px; letter-spacing: 0.14em; color: var(--text-2); }
+.project-cover, .unified-projects .project-cover { background: transparent; border-radius: 0; aspect-ratio: auto; }
+.project-cover::after { display: none; }
+.project-cover > img:first-child { width: 100%; height: auto; max-height: 100px; object-fit: contain; border-radius: 2px; }
+.project-cover .project-reflection { height: auto; max-height: 100px; object-fit: contain; border-radius: 0; opacity: 0.24; }
+.project-cover-index { display: none; }
+.unified-projects .project-entry > summary { grid-template-columns: 96px minmax(0, 1fr); gap: 28px; padding-block: 20px 30px; }
+.unified-projects .project-entry { border-bottom-color: rgb(192 171 212 / 0.14); }
+.project-action > span { font-size: 16px; }
+.project-content { padding-top: 10px; }
+.gallery-toolbar { border-top: 1px solid var(--line); padding-top: 18px; }
+.gallery-toolbar button { border: 0; border-radius: 0; width: 42px; height: 36px; color: var(--text-2); background: transparent; }
+.gallery-toolbar button:hover { border: 0; background: transparent; color: var(--sc); }
+.gallery-toolbar > .mono { letter-spacing: 0.16em; }
+/* 각 항목을 잇는 가는 궤도와 빛점으로 탐색 상태를 표시합니다. */
+.project-filters { gap: 24px; padding-bottom: 12px; border-bottom: 0; }
+.project-filters button { position: relative; border: 0; border-radius: 0; padding: 8px 0 12px; background: transparent; }
+.project-filters button[aria-pressed='true'] { background: transparent; border: 0; color: var(--sc); }
+.project-filters button::after { content: ''; position: absolute; bottom: 4px; left: 0; width: 0; height: 1px; background: var(--sc); transition: width 0.3s ease; }
+.project-filters button[aria-pressed='true']::after { width: 100%; }
+.project-pagination { align-items: center; justify-content: flex-end; gap: 0; border-bottom: 1px solid var(--line); margin: 0 0 12px; padding: 4px 0 18px; }
+.project-pagination::before { content: 'ARCHIVE COORDINATES'; margin-right: auto; font: 9px var(--font-mono); letter-spacing: 0.16em; color: var(--text-2); }
+.project-pagination button { position: relative; width: 64px; height: 40px; border: 0; border-radius: 0; background: transparent; font: 11px var(--font-mono); letter-spacing: 0.12em; }
+.project-pagination button::before { content: ''; position: absolute; left: 0; right: 0; bottom: 1px; height: 1px; background: var(--line-2); }
+.project-pagination button::after { content: ''; position: absolute; width: 4px; height: 4px; left: calc(50% - 2px); bottom: 0; background: var(--text-2); transform: rotate(45deg); transition: background 0.3s, box-shadow 0.3s; }
+.project-pagination button[aria-current] { border: 0; background: transparent; color: var(--sc); }
+.project-pagination button[aria-current]::after { background: var(--sc); box-shadow: 0 0 8px color-mix(in oklab, var(--sc) 45%, transparent); }
+.artwork-frame { height: auto; min-height: 0; background: transparent; border: 0; border-radius: 0; overflow: visible; }
+.artwork-frame > img { display: block; width: 100%; height: auto; object-fit: contain; border-radius: 2px; }
+.artwork-card.is-pending .artwork-frame { min-height: 160px; }
+.artwork-upload { border: 0; border-bottom: 1px solid var(--sc); border-radius: 0; padding-inline: 0; }
+.artwork-upload:hover { background: transparent; }
+.artwork-empty { border-inline: 0; border-radius: 0; border-block-style: solid; }
+@media (prefers-reduced-motion: no-preference) {
+.project-entry.is-filter-arriving { animation: archive-materialize 0.5s var(--ease-out-expo) var(--entry-delay, 0ms) both; }
+.project-entry[open] .project-content, .arka-sephira[open] .arka-story, .arka-faction-group[open] > div { animation: archive-materialize 0.5s var(--ease-out-expo) both; }
+.project-gallery figure { animation: image-materialize 0.75s var(--ease-out-expo) both; }
+.project-gallery a:hover img { transform: translateY(-3px); }
+}
+@keyframes archive-materialize { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes image-materialize { from { opacity: 0; transform: translateY(14px); filter: brightness(0.8); } to { opacity: 1; transform: translateY(0); filter: brightness(1); } }
+@media (max-width: 600px) {
+.unified-projects .project-entry > summary { grid-template-columns: 66px minmax(0, 1fr); gap: 20px; }
+.project-cover > img:first-child, .project-cover .project-reflection { max-height: 76px; }
+.project-gallery figure { flex-basis: 91%; }
+.project-gallery { gap: 22px; }
+.project-pagination::before { font-size: 8px; letter-spacing: 0.1em; }
+.project-filters { gap: 22px; }
+}
