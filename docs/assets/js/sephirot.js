@@ -472,14 +472,14 @@ const now = performance.now();
 const dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 0; lastTime = now;
 anim += Math.sign(target - anim) * Math.min(Math.abs(target - anim), dt / MORPH_SECONDS);
 const progress = anim;
-if (target === 0 && anim < 1 && !reversing && raw0 > 8) { reversing = true; setTimeout(() => playLayer('tree-off'), 1000); // 1초 뒤 재생 }
+if (target === 0 && anim < 1 && !reversing && raw0 > 8) { reversing = true; setTimeout(() => playLayer('tree-off'), 1000); /* 1초 뒤 재생 */ }
 if (anim <= 0) { reversing = false; wantUp = false; }
 if (anim >= 1) wantDown = false;
 const inHero = raw0 <= pin + 2;
 if (!inHero && target === 1) anim = 1; // 링크로 멀리 점프한 경우: 잠그지 않고 즉시 완료
 // 변형 중에는 양방향 모두 입력을 잠그고, 연출 진행에 맞춰 페이지를 목적지(가로=고정 끝 / 세로=맨 위)로 미끄러뜨립니다
 const shouldLock = inHero && anim !== target && !reduceMotion.matches;
-if (shouldLock && (!scrollLocked || lockDir !== target)) { glideFrom = scrollY; glideAnim = anim; lockDir = target; if (target === 1 && anim < .05) { setTimeout(() => playLayer('tree-on'), 1000); // 1초 뒤 재생 prepareSfx('node-lit'); } }
+if (shouldLock && (!scrollLocked || lockDir !== target)) { glideFrom = scrollY; glideAnim = anim; lockDir = target; if (target === 1 && anim < .05) { setTimeout(() => playLayer('tree-on'), 1000); /* 1초 뒤 재생 */ prepareSfx('node-lit'); } }
 if (shouldLock !== scrollLocked) { if (!shouldLock) holdFor(500); setScrollLock(shouldLock); }
 if (scrollLocked) {
 const to = target ? heroTop + pin : heroTop;
