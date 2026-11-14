@@ -112,3 +112,5 @@
 .js .ht-tree .path-badge { transition: opacity .6s ease-out; }
 .js .hero-tree:not(.is-laid) .ht-tree .path-badge { opacity: .45; }
 @media (prefers-reduced-motion: reduce) { .js .ht-tree .node:not(.is-lit) { filter: none; opacity: 1; pointer-events: auto; } }
+/* 말쿠트의 라벤더는 채도가 낮아 실루엣(흰색)과 구분되지 않으므로, 나무 안에서만 조금 더 진한 라벤더를 씁니다 */
+.ht-tree .node[data-seph='10'] { --sc: oklch(0.74 0.15 295); }
