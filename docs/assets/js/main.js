@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261115a';
-import { initSephirot } from './sephirot.js?v=20261116m';
+import { initSephirot } from './sephirot.js?v=20261116n';
 import { initChapterScenes } from './chapter-scenes.js?v=20261116a';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
@@ -611,26 +611,37 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 const chapters = [...document.querySelectorAll('section.chapter')];
 if (!chapters.length) return;
 let gliding = false;
-const ease = (x) => (x < .15 ? (x * x) / .3 : x > .85 ? 1 - ((1 - x) * (1 - x)) / .3 : (x - .075) / .85);
-const block = (event) => { if (gliding && event.cancelable) event.preventDefault(); };
+// 애플식 '쫀득한' 이징: cubic-bezier(0.65, 0, 0.15, 1). 출발은 살짝 머뭇이고 가운데서 힘 있게 가속한 뒤, 길고 매끈하게 감속합니다
+const bezier = (p1x, p1y, p2x, p2y) => (x) => {
+let t = x; // 뉴턴 반복으로 x(t)=x 를 푸는 t를 찾습니다
+for (let i = 0; i < 6; i++) { const cx = 3 * p1x * t * (1 - t) ** 2 + 3 * p2x * t * t * (1 - t) + t ** 3 - x; const dx = 3 * p1x * (1 - t) ** 2 + 6 * (p2x - p1x) * t * (1 - t) + 3 * (1 - p2x) * t * t; if (Math.abs(dx) < 1e-6) break; t = Math.min(1, Math.max(0, t - cx / dx)); }
+return 3 * p1y * t * (1 - t) ** 2 + 3 * p2y * t * t * (1 - t) + t ** 3;
+};
+const silky = bezier(0.65, 0, 0.15, 1);
+// 스크롤 잠금 공용 상태: 자동 이동 중이거나, 끝난 직후 0.5초 동안은 관성 휠 입력까지 막아 화면 떨림을 없앱니다
+window.__scrollHold = window.__scrollHold || { until: 0 };
+const holdFor = (ms) => { window.__scrollHold.until = Math.max(window.__scrollHold.until, performance.now() + ms); };
+const holding = () => performance.now() < window.__scrollHold.until;
+
+const block = (event) => { if ((gliding || holding()) && event.cancelable) event.preventDefault(); };
 window.addEventListener('wheel', block, { passive: false, capture: true });
 window.addEventListener('touchmove', block, { passive: false, capture: true });
-window.addEventListener('keydown', (event) => { if (gliding && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Spacebar', 'Home', 'End'].includes(event.key)) event.preventDefault(); }, { capture: true });
+window.addEventListener('keydown', (event) => { if ((gliding || holding()) && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Spacebar', 'Home', 'End'].includes(event.key)) event.preventDefault(); }, { capture: true });
 // 다음 장이 화면 아래 가장자리에 걸쳐 있으면 그 장을 돌려줍니다
 const upcoming = () => chapters.find((ch) => { const top = ch.getBoundingClientRect().top; return top > 2 && top < innerHeight + 4; });
 const glideTo = (chapter) => {
 gliding = true;
 const from = scrollY, to = chapter.getBoundingClientRect().top + scrollY, start = performance.now();
-const duration = Math.min(2200, Math.max(900, Math.abs(to - from) * 1.4));
+const duration = Math.min(1600, Math.max(1050, Math.abs(to - from) * .9));
 const step = (now) => {
 const x = Math.min(1, (now - start) / duration);
-scrollTo(0, from + (to - from) * ease(x));
-if (x < 1) requestAnimationFrame(step); else gliding = false;
+scrollTo(0, Math.round(from + (to - from) * silky(x)));
+if (x < 1) requestAnimationFrame(step); else { gliding = false; holdFor(500); }
 };
 requestAnimationFrame(step);
 };
 const tryGlide = (event) => {
-if (gliding || reduce.matches) return;
+if (gliding || holding() || reduce.matches) return;
 const next = upcoming(); if (!next) return;
 if (event.cancelable) event.preventDefault();
 glideTo(next);

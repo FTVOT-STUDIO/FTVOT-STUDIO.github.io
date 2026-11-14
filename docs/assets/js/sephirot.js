@@ -305,8 +305,22 @@ const MORPH_SECONDS = 1.8; // 가로로 바뀌는 데 걸리는 시간
 let reversing = false, anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0, tension = 0, snapping = false;
 
 const LOCK_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar']);
+
+// 애플식 '쫀득한' 이징: cubic-bezier(0.65, 0, 0.15, 1). 출발은 살짝 머뭇이고 가운데서 힘 있게 가속한 뒤, 길고 매끈하게 감속합니다
+const bezier = (p1x, p1y, p2x, p2y) => (x) => {
+let t = x; // 뉴턴 반복으로 x(t)=x 를 푸는 t를 찾습니다
+for (let i = 0; i < 6; i++) { const cx = 3 * p1x * t * (1 - t) ** 2 + 3 * p2x * t * t * (1 - t) + t ** 3 - x; const dx = 3 * p1x * (1 - t) ** 2 + 6 * (p2x - p1x) * t * (1 - t) + 3 * (1 - p2x) * t * t; if (Math.abs(dx) < 1e-6) break; t = Math.min(1, Math.max(0, t - cx / dx)); }
+return 3 * p1y * t * (1 - t) ** 2 + 3 * p2y * t * t * (1 - t) + t ** 3;
+};
+const silky = bezier(0.65, 0, 0.15, 1);
+// 스크롤 잠금 공용 상태: 자동 이동 중이거나, 끝난 직후 0.5초 동안은 관성 휠 입력까지 막아 화면 떨림을 없앱니다
+window.__scrollHold = window.__scrollHold || { until: 0 };
+const holdFor = (ms) => { window.__scrollHold.until = Math.max(window.__scrollHold.until, performance.now() + ms); };
+const holding = () => performance.now() < window.__scrollHold.until;
 const blockScroll = (event) => { if (event.cancelable) event.preventDefault(); };
 const blockKeys = (event) => { if (LOCK_KEYS.has(event.key)) event.preventDefault(); };
+window.addEventListener('wheel', (e) => { if (holding() && e.cancelable) e.preventDefault(); }, { passive: false, capture: true });
+window.addEventListener('touchmove', (e) => { if (holding() && e.cancelable) e.preventDefault(); }, { passive: false, capture: true });
 function setScrollLock(on) {
 scrollLocked = on;
 const method = on ? 'addEventListener' : 'removeEventListener';
@@ -466,7 +480,7 @@ if (anim <= 0) reversing = false;
 const inHero = distance < heroHeight * PIN_RATIO;
 if (!inHero && target === 1) anim = 1;
 const shouldLock = inHero && target === 1 && anim < 1 && !reduceMotion.matches;
-if (shouldLock !== scrollLocked) { setScrollLock(shouldLock); glideFrom = scrollY; if (shouldLock && anim < .05) { playLayer('tree-on'); prepareSfx('node-lit'); } }
+if (shouldLock !== scrollLocked) { if (!shouldLock) holdFor(500); setScrollLock(shouldLock); glideFrom = scrollY; if (shouldLock && anim < .05) { playLayer('tree-on'); prepareSfx('node-lit'); } }
 // 멈춰 세우지 않고, 연출 진행에 맞춰 페이지를 고정 구간 한가운데까지 부드럽게 미끄러뜨립니다
 if (scrollLocked) { const to = heroTop + heroHeight * PIN_RATIO * .55; scrollTo(0, glideFrom + (to - glideFrom) * easeInOut(anim)); }
 const e = easeInOut(progress);
@@ -519,7 +533,7 @@ const TENSION_PX = 520;      // 이만큼 당겨야 넘어갑니다
 const SNAP_MS = 950;         // 케테르까지 내려가는 시간
 // 시작·끝만 살짝 부드럽고 가운데는 거의 일정한 속도 (튕김 없음)
 const autoEase = (x) => (x < .15 ? (x * x) / .3 : x > .85 ? 1 - ((1 - x) * (1 - x)) / .3 : (x - .075) / .85);
-const inTensionZone = () => laid && !snapping && !scrollLocked && !reduceMotion.matches && scrollY - heroTop < heroHeight * PIN_RATIO * .95;
+const inTensionZone = () => !holding() && laid && !snapping && !scrollLocked && !reduceMotion.matches && scrollY - heroTop < heroHeight * PIN_RATIO * .95;
 const release = () => {
 cancelAnimationFrame(tensionFrame);
 const step = () => { tension *= .8; if (tension < .005) tension = 0; schedule(); if (tension) tensionFrame = requestAnimationFrame(step); };
@@ -530,13 +544,13 @@ const kether = document.getElementById('kether'); if (!kether) return;
 snapping = true; setScrollLock(true); cancelAnimationFrame(tensionFrame); clearTimeout(tensionTimer);
 const from = scrollY, to = kether.getBoundingClientRect().top + scrollY, start = performance.now(), t0 = tension;
 // 마우스 휠 클릭 자동 스크롤처럼 일정한 속도로 미끄러지게: 거리 1px당 약 1.4ms, 0.9~2.2초 범위
-const duration = Math.min(2200, Math.max(900, Math.abs(to - from) * 1.4));
+const duration = Math.min(1600, Math.max(1050, Math.abs(to - from) * .9));
 const step = (now) => {
 const x = Math.min(1, (now - start) / duration);
-scrollTo(0, from + (to - from) * autoEase(x));
+scrollTo(0, Math.round(from + (to - from) * silky(x)));
 tension = t0 * (1 - Math.min(1, x * 3)); // 출발하면서 당겨졌던 긴장이 풀립니다
 schedule();
-if (x < 1) requestAnimationFrame(step); else { snapping = false; tension = 0; setScrollLock(false); }
+if (x < 1) requestAnimationFrame(step); else { snapping = false; tension = 0; holdFor(500); setScrollLock(false); }
 };
 requestAnimationFrame(step);
 };
