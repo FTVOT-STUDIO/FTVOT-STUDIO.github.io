@@ -1467,3 +1467,11 @@ summary:hover .arka-expand { color: var(--sc); }
 .audio-controls { top: 60px; right: 12px; }
 .audio-controls .music-control, .audio-controls .sound-control { padding-inline: 9px; font-size: 10px; }
 }
+/* 첫 화면의 제목과 본문의 탐색 바가 소리 설정에 가리지 않게 합니다. */
+.audio-controls { top: 12px; }
+.topbar.is-shown ~ .audio-controls { top: 64px; }
+@media (max-width: 600px) {
+.audio-controls { top: 8px; }
+.topbar.is-shown ~ .audio-controls { top: 60px; }
+.hero-tree { padding-top: 72px; }
+}
