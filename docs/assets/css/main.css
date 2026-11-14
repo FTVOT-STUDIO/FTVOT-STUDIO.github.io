@@ -1049,3 +1049,16 @@ body { overflow-x: clip; }
 }
 /* 모바일의 이전 단일 열 규칙이 썸네일 옆 제목을 아래로 밀지 않게 합니다. */
 .project-entry > summary > .project-info { grid-column: 2; min-width: 0; width: 100%; }
+
+/* 세계관은 선택한 장만 읽고 목차는 읽는 위치 가까이에 남깁니다. */
+.arka-nav.is-reader-nav { position: sticky; top: 56px; z-index: 8; margin-top: 24px; padding-block: 8px; gap: 4px 24px; background: rgb(8 6 13 / 0.94); backdrop-filter: blur(14px); }
+.arka-nav.is-reader-nav a { position: relative; white-space: nowrap; }
+.arka-nav.is-reader-nav a[aria-current] { color: var(--sc); }
+.arka-nav.is-reader-nav a[aria-current]::after { content: ''; position: absolute; bottom: 3px; height: 1px; left: 0; right: 0; background: var(--sc); }
+.arka-part.is-reading { margin-top: 28px; padding-top: 16px; }
+.arka-part.is-reading > h3 { margin-bottom: 22px; }
+.arka-part.is-reading .arka-sephira > summary { padding-block: 14px; }
+.arka-part.is-reading .arka-faction-group > summary { padding-block: 16px; }
+.arka-part.is-reading .arka-story { padding-bottom: 24px; }
+@media (prefers-reduced-motion: no-preference) { .arka-part.is-reading { animation: archive-materialize 0.45s var(--ease-out-expo) both; } }
+@media (max-width: 600px) { .arka-nav.is-reader-nav { gap: 0 18px; font-size: 11px; } }
