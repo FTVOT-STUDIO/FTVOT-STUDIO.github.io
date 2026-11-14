@@ -50,15 +50,38 @@ initArtworkGallery();
 initIntro(() => document.documentElement.classList.add('tree-grown'));
 
 function initDetails() {
-document.querySelectorAll('.arka-sephira, .project-entry, .arka-faction-group').forEach((details) => {
-details.addEventListener('toggle', () => {
-if (!details.open) return;
-// 내용이 펼쳐진 뒤 제목을 상단 바 아래에 맞춰 새 내용을 놓치지 않게 합니다.
-requestAnimationFrame(() => {
-if (!details.open) return;
-const top = details.getBoundingClientRect().top + scrollY - TOPBAR - 20;
-window.scrollTo({ top, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+const lists = document.querySelectorAll('.arka-sephira, .project-entry, .arka-faction-group');
+lists.forEach((details) => {
+const summary = details.querySelector('summary');
+let animation = null;
+let expanding = false;
+const finish = (open) => {
+details.open = open;
+details.style.height = '';
+details.style.overflow = '';
+animation = null;
+};
+summary.addEventListener('click', (event) => {
+if (event.target.closest('a, button')) return;
+event.preventDefault();
+const open = animation ? !expanding : !details.open;
+const start = details.getBoundingClientRect().height;
+if (animation) { animation.onfinish = null; animation.cancel(); }
+expanding = open;
+if (reduceMotion.matches || !details.animate) { finish(open); return; }
+// 닫는 동안에도 본문을 유지해야 높이가 자연스럽게 줄어듭니다.
+details.open = true;
+details.style.height = '';
+const end = open ? details.getBoundingClientRect().height : summary.getBoundingClientRect().height;
+details.style.overflow = 'hidden';
+animation = details.animate({ height: [`${start}px`, `${end}px`] }, { duration: open ? 380 : 280, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+animation.onfinish = () => finish(open);
 });
+reduceMotion.addEventListener('change', () => {
+if (!animation || !reduceMotion.matches) return;
+animation.onfinish = null;
+animation.cancel();
+finish(expanding);
 });
 });
 }
@@ -77,15 +100,18 @@ try {
 context.drawImage(img, 0, 0);
 const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
 let left = canvas.width, top = canvas.height, right = -1, bottom = -1;
+let mass = 0, momentX = 0, momentY = 0;
 for (let y = 0; y < canvas.height; y += 1) {
 for (let x = 0; x < canvas.width; x += 1) {
 if (pixels[(y * canvas.width + x) * 4 + 3] < 16) continue;
+const weight = pixels[(y * canvas.width + x) * 4 + 3] / 255;
+mass += weight; momentX += x * weight; momentY += y * weight;
 left = Math.min(left, x); right = Math.max(right, x);
 top = Math.min(top, y); bottom = Math.max(bottom, y);
 }
 }
 if (right < left) return null;
-const bounds = { left, top, width: right - left + 1, height: bottom - top + 1 };
+const bounds = { left, top, width: right - left + 1, height: bottom - top + 1, mass, centerX: momentX / mass, centerY: momentY / mass };
 boundsCache.set(img.currentSrc, bounds);
 return bounds;
 } catch { return null; }
@@ -97,12 +123,16 @@ frame.querySelectorAll('img').forEach((img) => {
 if (!img.complete || !img.naturalWidth) return;
 const b = measure(img);
 if (!b) return;
-// 투명 여백 대신 실제 픽셀의 중심과 크기로 대기·공격 프레임을 맞춥니다.
-const scale = Math.min(frame.clientWidth / b.width, frame.clientHeight / b.height) * 0.95;
+// 불투명 면적을 맞춰 넓은 무기와 잔상 때문에 몸체가 작아지는 문제를 줄입니다.
+const size = Math.min(frame.clientWidth, frame.clientHeight);
+const areaScale = size * 0.72 / Math.sqrt(b.mass);
+const extentScale = Math.min(frame.clientWidth * 1.12 / b.width, frame.clientHeight * 1.12 / b.height);
+const scale = Math.min(areaScale, extentScale);
+const centerX = Math.max(b.left + b.width * 0.35, Math.min(b.centerX, b.left + b.width * 0.65));
 img.style.width = `${img.naturalWidth * scale}px`;
 img.style.height = `${img.naturalHeight * scale}px`;
-img.style.left = `${(frame.clientWidth - b.width * scale) / 2 - b.left * scale}px`;
-img.style.top = `${(frame.clientHeight - b.height * scale) / 2 - b.top * scale}px`;
+img.style.left = `${frame.clientWidth / 2 - centerX * scale}px`;
+img.style.top = `${frame.clientHeight / 2 - b.centerY * scale}px`;
 });
 };
 frame.querySelectorAll('img').forEach((img) => img.addEventListener('load', fit));
@@ -228,19 +258,44 @@ if (!controls) return;
 controls.hidden = false;
 const entries = [...document.querySelectorAll('.unified-projects .project-entry')];
 const status = document.querySelector('[data-project-filter-status]');
+const pager = document.createElement('nav');
+pager.className = 'project-pagination';
+pager.setAttribute('aria-label', '프로젝트 목록 페이지');
+controls.after(pager);
+let filter = 'all';
+let page = 0;
+const pageSize = 5;
+const render = () => {
+const matches = entries.filter((entry) => filter === 'all' || (filter === 'selected' ? entry.dataset.selected === 'true' : entry.dataset.status === filter));
+const total = Math.max(1, Math.ceil(matches.length / pageSize));
+page = Math.min(page, total - 1);
+entries.forEach((entry) => {
+const index = matches.indexOf(entry);
+entry.hidden = index < page * pageSize || index >= (page + 1) * pageSize;
+if (entry.hidden) entry.open = false;
+});
+pager.replaceChildren();
+pager.hidden = total < 2;
+for (let i = 0; i < total; i += 1) {
+const button = document.createElement('button');
+button.type = 'button';
+button.textContent = String(i + 1).padStart(2, '0');
+button.setAttribute('aria-label', `프로젝트 ${i + 1}페이지`);
+if (i === page) button.setAttribute('aria-current', 'page');
+button.addEventListener('click', () => { page = i; render(); });
+pager.append(button);
+}
+if (status) status.textContent = `${matches.length}개 중 ${page * pageSize + 1}–${Math.min(matches.length, (page + 1) * pageSize)}개를 표시합니다.`;
+};
 controls.querySelectorAll('button').forEach((button) => {
 button.addEventListener('click', () => {
-const value = button.dataset.projectFilter;
-let count = 0;
-entries.forEach((entry) => {
-const show = value === 'all' || (value === 'selected' ? entry.dataset.selected === 'true' : entry.dataset.status === value);
-entry.hidden = !show;
-if (show) count += 1;
-});
+filter = button.dataset.projectFilter;
+page = 0;
 controls.querySelectorAll('button').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-if (status) status.textContent = `${button.textContent} 프로젝트 ${count}개를 표시합니다.`;
+render();
 });
 });
+render();
 }
 
 function initArtworkGallery() {
