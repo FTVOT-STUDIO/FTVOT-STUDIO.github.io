@@ -252,7 +252,17 @@ p.after(signal);
 const ROTATE_RATIO = 0.1;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
 const PIN_RATIO = 0.8;     // 가로로 다 바뀔 때까지 나무를 화면에 붙잡아 두는 스크롤 길이 (#tree margin-bottom과 같은 값)
 const MORPH_SECONDS = 1.8; // 가로로 바뀌는 데 걸리는 시간
-let anim = 0, lastTime = 0;     // 다 누운 뒤에도 점등 연출이 끝날 때까지 고정을 유지하는 전체 길이 (#tree의 margin-bottom과 같은 값)
+let anim = 0, lastTime = 0, scrollLocked = false;
+const LOCK_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar']);
+const blockScroll = (event) => { if (event.cancelable) event.preventDefault(); };
+const blockKeys = (event) => { if (LOCK_KEYS.has(event.key)) event.preventDefault(); };
+function setScrollLock(on) {
+scrollLocked = on;
+const method = on ? 'addEventListener' : 'removeEventListener';
+window[method]('wheel', blockScroll, { passive: false });
+window[method]('touchmove', blockScroll, { passive: false });
+window[method]('keydown', blockKeys);
+}     // 다 누운 뒤에도 점등 연출이 끝날 때까지 고정을 유지하는 전체 길이 (#tree의 margin-bottom과 같은 값)
 const SWAY_DEG = 16;        // 도는 중간에 앞뒤로 기울어지는 최대 각도. 평면 회전이 밋밋해 보이지 않게
 const lerp = (a, b, k) => a + (b - a) * k;
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -380,6 +390,10 @@ const now = performance.now();
 const dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 0; lastTime = now;
 anim += Math.sign(target - anim) * Math.min(Math.abs(target - anim), dt / MORPH_SECONDS);
 const progress = anim;
+// 가로로 바뀌는 중에는 스크롤을 막아 연출을 끝까지 보여줍니다 (되돌아갈 때는 막지 않습니다)
+const shouldLock = target === 1 && anim < 1 && !reduceMotion.matches;
+if (shouldLock !== scrollLocked) setScrollLock(shouldLock);
+if (scrollLocked && scrollY > heroTop + heroHeight * PIN_RATIO * .5) scrollTo(0, heroTop + heroHeight * PIN_RATIO * .5);
 const e = easeInOut(progress);
 if (anim !== target) schedule(); else lastTime = 0;
 // 다 누웠을 때 / 다시 섰을 때 경로에 빛을 한 번 흘립니다
