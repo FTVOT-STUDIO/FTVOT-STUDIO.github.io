@@ -125,6 +125,13 @@ const echo = ring.cloneNode(false);
 echo.setAttribute('class', 'node-echo');
 echo.setAttribute('aria-hidden', 'true');
 node.prepend(echo);
+// 겹친 두 파동이 천천히 번져 클릭 가능한 좌표임을 보여줍니다.
+for (let i = 0; i < 2; i += 1) {
+const aura = ring.cloneNode(false);
+aura.setAttribute('class', `node-aura${i ? ' node-aura-second' : ''}`);
+aura.setAttribute('aria-hidden', 'true');
+node.prepend(aura);
+}
 });
 
 const visited = new Set();
