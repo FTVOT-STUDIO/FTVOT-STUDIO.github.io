@@ -438,8 +438,8 @@ links.forEach((link) => {
 if (link.hash === `#${chosen.id}`) link.setAttribute('aria-current', 'location');
 else link.removeAttribute('aria-current');
 });
-if (move && nav.getBoundingClientRect().top < TOPBAR) {
-window.scrollTo({ top: nav.getBoundingClientRect().top + scrollY - TOPBAR - 8, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+if (move) {
+window.scrollTo({ top: chosen.getBoundingClientRect().top + scrollY - TOPBAR - nav.offsetHeight - 20, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
 }
 };
 links.forEach((link) => {
