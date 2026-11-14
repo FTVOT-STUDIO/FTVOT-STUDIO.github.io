@@ -1114,3 +1114,6 @@ summary:hover .arka-expand { color: var(--sc); }
 .deep-nebula *, .celestial-halo, .seph-boundary *, .sky::after { animation: none !important; }
 :where(a, button, summary, .arka-person, .arka-expand) { transition-duration: 0s !important; }
 }
+/* 넓은 띠가 본문을 가리지 않도록 먼 궤도도 가는 선으로만 표현합니다. */
+.celestial-halo { box-shadow: none; }
+.celestial-halo::after { content: ''; position: absolute; inset: -90px; border: 1px solid rgb(193 172 216 / 0.04); border-radius: 50%; }
