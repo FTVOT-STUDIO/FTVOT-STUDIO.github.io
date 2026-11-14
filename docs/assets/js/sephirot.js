@@ -112,18 +112,21 @@ audio.play().catch(() => {});
 }
 
 function bindSoundInput(element, sid) {
-let lastMousePress = -Infinity;
+let mouseStarted = false;
 const prime = () => prepareSfx(sid);
 element.addEventListener('pointerenter', prime, { once: true });
 element.addEventListener('focus', prime, { once: true });
 element.addEventListener('pointerdown', (event) => {
 // 마우스는 누르는 순간 재생하고 터치는 스크롤 오작동을 피하려고 클릭에서 재생합니다.
-if (event.pointerType !== 'mouse' || event.button !== 0) return;
-lastMousePress = performance.now();
+if (event.pointerType !== 'mouse' || event.button !== 0) { mouseStarted = false; return; }
+mouseStarted = true;
 playSfx(sid);
 });
+element.addEventListener('pointercancel', () => { mouseStarted = false; });
 element.addEventListener('click', (event) => {
-if (event.detail === 0 || performance.now() - lastMousePress > 700) playSfx(sid);
+if (event.detail !== 0 && mouseStarted) { mouseStarted = false; return; }
+mouseStarted = false;
+playSfx(sid);
 });
 }
 
