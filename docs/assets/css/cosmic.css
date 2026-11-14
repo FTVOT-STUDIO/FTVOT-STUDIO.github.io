@@ -114,3 +114,21 @@
 @media (prefers-reduced-motion: reduce) { .js .ht-tree .node:not(.is-lit) { filter: none; opacity: 1; pointer-events: auto; } }
 /* 말쿠트의 라벤더는 채도가 낮아 실루엣(흰색)과 구분되지 않으므로, 나무 안에서만 조금 더 진한 라벤더를 씁니다 */
 .ht-tree .node[data-seph='10'] { --sc: oklch(0.74 0.15 295); }
+/* 가로 배치 뒤 배경: --laid(0~1)에 맞춰 떠오르고, 궤도는 서로 다른 속도와 방향으로 천천히 돕니다 */
+.ht-backdrop { opacity: calc(var(--laid, 0) * .9); pointer-events: none; }
+.ht-backdrop .b-orbit { fill: none; stroke: rgb(255 255 255 / .07); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.ht-backdrop .b-o2 { stroke-dasharray: 2 10; stroke: rgb(255 255 255 / .1); }
+.ht-backdrop .b-o3 { stroke-dasharray: 1 18; }
+.ht-backdrop .b-ticks line { stroke: rgb(255 255 255 / .12); vector-effect: non-scaling-stroke; }
+.ht-backdrop .b-horizon { stroke: rgb(255 255 255 / .06); stroke-dasharray: 3 7; vector-effect: non-scaling-stroke; }
+.ht-backdrop .b-sat { fill: var(--c1); }
+.ht-backdrop .b-s1 { fill: var(--c6); } .ht-backdrop .b-s2 { fill: var(--c9); }
+.ht-backdrop .b-ticks, .ht-backdrop .b-o2, .ht-backdrop .b-sat { transform-box: view-box; transform-origin: 200px 320px; }
+.ht-backdrop .b-ticks { animation: b-spin 120s linear infinite; }
+.ht-backdrop .b-o2 { animation: b-spin 90s linear infinite reverse; }
+.ht-backdrop .b-s0 { animation: b-spin 26s linear infinite; }
+.ht-backdrop .b-s1 { animation: b-spin 40s linear infinite reverse; }
+.ht-backdrop .b-s2 { animation: b-spin 60s linear infinite; }
+@keyframes b-spin { to { rotate: 360deg; } }
+@keyframes b-orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+@media (prefers-reduced-motion: reduce) { .ht-backdrop * { animation: none !important; } }

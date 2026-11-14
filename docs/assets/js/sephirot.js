@@ -304,9 +304,21 @@ const dx = B.x - A.x, dy = B.y - A.y, len2 = dx * dx + dy * dy || 1;
 return { el, A, B, bx, by, t: ((bx - A.x) * dx + (by - A.y) * dy) / len2 };
 });
 let lastMorph = -1;
-const ain = tree.querySelector('.ain'), veil = tree.querySelector('.veil');
-const morph = (e) => {
-const m = Math.round(e * 1000) / 1000; if (m === lastMorph) return; lastMorph = m;
+const ain = tree.querySelector('.ain'), veil = tree.querySelector('.veil'), veilText = veil?.querySelector('text');
+// 가로 배치 뒤 배경: 나무 중심을 도는 세 겹 궤도, 눈금, 수평선. svg 맨 뒤에 넣습니다
+(() => {
+const svg = tree.querySelector('svg'); if (!svg) return;
+const NS2 = 'http://www.w3.org/2000/svg', g = document.createElementNS(NS2, 'g'); g.setAttribute('class', 'ht-backdrop'); g.setAttribute('aria-hidden', 'true');
+const mk = (tag, a, parent = g) => { const el = document.createElementNS(NS2, tag); for (const k in a) el.setAttribute(k, a[k]); parent.append(el); return el; };
+[[300, 'b-orbit b-o1'], [390, 'b-orbit b-o2'], [480, 'b-orbit b-o3']].forEach(([r, c]) => mk('circle', { cx: CX, cy: CY, r, class: c }));
+const ticks = mk('g', { class: 'b-ticks' });
+for (let i = 0; i < 72; i++) { const a = i / 72 * Math.PI * 2, r1 = 390, r2 = i % 6 ? 396 : 406; mk('line', { x1: CX + Math.cos(a) * r1, y1: CY + Math.sin(a) * r1, x2: CX + Math.cos(a) * r2, y2: CY + Math.sin(a) * r2 }, ticks); }
+mk('line', { x1: CX - 620, y1: CY, x2: CX + 620, y2: CY, class: 'b-horizon' });
+[300, 390, 480].forEach((r, i) => mk('circle', { cx: CX + r, cy: CY, r: 3, class: `b-sat b-s${i}` }));
+svg.insertBefore(g, svg.querySelector('title')?.nextSibling || svg.firstChild);
+})();
+const morph = (e, leave = 0) => {
+const m = Math.round(e * 1000) / 1000 + Math.round(leave * 1000) * 10; if (m === lastMorph) return; lastMorph = m;
 for (const info of nodeInfo.values()) {
 const i = Number(info.node.dataset.seph) - 1;
 const raw = Math.min(1, Math.max(0, e * 1.6 - i * (.6 / 9)));
@@ -316,6 +328,10 @@ const mx = info.tx - info.x, my = info.ty - info.y, len = Math.hypot(mx, my) || 
 const bulge = Math.sin(Math.PI * k) * Math.min(60, len * .25);
 info.cx = info.x + mx * k + (-my / len) * bulge;
 info.cy = info.y + my * k + (mx / len) * bulge;
+// 떠날 때: 세피라마다 다른 속도로 위로 흩어지는 시차(패럴랙스). 케테르가 가장 느리고 말쿠트가 가장 빠릅니다
+const ls = leave * leave;
+info.cx -= ls * (i - 4.5) * 6;
+info.cy -= ls * (40 + i * 22);
 info.node.setAttribute('transform', k ? `translate(${(info.cx - info.x).toFixed(2)} ${(info.cy - info.y).toFixed(2)})` : '');
 // 도착 = 점등
 const lit = raw >= .999; // 부동소수 오차로 말쿠트(마지막)가 1에 못 미쳐 켜지지 않던 문제 방지
@@ -325,7 +341,9 @@ if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit
 const K = nodeInfo.get('1');
 if (ain && K) { const kk = easeInOut(Math.min(1, Math.max(0, e * 1.6))); ain.setAttribute('transform', e ? `translate(${(K.cx - K.x).toFixed(2)} ${(K.cy - K.y).toFixed(2)}) rotate(${(-90 * kk).toFixed(2)} ${K.x} ${K.y})` : ''); }
 // 심연의 장막: 위 삼각과 아래를 가르는 가로선이 세로선으로 서서히 바뀝니다
-if (veil) veil.setAttribute('transform', e ? `rotate(${(-90 * easeInOut(e)).toFixed(2)} ${CX} ${CY})` : '');
+if (veil) { const va = 90 * easeInOut(e); veil.setAttribute('transform', e ? `rotate(${(-va).toFixed(2)} ${CX} ${CY})` : ''); if (veilText) veilText.setAttribute('transform', e ? `rotate(${va.toFixed(2)} ${veilText.getAttribute('x')} ${veilText.getAttribute('y')})` : ''); }
+// 배경 궤도: 다 바뀐 뒤 나무 뒤를 채우는 고리와 눈금 (진하기만 e로 조절, 회전은 CSS)
+tree.style.setProperty('--laid', easeInOut(e).toFixed(3));
 for (const { el, a, b } of lines) { const A = nodeInfo.get(a), B = nodeInfo.get(b); if (!A || !B) continue; el.setAttribute('x1', A.cx.toFixed(1)); el.setAttribute('y1', A.cy.toFixed(1)); el.setAttribute('x2', B.cx.toFixed(1)); el.setAttribute('y2', B.cy.toFixed(1)); }
 for (const bd of badges) { const x = bd.A.cx + (bd.B.cx - bd.A.cx) * bd.t, y = bd.A.cy + (bd.B.cy - bd.A.cy) * bd.t; bd.el.setAttribute('transform', `translate(${(x - bd.bx).toFixed(2)} ${(y - bd.by).toFixed(2)})`); }
 };
@@ -410,14 +428,15 @@ const hold = Math.min(distance, pin);
 // 원근 흔들림: 회전 중간에 가장 크게, 시작과 끝에서는 0
 
 // 나무는 눕지만 이름·문양·히브리 글자는 각자 제자리에서 반대로 돌아 항상 똑바로 읽히게 합니다
-morph(e); // 회전 대신 각 세피라가 차례로 제자리를 찾아 이동하며 가로 배치가 됩니다
+const leave = Math.min(1, Math.max(0, (distance - pin) / (innerHeight * .6)));
+morph(e, leave); // 회전 대신 각 세피라가 차례로 제자리를 찾아 이동하며 가로 배치가 됩니다
 const lift = `translate3d(0, ${hold.toFixed(1)}px, 0)`;
 const spin = `scale(${scale.toFixed(3)})`;
 // 다 바뀌면 고정을 풀고 페이지와 함께 자연스럽게 올라가며, 바로 아래 케테르 장이 이어집니다.
 // 떠나는 동안만 살짝 옅어져 다음 장으로 시선이 넘어가게 합니다
-const leave = Math.min(1, Math.max(0, (distance - pin) / (innerHeight * .6)));
+
 tree.style.transform = `${lift} ${spin}`;
-tree.style.opacity = (1 - leave * .6).toFixed(3);
+tree.style.opacity = (1 - leave * .75).toFixed(3);
 // 다이얼: 회전 중간에 가장 진하고, 시작과 끝에서는 사라집니다. 바깥 고리는 반대로, 안쪽 바늘은 빠르게 돕니다
 const presence = Math.sin(Math.PI * e);
 const diameter = Math.max(treeW, treeH) * scale * .86;

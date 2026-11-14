@@ -165,44 +165,42 @@ c.restore();
 if (open > 0) { const f = seg(p, .62, 1), bx = x + 10 + Math.sin(f * 7 + k) * 35 + f * 40, by = base - h * .62 + 22 - f * 330; c.save(); c.globalAlpha *= Math.sin(f * Math.PI) * 1.2; butterfly(c, bx, by, t + k, .6 + seg(p, .62, .7) * .6); for (let d = 1; d < 6; d++) { const ff = Math.max(0, f - d * .025); c.save(); c.globalAlpha *= .3 * (1 - d / 6); dot(c, x + 10 + Math.sin(ff * 7 + k) * 35 + ff * 40, base - h * .62 + 22 - ff * 330, 1.2); c.restore(); } c.restore(); }
 }
 },
-// 헤세드: 세 겹의 겨울 도시. 멀리 있는 건물일수록 옅고, 앞쪽 건물 지붕엔 눈이 쌓이며, 세 깊이의 눈송이가 돌풍에 휘몰아칩니다
+// 헤세드: 고요한 겨울 도시에 눈이 내립니다. 눈송이는 깊이에 따라 크기·속도·진하기가 다르고,
+// 각자 다른 주기로 좌우로 살랑이며 떨어집니다. 바람은 아주 느리게 방향을 바꿀 뿐 몰아치지 않습니다
 chesed(c, t) {
-const gust = .75 + Math.sin(t * .5) * .35 + Math.max(0, Math.sin(t * .9)) ** 6 * .4; // 가끔 세게 몰아치는 돌풍
-const skyline = (seed, count, base, minH, maxH, w, alpha, windows) => {
-c.save(); c.globalAlpha *= alpha;
-for (let i = 0; i < count; i++) {
-const bw = w * (.7 + rand(seed + i) * .6), x = i * (300 / count) - 6 + rand(seed + i + 9) * 6, h = minH + rand(seed + i + 3) * (maxH - minH), top = base - h;
-c.strokeRect(x, top, bw, h);
-const roof = rand(seed + i + 5);
-if (roof > .7) { c.beginPath(); c.moveTo(x, top); c.lineTo(x + bw / 2, top - 14); c.lineTo(x + bw, top); c.stroke(); }
-else if (roof > .45) { line(c, x + bw * .6, top, x + bw * .6, top - 18); dot(c, x + bw * .6, top - 18, Math.sin(t * 3 + i) > 0 ? 1.6 : .6); }
-// 지붕 위 눈더미
-c.beginPath(); c.moveTo(x - 2, top); c.quadraticCurveTo(x + bw / 2, top - 4 - rand(i + seed) * 3, x + bw + 2, top); c.stroke();
-if (windows) for (let wx = 0; wx < Math.floor(bw / 8); wx++) for (let wy = 0; wy < Math.floor(h / 16); wy++) {
-const on = rand(seed * 3 + i * 17 + wx * 5 + wy + Math.floor(t * .35 + rand(wy + i) * 5) * 11) > .5;
-if (on) c.fillRect(x + 3 + wx * 8, top + 8 + wy * 16, 3, 6); else c.strokeRect(x + 3 + wx * 8, top + 8 + wy * 16, 3, 6);
-}
-}
+const wind = Math.sin(t * .12) * 6 + Math.sin(t * .05 + 1) * 4; // 초당 몇 px 수준의 잔잔한 바람
+// 먼 도시 실루엣 (한 겹, 옅게)
+c.save(); c.globalAlpha *= .35;
+c.beginPath(); c.moveTo(0, 430);
+const tops = [370, 340, 352, 318, 360, 300, 344, 326, 362, 336, 350, 312, 358, 342];
+tops.forEach((y, k) => { const x = k * 23; c.lineTo(x, y); c.lineTo(x + 19, y); c.lineTo(x + 19, 430); c.lineTo(x + 23, 430); });
+c.lineTo(300, 430); c.stroke();
 c.restore();
-};
-// 하늘의 흐린 달과 눈구름
-c.save(); c.globalAlpha *= .35; circle(c, 230, 70, 22); for (let i = 0; i < 3; i++) { const y = 60 + i * 26, o = (t * 6 * (i + 1)) % 340 - 40; c.beginPath(); c.moveTo(o - 60, y); c.bezierCurveTo(o - 30, y - 14, o + 10, y - 14, o + 40, y); c.stroke(); } c.restore();
-skyline(40, 13, 400, 120, 230, 22, .28, false);
-// 먼 눈송이 (작고 느림)
-for (let i = 0; i < 70; i++) { const sp = 8 + rand(i) * 6, y = (rand(i + 3) * 480 + t * sp) % 480, x = ((rand(i + 5) * 340 + t * sp * gust * .9 + Math.sin(y * .02 + i) * 10) % 340) - 20; c.save(); c.globalAlpha *= .45; dot(c, x, y, .6); c.restore(); }
-skyline(80, 9, 415, 80, 170, 30, .6, true);
-// 가로등과 원뿔 불빛 속에서 반짝이는 눈
-for (let i = 0; i < 3; i++) { const x = 45 + i * 105; line(c, x, 440, x, 372); c.beginPath(); c.moveTo(x, 372); c.quadraticCurveTo(x, 364, x + 10, 364); c.stroke(); c.strokeRect(x + 7, 364, 7, 4);
-c.save(); c.globalAlpha *= .22 + .06 * Math.sin(t * 7 + i); c.beginPath(); c.moveTo(x + 10, 368); c.lineTo(x - 18, 440); c.lineTo(x + 38, 440); c.closePath(); c.stroke(); c.restore();
-for (let j = 0; j < 6; j++) { const yy = 372 + ((t * 10 + j * 12 + i * 7) % 66), xx = x + 10 + (yy - 368) * (rand(j + i * 6) - .5) * .8 + Math.sin(t * 2 + j) * 3; dot(c, xx, yy, 1.1); } }
-skyline(120, 6, 440, 40, 95, 44, 1, true);
-// 바람에 쓸려 쌓이는 지면의 눈
-c.beginPath(); c.moveTo(0, 440); for (let x = 0; x <= 300; x += 8) c.lineTo(x, 436 - Math.sin(x * .045 + t * .15) * 4 - Math.sin(x * .13) * 2); c.stroke();
-for (let i = 0; i < 6; i++) { const x = ((t * 16 * gust + i * 60) % 360) - 30; c.save(); c.globalAlpha *= .5; c.beginPath(); c.moveTo(x, 438); c.quadraticCurveTo(x + 15, 430, x + 34, 436); c.stroke(); c.restore(); }
-// 가까운 눈송이 (크고 빠르며 꼬리를 끕니다)
-for (let i = 0; i < 80; i++) { const sp = 22 + rand(i + 20) * 22, y = (rand(i + 23) * 480 + t * sp) % 480, x = ((rand(i + 25) * 360 + t * sp * gust * 1.1 + Math.sin(y * .035 + t * 1.3 + i) * 22) % 360) - 30, r = .9 + rand(i + 29) * 1.5; dot(c, x, y, r); if (r > 1.6) line(c, x, y, x - 6 * gust, y - 3); }
-// 휘몰아치는 돌풍 곡선
-for (let i = 0; i < 5; i++) { const y = 120 + i * 62 + Math.sin(t * .8 + i) * 16, o = Math.sin(t * .6 + i) * 30; c.save(); c.globalAlpha *= .35 * gust; c.beginPath(); c.moveTo(-20 + o, y); c.bezierCurveTo(70 + o, y - 34 * gust, 150 + o, y + 30, 230 + o, y - 8); c.quadraticCurveTo(255 + o, y - 22, 245 + o, y - 30); c.stroke(); c.restore(); }
+// 가까운 건물: 지붕마다 둥글게 쌓인 눈, 드문드문 켜진 창
+const near = [[6, 46, 120], [62, 40, 92], [112, 54, 140], [176, 38, 104], [224, 58, 128]];
+for (const [x, w, h] of near) {
+const top = 440 - h;
+c.strokeRect(x, top, w, h);
+c.beginPath(); c.moveTo(x - 2, top); c.bezierCurveTo(x + w * .2, top - 6, x + w * .8, top - 6, x + w + 2, top); c.stroke();
+for (let wx = 0; wx < Math.floor((w - 8) / 10); wx++) for (let wy = 0; wy < Math.floor((h - 14) / 18); wy++) {
+const seed = x * 7 + wx * 13 + wy * 29;
+if (rand(seed) > .72) { c.save(); c.globalAlpha *= .55 + .25 * Math.sin(t * .3 + seed); c.fillRect(x + 6 + wx * 10, top + 12 + wy * 18, 4, 7); c.restore(); }
+}
+}
+// 땅에 쌓인 눈
+c.beginPath(); c.moveTo(0, 442); for (let x = 0; x <= 300; x += 12) c.lineTo(x, 440 - Math.sin(x * .03) * 2); c.stroke();
+// 눈송이 3개 층: [개수, 최소 크기, 크기 폭, 낙하 속도, 진하기]
+const layers = [[60, .5, .4, 9, .35], [45, .9, .6, 16, .6], [24, 1.5, .9, 26, .9]];
+layers.forEach(([n, r0, rr, sp, alpha], L) => {
+for (let i = 0; i < n; i++) {
+const id = i + L * 100;
+const speed = sp * (.8 + rand(id) * .4);
+const y = (rand(id + 1) * 520 + t * speed) % 520 - 20;
+const sway = Math.sin(t * (.4 + rand(id + 2) * .5) + rand(id + 3) * 6.28) * (6 + L * 4);
+const x = ((rand(id + 4) * 340 + t * wind * (.5 + L * .4) + sway) % 340 + 340) % 340 - 20;
+c.save(); c.globalAlpha *= alpha; dot(c, x, y, r0 + rand(id + 5) * rr); c.restore();
+}
+});
 },
 // 게부라: 맞물린 톱니, 왕복 피스톤, 컨베이어, 표적을 훑다가 발사하는 레이저 포탑
 gevurah(c, t) {
