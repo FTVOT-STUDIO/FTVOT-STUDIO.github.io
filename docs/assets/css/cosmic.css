@@ -221,3 +221,5 @@
 .ht-tree .node-riddle { font: 500 9.5px var(--font-sans, Pretendard, sans-serif); letter-spacing: .02em; fill: #cfcfd6; text-anchor: middle; pointer-events: none; transition: opacity .5s ease-out; }
 .ht-tree .node.is-lit .node-riddle, .js:not(.js) .node-riddle { opacity: 0; }
 .js .hero-tree:not(.is-laid) .ht-tree .path-badge { opacity: 0 !important; }
+/* 넓은 화면: 소개 글이 화면 왼쪽 끝에 붙어 나무와 멀어지지 않도록, 나무 쪽(오른쪽)으로 붙여 둡니다 */
+@media (min-width: 1024px) { .hero-tree .ht-copy { justify-self: end; padding-right: clamp(40px, 5vw, 96px); } }
