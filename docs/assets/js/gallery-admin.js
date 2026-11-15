@@ -13,7 +13,7 @@ const IMAGE_RE = /\.(png|jpe?g|webp|gif|avif)$/i;
 
 // 파일 이름 정리: 경로 문자·제어 문자를 막고, 확장자는 원래 것을 유지합니다
 function safeName(raw, ext) {
-const base = String(raw).replace(/\.[^.]+$/, '').replace(/[\\/\u0000-\u001f<>:"|?*]+/g, ' ').replace(/^[._\s]+/, '').trim().slice(0, 120);
+const base = String(raw).normalize('NFC').replace(/\.[^.]+$/, '').replace(/[\\/\u0000-\u001f<>:"|?*]+/g, ' ').replace(/^[._\s]+/, '').trim().slice(0, 120);
 return base ? `${base}${ext}` : '';
 }
 const extOf = (name) => (name.match(/\.[^.]+$/)?.[0] || '').toLowerCase();

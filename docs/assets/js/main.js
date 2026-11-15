@@ -4,7 +4,7 @@
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261115a';
 import { initSephirot } from './sephirot.js?v=20261117n';
-import { initGalleryAdmin } from './gallery-admin.js?v=20261117b';
+import { initGalleryAdmin } from './gallery-admin.js?v=20261117c';
 import { initChapterScenes } from './chapter-scenes.js?v=20261116a';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
@@ -369,7 +369,7 @@ const count = document.querySelector('[data-artwork-count]');
 const refresh = document.querySelector('[data-artwork-refresh]');
 if (!grid || !state) return;
 const endpoint = 'https://api.github.com/repos/FTVOT-STUDIO/FTVOT-STUDIO.github.io/contents/docs/assets/gallery?ref=main';
-const cacheKey = 'ftvot-artwork-gallery-v2';
+const cacheKey = 'ftvot-artwork-gallery-v3'; // 파일명 정규화 후 예전 목록 캐시를 버립니다
 const validFile = (file) => file && typeof file.name === 'string' && file.name.length <= 255 && !/^[._]/.test(file.name) && !/[\\/\u0000-\u001f]/.test(file.name) && /\.(png|jpe?g|webp|gif|avif)$/i.test(file.name) && typeof file.sha === 'string' && /^[a-f0-9]{40,64}$/i.test(file.sha);
 const artObserver = new ResizeObserver((entries) => {
 entries.forEach(({ target }) => {
