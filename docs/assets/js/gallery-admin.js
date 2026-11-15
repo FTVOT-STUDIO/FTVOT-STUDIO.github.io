@@ -6,7 +6,9 @@ const BRANCH = 'main';
 const DIR = 'docs/assets/gallery';
 const API = `https://api.github.com/repos/${REPO}`;
 const TOKEN_KEY = 'ftvot-gallery-token';
-const MAX_BYTES = 20 * 1024 * 1024; // GitHub Contents API 한계(약 100MB)보다 넉넉히 작게, 페이지 로딩도 고려
+const MAX_BYTES = 95 * 1024 * 1024; // GitHub 파일 한도(100MB) 바로 아래까지 허용
+const SHRINK_OVER = 8 * 1024 * 1024; // 이보다 큰 그림은 화질을 거의 유지한 채 WebP로 자동 압축 (움직이는 GIF 제외)
+const MAX_SIDE = 6000;            // 압축할 때 긴 변 최대 픽셀
 const IMAGE_RE = /\.(png|jpe?g|webp|gif|avif)$/i;
 
 // 파일 이름 정리: 경로 문자·제어 문자를 막고, 확장자는 원래 것을 유지합니다
@@ -55,6 +57,21 @@ reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
 reader.onerror = () => reject(new Error('파일을 읽지 못했습니다.'));
 reader.readAsDataURL(file);
 });
+// 큰 그림 자동 압축: 브라우저에서 WebP(품질 0.92)로 다시 인코딩합니다. 결과가 더 크면 원본을 그대로 씁니다
+async function shrink(file) {
+if (file.size <= SHRINK_OVER || /\.gif$/i.test(file.name)) return { file, name: file.name };
+try {
+const bitmap = await createImageBitmap(file);
+const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+const canvas = document.createElement('canvas');
+canvas.width = Math.round(bitmap.width * scale); canvas.height = Math.round(bitmap.height * scale);
+canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+bitmap.close?.();
+const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.92));
+if (!blob || blob.size >= file.size) return { file, name: file.name };
+return { file: blob, name: file.name.replace(/\.[^.]+$/, '.webp') };
+} catch { return { file, name: file.name }; }
+}
 const pathOf = (name) => `/contents/${DIR}/${encodeURIComponent(name)}`;
 
 function el(tag, attrs = {}, ...children) {
@@ -81,7 +98,7 @@ el('label', { class: 'ga-check', for: 'ga-remember' }, remember, el('span', { te
 el('button', { type: 'submit', class: 'ga-btn ga-primary', text: '연결' }));
 
 const fileInput = el('input', { type: 'file', accept: '.png,.jpg,.jpeg,.webp,.gif,.avif', multiple: '', id: 'ga-file', class: 'ga-file' });
-const drop = el('label', { class: 'ga-drop', for: 'ga-file' }, el('strong', { text: '그림을 끌어다 놓거나 눌러서 선택' }), el('span', { text: 'PNG · JPG · WebP · GIF · AVIF, 파일당 20MB까지. 같은 이름이면 교체됩니다.' }));
+const drop = el('label', { class: 'ga-drop', for: 'ga-file' }, el('strong', { text: '그림을 끌어다 놓거나 눌러서 선택' }), el('span', { text: 'PNG · JPG · WebP · GIF · AVIF. 8MB가 넘는 그림은 자동으로 압축되고, 최대 95MB까지 올릴 수 있습니다. 같은 이름이면 교체됩니다.' }));
 const list = el('ul', { class: 'ga-list' });
 const logout = el('button', { type: 'button', class: 'ga-btn ga-ghost', text: '토큰 지우기' });
 const manager = el('div', { class: 'ga-manager', hidden: '' }, drop, fileInput, el('div', { class: 'ga-list-head' }, el('span', { text: '전시 중인 그림' }), logout), list);
@@ -133,12 +150,14 @@ setBusy(true);
 let done = 0;
 try {
 for (const file of items) {
-if (file.size > MAX_BYTES) { say(`${file.name}: 20MB를 넘어 건너뜁니다.`, 'error'); continue; }
-const name = safeName(file.name, extOf(file.name));
+say(`준비 중 (${done + 1}/${items.length}) ${file.name}`);
+const packed = await shrink(file);
+if (packed.file.size > MAX_BYTES) { say(`${file.name}: 압축해도 95MB를 넘어 건너뜁니다.`, 'error'); continue; }
+const name = safeName(packed.name, extOf(packed.name));
 if (!name) continue;
-say(`올리는 중 (${done + 1}/${items.length}) ${name}`);
+say(`올리는 중 (${done + 1}/${items.length}) ${name}${packed.file !== file ? ` · ${(file.size / 1048576).toFixed(1)}MB → ${(packed.file.size / 1048576).toFixed(1)}MB로 압축` : ''}`);
 const existing = files.find((f) => f.name === name);
-const content = await fileToBase64(file);
+const content = await fileToBase64(packed.file);
 await gh(pathOf(name), getToken(), { method: 'PUT', body: JSON.stringify({ message: `${existing ? 'Replace' : 'Add'} artwork ${name}`, content, branch: BRANCH, ...(existing ? { sha: existing.sha } : {}) }) });
 done += 1;
 }

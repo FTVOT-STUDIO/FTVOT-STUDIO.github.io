@@ -389,17 +389,16 @@ const NS3 = 'http://www.w3.org/2000/svg', cap = document.createElementNS(NS3, 'g
 const t = (x, y, cls, text) => { const el = document.createElementNS(NS3, 'text'); el.setAttribute('x', x.toFixed(1)); el.setAttribute('y', y.toFixed(1)); el.setAttribute('class', cls); el.textContent = text; cap.append(el); return el; };
 const pts = [...nodeInfo.values()];
 const minY = Math.min(...pts.map((p) => p.ty)), maxY = Math.max(...pts.map((p) => p.ty));
-t(CX, minY - 92, 'cap-title', 'ETZ HAYIM');
-t(CX, minY - 72, 'cap-ko', '생명의 나무 · 열 개의 세피라와 스물두 개의 길');
+t(CX, minY - 128, 'cap-title', 'ETZ HAYIM');
+t(CX, minY - 98, 'cap-ko cap-lead', '생명의 나무 · 열 개의 세피라와 스물두 개의 길');
 const groups = [[['1', '2', '3'], 'SUPERNAL TRIAD', '천상의 삼각'], [['4', '5', '6'], 'ETHICAL TRIAD', '윤리의 삼각'], [['7', '8', '9'], 'ASTRAL TRIAD', '아스트랄 삼각'], [['10'], 'KINGDOM', '왕국']];
 for (const [ids, en, ko] of groups) {
 const g = ids.map((id) => nodeInfo.get(id)).filter(Boolean); if (!g.length) continue;
 const x = g.reduce((a, p) => a + p.tx, 0) / g.length;
-const x0 = Math.min(...g.map((p) => p.tx)) - 34, x1 = Math.max(...g.map((p) => p.tx)) + 34, y = maxY + 62;
+const x0 = Math.min(...g.map((p) => p.tx)) - 30, x1 = Math.max(...g.map((p) => p.tx)) + 30, y = maxY + 84;
 const br = document.createElementNS(NS3, 'path'); br.setAttribute('class', 'cap-bracket'); br.setAttribute('d', `M${x0} ${y - 22} V${y - 16} H${x1} V${y - 22}`); cap.append(br);
-t(x, y, 'cap-group', en); t(x, y + 16, 'cap-ko', ko);
+t(x, y, 'cap-ko cap-name', ko); t(x, y + 22, 'cap-group', en);
 }
-t(CX, maxY + 120, 'cap-hint', 'SCROLL TO DESCEND ↓');
 svg.append(cap);
 })();
 const morph = (e, leave = 0) => {
@@ -509,6 +508,10 @@ const to = target ? heroTop + pin : heroTop;
 const span = Math.abs(target - glideAnim) || 1, k = Math.min(1, Math.abs(anim - glideAnim) / span);
 scrollTo(0, Math.round(glideFrom + (to - glideFrom) * easeInOut(k)));
 }
+{ const show = !scrollLocked && !holding() && raw0 <= pin + 2 && (anim === 0 || anim === 1);
+hint.classList.toggle('is-shown', show);
+const label = anim >= 1 ? '아래로 스크롤하여 케테르로' : '아래로 스크롤하여 나무 깨우기';
+if (hintText.textContent !== label) hintText.textContent = label; }
 // 스크롤을 옮긴 '뒤'의 위치로 나무 위치를 계산해야 한 프레임 어긋남(떨림)이 없습니다
 const distance = Math.max(0, scrollY - heroTop);
 const e = easeInOut(progress);
@@ -559,6 +562,11 @@ const schedule = () => { if (!pending) pending = requestAnimationFrame(update); 
 // 가로 나무가 활성인 상태에서 아래로 스크롤하면 바로 내려가지 않고 고무줄처럼 버팁니다(tension 0→1).
 // 끝까지 당기면 스크롤을 잠근 채 케테르 장으로 탄력 있게 내려가고, 중간에 놓으면 제자리로 튕겨 돌아옵니다
 let tensionTimer = 0, tensionFrame = 0;
+// 스크롤 힌트: 비활성(세로) 상태에서는 '나무 깨우기', 활성(가로) 상태에서는 '케테르로'를 화면 아래에 띄웁니다
+const hint = document.createElement('div');
+hint.className = 'tree-hint'; hint.setAttribute('aria-hidden', 'true');
+const hintText = document.createElement('span'); hint.append(hintText, Object.assign(document.createElement('i'), { className: 'tree-hint-line' }));
+document.body.append(hint);
 const TENSION_PX = 520;      // 이만큼 당겨야 넘어갑니다
 const SNAP_MS = 950;         // 케테르까지 내려가는 시간
 // 시작·끝만 살짝 부드럽고 가운데는 거의 일정한 속도 (튕김 없음)
