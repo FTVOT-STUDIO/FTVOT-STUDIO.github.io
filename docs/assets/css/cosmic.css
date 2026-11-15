@@ -207,3 +207,14 @@
 @keyframes hint-drop { to { top: 100%; } }
 @media (max-width: 699px) { .tree-hint { left: 50%; translate: -50% 8px; bottom: calc(68px + env(safe-area-inset-bottom)); } .tree-hint.is-shown { translate: -50% 0; } }
 @media (prefers-reduced-motion: reduce) { .tree-hint-line::after { animation: none; top: 30%; } }
+/* 고대 문자 흐름: 아주 옅게, 줄마다 반대 방향과 다른 속도로 흐릅니다 */
+.ht-captions .cap-runes text { text-anchor: start; font: 22px/1 "Noto Sans Symbols 2", "Segoe UI Symbol", serif; letter-spacing: .5em; fill: rgb(220 210 240 / .055); }
+.ht-captions .cap-runes { animation: rune-flow 80s linear infinite; }
+.ht-captions .cap-r1 { animation-direction: reverse; }
+@keyframes rune-flow { from { transform: translateX(0); } to { transform: translateX(-900px); } }
+@media (prefers-reduced-motion: reduce) { .ht-captions .cap-runes { animation: none; } }
+/* 처음 세로 나무에서는 어떤 원이 어떤 세피라인지 알 수 없게 이름·문양·번호와 경로 글자를 숨기고 빈 원만 보입니다.
+   켜지는(is-lit) 순간 하나씩 드러납니다 */
+.js .ht-tree .node text, .js .ht-tree .node .node-num-bg { transition: opacity .5s ease-out; }
+.js .ht-tree .node:not(.is-lit) text, .js .ht-tree .node:not(.is-lit) .node-num-bg { opacity: 0; }
+.js .hero-tree:not(.is-laid) .ht-tree .path-badge { opacity: 0 !important; }

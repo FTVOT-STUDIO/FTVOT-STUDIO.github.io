@@ -302,7 +302,7 @@ p.after(signal);
 const ROTATE_RATIO = 0.1;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
 const PIN_RATIO = 0.44;     // 가로로 다 바뀔 때까지 나무를 화면에 붙잡아 두는 스크롤 길이 (#tree margin-bottom과 같은 값)
 const MORPH_SECONDS = 1.8; // 가로로 바뀌는 데 걸리는 시간
-let wantDown = false, wantUp = false, lockDir = -1, glideAnim = 0, reversing = false, anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0, tension = 0, snapping = false;
+let treeAudible = false, wantDown = false, wantUp = false, lockDir = -1, glideAnim = 0, reversing = false, anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0, tension = 0, snapping = false;
 
 const LOCK_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar']);
 
@@ -391,14 +391,14 @@ const pts = [...nodeInfo.values()];
 const minY = Math.min(...pts.map((p) => p.ty)), maxY = Math.max(...pts.map((p) => p.ty));
 t(CX, minY - 128, 'cap-title', 'ETZ HAYIM');
 t(CX, minY - 98, 'cap-ko cap-lead', '생명의 나무 · 열 개의 세피라와 스물두 개의 길');
-const groups = [[['1', '2', '3'], 'SUPERNAL TRIAD', '천상의 삼각'], [['4', '5', '6'], 'ETHICAL TRIAD', '윤리의 삼각'], [['7', '8', '9'], 'ASTRAL TRIAD', '아스트랄 삼각'], [['10'], 'KINGDOM', '왕국']];
-for (const [ids, en, ko] of groups) {
-const g = ids.map((id) => nodeInfo.get(id)).filter(Boolean); if (!g.length) continue;
-const x = g.reduce((a, p) => a + p.tx, 0) / g.length;
-const x0 = Math.min(...g.map((p) => p.tx)) - 30, x1 = Math.max(...g.map((p) => p.tx)) + 30, y = maxY + 84;
-const br = document.createElementNS(NS3, 'path'); br.setAttribute('class', 'cap-bracket'); br.setAttribute('d', `M${x0} ${y - 22} V${y - 16} H${x1} V${y - 22}`); cap.append(br);
-t(x, y, 'cap-ko cap-name', ko); t(x, y + 22, 'cap-group', en);
-}
+// 고대 문자 흐름: 나무 뒤로 히브리·룬·연금술 기호 줄이 아주 희미하게 좌우로 흘러갑니다 (CSS 애니메이션)
+const GLYPHS = Array.from('אבגדהוזחטיכלמנסעפצקרשת ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ ☉☽☿♀♂♃♄⊕△▽ ∴∵⊙⋈ '); /* Array.from: 글자 단위로 나눠야 기호가 깨지지 않습니다 */
+const rows = [minY - 40, minY + 70, CY, maxY - 70, maxY + 40];
+rows.forEach((y, r) => {
+let line = ''; for (let k = 0; k < 90; k++) line += GLYPHS[Math.floor(Math.abs(Math.sin((k + 1) * (r + 3) * 12.9898)) * GLYPHS.length)];
+const g = document.createElementNS(NS3, 'g'); g.setAttribute('class', `cap-runes cap-r${r % 2}`); g.style.animationDuration = `${70 + r * 14}s`;
+const el = document.createElementNS(NS3, 'text'); el.setAttribute('x', String(CX - 900)); el.setAttribute('y', y.toFixed(1)); el.textContent = line + line; g.append(el); cap.prepend(g);
+});
 svg.append(cap);
 })();
 const morph = (e, leave = 0) => {
@@ -421,7 +421,7 @@ info.cy -= ls * (40 + i * 22);
 info.node.setAttribute('transform', k ? `translate(${(info.cx - info.x).toFixed(2)} ${(info.cy - info.y).toFixed(2)})` : '');
 // 도착 = 점등
 const lit = raw >= .999; // 부동소수 오차로 말쿠트(마지막)가 1에 못 미쳐 켜지지 않던 문제 방지
-if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit); if (lit) playLayer('node-lit'); }
+if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit); if (lit && treeAudible) playLayer('node-lit'); /* 나무 구간에서 실제로 켜질 때만 */ }
 }
 // 케테르 위의 아인 호(세 겹 반원)는 케테르를 따라가며 바깥쪽(왼쪽)을 향하도록 방향만 바꿉니다
 const K = nodeInfo.get('1');
@@ -487,6 +487,7 @@ const update = () => {
 pending = 0;
 const pin = heroHeight * PIN_RATIO;
 const raw0 = Math.max(0, scrollY - heroTop);
+treeAudible = raw0 <= pin + 2; // 나무 구간 안에서만 점등·경로 소리를 냅니다
 // 방향 결정: 위로 스크롤 의사(wantUp)가 있으면 세로로, 조금이라도 내려와 있으면 가로로
 const target = wantUp ? 0 : (wantDown || raw0 > 8) ? 1 : 0;
 const now = performance.now();
@@ -498,6 +499,7 @@ if (anim <= 0) { reversing = false; wantUp = false; }
 if (target === 1) reversing = false; /* 가로로 다시 가면 비활성 소리를 다시 낼 수 있게 초기화 */
 if (anim >= 1) wantDown = false;
 const inHero = raw0 <= pin + 2;
+
 if (!inHero && target === 1) anim = 1; // 링크로 멀리 점프한 경우: 잠그지 않고 즉시 완료
 // 변형 중에는 양방향 모두 입력을 잠그고, 연출 진행에 맞춰 페이지를 목적지(가로=고정 끝 / 세로=맨 위)로 미끄러뜨립니다
 const shouldLock = inHero && anim !== target && !reduceMotion.matches;
@@ -517,7 +519,7 @@ const distance = Math.max(0, scrollY - heroTop);
 const e = easeInOut(progress);
 if (anim !== target) schedule(); else lastTime = 0;
 // 다 누웠을 때 / 다시 섰을 때 경로에 빛을 한 번 흘립니다
-if (progress >= 1 && !laid) { laid = true; hero.classList.add('is-laid'); trace(); playLayer('path-trace'); } // 경로를 따라 빛이 흐를 때 마법진 울림
+if (progress >= 1 && !laid) { laid = true; hero.classList.add('is-laid'); trace(); if (treeAudible) playLayer('path-trace'); } // 경로를 따라 빛이 흐를 때 마법진 울림
 if (progress < 0.02 && laid) { laid = false; hero.classList.remove('is-laid'); trace(); }
 previous = progress;
 if (reduceMotion.matches) { tree.style.transform = ''; morph(1); return; }
