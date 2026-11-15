@@ -838,3 +838,52 @@ addEventListener('scroll', () => { if (busy) return; const r = sec.getBoundingCl
 if (r.top > innerHeight && isDown()) { dim(false); document.documentElement.style.setProperty('--qd', '0'); }
 else if (r.top <= innerHeight * .2 && !isDown()) { busy = true; animDone = false; glided = true; light(); } }, { passive: true });
 })();
+
+/* 클리포트 미니맵: 클리포트가 깨어나면 오른쪽 세피로트 미니맵이 물러나고, 같은 모양의 핏빛 클리포트 미니맵이 그 자리에 들어옵니다.
+   열린 껍질(타우미엘·가말리엘)만 누를 수 있고, 잠긴 껍질은 흐린 고리로만 보입니다 */
+(() => {
+const src = document.querySelector('[data-minimap]'), sec = document.getElementById('qliphoth'); if (!src || !sec) return;
+const OPEN = { 1: ['q-thaumiel', '타우미엘'], 9: ['q-gamaliel', '가말리엘'] };
+const qm = src.cloneNode(true);
+qm.removeAttribute('data-minimap'); qm.classList.add('q-minimap'); qm.setAttribute('aria-label', '클리포트의 나무 미니맵');
+qm.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+qm.querySelector('title')?.replaceChildren(document.createTextNode('클리포트의 나무 미니맵'));
+qm.querySelectorAll('.ain, .veil, .path-badge, .path-signal').forEach((n) => n.remove());
+qm.querySelectorAll('a.node').forEach((a) => { const k = Number(a.dataset.seph), open = OPEN[k];
+a.classList.remove('node', 'is-current'); a.classList.add('qm-node', open ? 'is-open' : 'is-locked');
+if (open) { a.setAttribute('href', `#${open[0]}`); a.setAttribute('aria-label', `${k}. ${open[1]}`); }
+else { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); a.setAttribute('aria-label', `${k}. 봉인됨`); a.setAttribute('tabindex', '-1'); } });
+src.after(qm);
+const sync = () => { const on = sec.classList.contains('is-awake'); src.classList.toggle('is-yielded', on); qm.classList.toggle('is-shown', on);
+/* 지금 보고 있는 열린 껍질을 강조 */
+let cur = ''; for (const id of ['q-gamaliel', 'q-thaumiel']) { const r = document.getElementById(id)?.getBoundingClientRect(); if (r && r.top < innerHeight * .55) { cur = id; break; } }
+qm.querySelectorAll('.qm-node.is-open').forEach((a) => a.classList.toggle('is-current', a.getAttribute('href') === `#${cur}`)); };
+new MutationObserver(sync).observe(sec, { attributes: true, attributeFilter: ['class'] });
+let f = 0; addEventListener('scroll', () => { if (!f) f = requestAnimationFrame(() => { f = 0; sync(); }); }, { passive: true });
+sync();
+})();
+
+/* 클리포트 배경 장식: 세피로트 나무와 같은 문법의 고대 문자 흐름(핏빛) + 나무 뒤 역회전하는 이중 마법진 */
+(() => {
+const svg = document.querySelector('#qliphoth .q-tree'); if (!svg) return;
+const NS = 'http://www.w3.org/2000/svg', mk = (tag, attrs = {}) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v)); return n; };
+const deco = mk('g', { class: 'q-deco', 'aria-hidden': 'true' });
+/* 1) 고대 문자 줄: 히브리·룬·연금술 기호가 아주 희미하게 좌우로 흐릅니다 */
+const GLYPHS = Array.from('אבגדהוזחטיכלמנסעפצקרשת ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ ☉☽☿♀♂♃♄⊕△▽ ∴∵⊙⋈ 🜁🜂🜃🜄 ');
+[40, 170, 330, 490, 640].forEach((y, r) => { let line = ''; for (let k = 0; k < 90; k++) line += GLYPHS[Math.floor(Math.abs(Math.sin((k + 7) * (r + 5) * 78.233)) * GLYPHS.length)];
+const g = mk('g', { class: `q-runes q-r${r % 2}` }); g.style.animationDuration = `${64 + r * 12}s`; const t = mk('text', { x: -900, y }); t.textContent = line + line; g.append(t); deco.append(g); });
+/* 2) 마법진: 타우미엘과 말쿠트 자리 사이 중심(나무 중앙)에 원 두 겹 + 원둘레를 도는 문자열 + 별 다각형 */
+const CX = 200, CY = 346, R1 = 250, R2 = 205;
+const circle = mk('g', { class: 'q-circle' });
+const outer = mk('g', { class: 'q-ring-a' }), inner = mk('g', { class: 'q-ring-b' });
+outer.append(mk('circle', { cx: CX, cy: CY, r: R1 }), mk('circle', { cx: CX, cy: CY, r: R1 - 14 }));
+const pid = 'q-circle-path'; outer.append(mk('path', { id: pid, d: `M ${CX - (R1 - 7)} ${CY} a ${R1 - 7} ${R1 - 7} 0 1 1 ${2 * (R1 - 7)} 0 a ${R1 - 7} ${R1 - 7} 0 1 1 ${-2 * (R1 - 7)} 0`, fill: 'none', stroke: 'none' }));
+const tx = mk('text', { class: 'q-circle-text' }), tp = mk('textPath', { href: `#${pid}` });
+tp.textContent = 'THAUMIEL · GHAGIEL · SATARIEL · GAMCHICOTH · GOLACHAB · THAGIRION · A’ARAB ZARAQ · SAMAEL · GAMALIEL · NEHEMOTH · '; tx.append(tp); outer.append(tx);
+/* 열 꼭짓점 별(10각 성형): 껍질 열 개를 상징 */
+let pts = ''; for (let k = 0; k < 10; k++) { const a = (k * 3 * 2 * Math.PI) / 10 - Math.PI / 2; pts += `${(CX + R2 * Math.cos(a)).toFixed(1)},${(CY + R2 * Math.sin(a)).toFixed(1)} `; }
+inner.append(mk('circle', { cx: CX, cy: CY, r: R2 }), mk('polygon', { points: pts.trim() }));
+for (let k = 0; k < 10; k++) { const a = (k * 2 * Math.PI) / 10 - Math.PI / 2; inner.append(mk('circle', { class: 'q-dot', cx: (CX + R2 * Math.cos(a)).toFixed(1), cy: (CY + R2 * Math.sin(a)).toFixed(1), r: 3 })); }
+circle.append(outer, inner); deco.append(circle);
+svg.insertBefore(deco, svg.firstChild);
+})();

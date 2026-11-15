@@ -476,3 +476,32 @@ main#main { position: relative; z-index: 1; }
 .qliphoth .q-paths line:not(.q-signal) { stroke-dasharray: var(--plen, 260); stroke-dashoffset: var(--plen, 260); transition: stroke-dashoffset .9s cubic-bezier(.65, 0, .35, 1) var(--pdl, 0s); }
 .qliphoth.is-awake .q-paths line:not(.q-signal) { stroke-dashoffset: 0; }
 @media (prefers-reduced-motion: reduce) { .qliphoth .q-paths line:not(.q-signal) { stroke-dashoffset: 0; transition: none; } }
+/* 클리포트 미니맵 교대: 세피로트 미니맵은 오른쪽으로 물러나고 핏빛 미니맵이 들어옵니다 */
+.minimap.is-yielded { opacity: 0 !important; translate: 24px 0; pointer-events: none !important; }
+.q-minimap .path { stroke: rgb(192 57 43 / .3) !important; }
+.q-minimap .qm-node .node-ring { fill: rgb(10 2 3 / .9); stroke: rgb(255 255 255 / .16); stroke-width: 6; transition: stroke .3s, fill .3s; }
+.q-minimap .qm-node.is-open .node-ring { stroke: #c0392b; }
+.q-minimap .qm-node.is-open:hover .node-ring, .q-minimap .qm-node.is-open:focus-visible .node-ring { fill: rgb(90 10 12 / .95); }
+.q-minimap .qm-node.is-current .node-ring { fill: #c0392b; stroke: #ff8a7a; }
+.q-minimap .qm-node.is-locked { cursor: default; pointer-events: none; }
+.q-minimap .qm-node:focus-visible { outline: none; }
+.q-minimap .node-name, .q-minimap .node-sym, .q-minimap .node-num, .q-minimap .node-num-bg { display: none; }
+/* 클리포트 배경 장식 */
+.q-deco { pointer-events: none; }
+.q-runes text { font: 22px/1 "Noto Sans Symbols 2", "Segoe UI Symbol", serif; letter-spacing: .5em; fill: rgb(255 120 100 / .07); }
+.q-runes { animation: rune-flow 80s linear infinite; }
+.q-r1 { animation-direction: reverse; }
+.q-circle { opacity: 0; transform-box: view-box; transition: opacity 2s ease .6s; }
+.qliphoth.is-awake .q-circle { opacity: 1; }
+.q-ring-a, .q-ring-b { transform-box: view-box; transform-origin: 200px 346px; }
+.q-ring-a { animation: q-spin 120s linear infinite; }
+.q-ring-b { animation: q-spin 90s linear infinite reverse; }
+@keyframes q-spin { to { transform: rotate(360deg); } }
+.q-circle circle, .q-circle polygon { fill: none; stroke: rgb(192 57 43 / .16); stroke-width: 1; }
+.q-circle polygon { stroke: rgb(192 57 43 / .1); }
+.q-circle .q-dot { fill: rgb(255 120 100 / .35); stroke: none; }
+.q-circle-text { font: 11px/1 "Geist Mono", ui-monospace, monospace; letter-spacing: .32em; fill: rgb(255 138 122 / .28); }
+/* 마법진 점등: 경로가 그려질 때 원이 한 번 밝아집니다 */
+.qliphoth.is-traced .q-ring-b circle:not(.q-dot) { animation: q-pulse 4s ease-in-out infinite; }
+@keyframes q-pulse { 50% { stroke: rgb(255 106 85 / .32); } }
+@media (prefers-reduced-motion: reduce) { .q-runes, .q-ring-a, .q-ring-b, .qliphoth.is-traced .q-ring-b circle { animation: none; } }
