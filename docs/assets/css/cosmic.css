@@ -505,3 +505,9 @@ main#main { position: relative; z-index: 1; }
 .qliphoth.is-traced .q-ring-b circle:not(.q-dot) { animation: q-pulse 4s ease-in-out infinite; }
 @keyframes q-pulse { 50% { stroke: rgb(255 106 85 / .32); } }
 @media (prefers-reduced-motion: reduce) { .q-runes, .q-ring-a, .q-ring-b, .qliphoth.is-traced .q-ring-b circle { animation: none; } }
+/* 미니맵 등장·교대: 세로 중앙(-50%)은 고정하고 가로로만 미끄러지게 해 대각선으로 움직이지 않도록 */
+.minimap:not(.is-shown), .minimap.is-yielded { translate: 24px -50% !important; }
+.minimap.is-shown:not(.is-yielded) { translate: 0 -50% !important; }
+/* 상단 바: 클리포트에서는 번호 원과 진행 막대를 핏빛으로 */
+.topbar.is-qliphoth .tb-num { color: #ff8a7a; border-color: #c0392b; }
+.topbar.is-qliphoth ~ .reading-progress { background: linear-gradient(90deg, #c0392b, #ff8a7a) !important; }

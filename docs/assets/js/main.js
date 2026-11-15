@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261117b';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261118f';
+import { initSephirot } from './sephirot.js?v=20261118g';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117d';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118b';
@@ -694,6 +694,9 @@ frame = 0;
 const mid = innerHeight * 0.5;
 let next = '#main';
 if (chapters[0].getBoundingClientRect().top < mid) { for (const ch of chapters) { if (ch.getBoundingClientRect().top < mid) next = `#${ch.id}`; else break; } }
+/* 클리포트 아래로 넘어가면 #qliphoth, 열린 껍질 장에 닿으면 그 껍질(#q-thaumiel 등) */
+const q = document.getElementById('qliphoth');
+if (q && q.getBoundingClientRect().top < mid) { next = '#qliphoth'; for (const el of q.querySelectorAll('.q-card[id]')) if (el.getBoundingClientRect().top < mid) next = `#${el.id}`; }
 if (next !== current) { current = next; history.replaceState(history.state, '', `${location.pathname}${location.search}${next}`); }
 };
 addEventListener('scroll', () => { if (!frame) frame = requestAnimationFrame(sync); }, { passive: true });
@@ -730,7 +733,7 @@ once(rings, (el) => el.classList.add('is-shown'));
 // 브라우저 캐시에 들어가 두면, 나무를 깨우거나 장에 들어갈 때 소리와 그림이 바로 나옵니다
 (() => {
 const ids = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth'];
-const sounds = ['./assets/tree-on.mp3?v=2', './assets/tree-off.mp3?v=2', './assets/node-lit.mp3', './assets/path-trace.mp3?v=2', './assets/nav-jump.mp3?v=2', './assets/q-enter.mp3', './assets/q-exit.mp3', ...ids.map((id) => `./assets/sfx/${id}.mp3`)];
+const sounds = ['./assets/tree-on.mp3?v=2', './assets/tree-off.mp3?v=2', './assets/node-lit.mp3', './assets/path-trace.mp3?v=2', './assets/nav-jump.mp3?v=2', './assets/q-enter.mp3?v=2', './assets/q-exit.mp3', ...ids.map((id) => `./assets/sfx/${id}.mp3`)];
 const images = ids.flatMap((id) => [`./assets/sephirot/${id}-0.webp`, `./assets/sephirot/${id}-1.webp`]);
 const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
 const saveData = navigator.connection?.saveData;
@@ -857,7 +860,15 @@ src.after(qm);
 const sync = () => { const on = sec.classList.contains('is-awake'); src.classList.toggle('is-yielded', on); qm.classList.toggle('is-shown', on);
 /* 지금 보고 있는 열린 껍질을 강조 */
 let cur = ''; for (const id of ['q-gamaliel', 'q-thaumiel']) { const r = document.getElementById(id)?.getBoundingClientRect(); if (r && r.top < innerHeight * .55) { cur = id; break; } }
-qm.querySelectorAll('.qm-node.is-open').forEach((a) => a.classList.toggle('is-current', a.getAttribute('href') === `#${cur}`)); };
+qm.querySelectorAll('.qm-node.is-open').forEach((a) => a.classList.toggle('is-current', a.getAttribute('href') === `#${cur}`));
+/* 상단 바: 클리포트 안에서는 말쿠트 대신 지금 껍질 이름으로 바꾸고, 나가면 원래대로 되돌립니다 */
+const tb = document.querySelector('[data-topbar]'), num = tb?.querySelector('[data-tb-num]'), name = tb?.querySelector('[data-tb-name]'), link = tb?.querySelector('[data-tb-now]');
+if (tb && num && name && link) {
+if (on) { if (!saved) saved = { num: num.textContent, name: name.textContent, href: link.getAttribute('href'), seph: tb.dataset.seph };
+const label = cur === 'q-gamaliel' ? ['9', '클리포트 · 가말리엘'] : cur === 'q-thaumiel' ? ['1', '클리포트 · 타우미엘'] : ['Q', '클리포트 · 껍질의 나무'];
+num.textContent = label[0]; name.textContent = label[1]; link.setAttribute('href', `#${cur || 'qliphoth'}`); tb.classList.add('is-qliphoth'); }
+else if (saved) { num.textContent = saved.num; name.textContent = saved.name; link.setAttribute('href', saved.href); tb.classList.remove('is-qliphoth'); saved = null; } } };
+let saved = null;
 new MutationObserver(sync).observe(sec, { attributes: true, attributeFilter: ['class'] });
 let f = 0; addEventListener('scroll', () => { if (!f) f = requestAnimationFrame(() => { f = 0; sync(); }); }, { passive: true });
 sync();
