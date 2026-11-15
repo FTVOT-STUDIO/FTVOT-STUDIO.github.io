@@ -723,3 +723,18 @@ const rings = [...document.querySelectorAll('.bi-rings li')];
 rings.forEach((el, i) => { el.classList.add('fx-rise'); el.style.transitionDelay = `${i * 90}ms`; });
 once(rings, (el) => el.classList.add('is-shown'));
 })();
+
+// 첫 진입 속도: 인트로가 도는 동안(사용자가 아직 아무것도 안 하는 시간) 효과음과 세피라 그림을 미리 받아 둡니다.
+// 브라우저 캐시에 들어가 두면, 나무를 깨우거나 장에 들어갈 때 소리와 그림이 바로 나옵니다
+(() => {
+const ids = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth'];
+const sounds = ['./assets/tree-on.mp3?v=2', './assets/tree-off.mp3?v=2', './assets/node-lit.mp3', './assets/path-trace.mp3?v=2', './assets/nav-jump.mp3?v=2', ...ids.map((id) => `./assets/sfx/${id}.mp3`)];
+const images = ids.flatMap((id) => [`./assets/sephirot/${id}-0.webp`, `./assets/sephirot/${id}-1.webp`]);
+const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
+const saveData = navigator.connection?.saveData;
+idle(() => {
+// 데이터 절약 모드에서는 소리만 미리 받고 그림은 필요할 때 받습니다
+sounds.forEach((src) => fetch(src, { cache: 'force-cache', credentials: 'same-origin' }).catch(() => {}));
+if (!saveData) images.forEach((src, i) => setTimeout(() => { const img = new Image(); img.decoding = 'async'; img.src = src; }, i * 40));
+});
+})();
