@@ -710,7 +710,7 @@ const io = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.
 els.forEach((el) => io.observe(el));
 };
 const statements = [...document.querySelectorAll('.chapter-statement')];
-statements.forEach((el) => el.classList.add('fx-wipe'));
+/* 장 제목 와이프 연출은 요청으로 제거했습니다 */
 once(statements, (el) => el.classList.add('is-shown'));
 const numbers = [...document.querySelectorAll('.bi-stats dd')];
 once(numbers, (el) => {
@@ -751,4 +751,40 @@ document.documentElement.style.setProperty('--qd', p.toFixed(3));
 if (p > 0.55) sec.classList.add('is-awake'); };
 addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
 update();
+})();
+
+/* 클리포트 연출 2: 재(灰) 입자 캔버스, 타우미엘에서 경로를 타고 퍼지는 핏빛 신호, 잠긴 껍질의 글리치 */
+(() => {
+const sec = document.getElementById('qliphoth'); if (!sec) return;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, lite = document.documentElement.classList.contains('lite');
+/* 1) 재 입자: 아래에서 위로 천천히 떠오르며 흔들림. 화면에 보일 때만 돌립니다 */
+const cv = document.createElement('canvas'); cv.className = 'q-ash'; cv.setAttribute('aria-hidden', 'true'); sec.prepend(cv);
+const ctx = cv.getContext('2d'); let W = 0, H = 0, parts = [], run = false, last = 0;
+const N = lite ? 40 : 110;
+const resize = () => { const d = Math.min(devicePixelRatio || 1, 2); W = sec.clientWidth; H = sec.clientHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
+const spawn = (any) => ({ x: Math.random() * W, y: any ? Math.random() * H : H + 10, r: Math.random() * 1.8 + .4, v: Math.random() * 18 + 8, ph: Math.random() * 6.28, hot: Math.random() < .25 });
+const frame = (t) => { if (!run) return; const dt = Math.min(.05, (t - last) / 1000 || 0); last = t; ctx.clearRect(0, 0, W, H);
+for (const p of parts) { p.y -= p.v * dt; p.ph += dt; p.x += Math.sin(p.ph) * .3; if (p.y < -10) Object.assign(p, spawn(false));
+const a = Math.min(1, p.y / H + .1) * (p.hot ? .8 : .35); ctx.fillStyle = p.hot ? `rgba(255,110,90,${a})` : `rgba(200,190,190,${a * .6})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); }
+requestAnimationFrame(frame); };
+if (!reduce) { resize(); parts = Array.from({ length: N }, () => spawn(true)); addEventListener('resize', resize, { passive: true });
+new IntersectionObserver(([e]) => { if (e.isIntersecting && !run) { run = true; last = performance.now(); requestAnimationFrame(frame); } else if (!e.isIntersecting) run = false; }).observe(sec); }
+/* 2) 핏빛 신호: 타우미엘(1번)과 이어진 경로부터 바깥으로, 경로 위를 붉은 점이 흐릅니다 */
+const svg = sec.querySelector('.q-tree'), paths = sec.querySelector('.q-paths');
+if (svg && paths && !reduce) {
+const NS = 'http://www.w3.org/2000/svg', lines = [...paths.querySelectorAll('line')];
+lines.forEach((l, i) => { const s = document.createElementNS(NS, 'line'); for (const k of ['x1', 'y1', 'x2', 'y2']) s.setAttribute(k, l.getAttribute(k));
+const len = Math.hypot(l.getAttribute('x2') - l.getAttribute('x1'), l.getAttribute('y2') - l.getAttribute('y1'));
+s.setAttribute('class', 'q-signal'); s.style.setProperty('--len', len.toFixed(0)); s.style.animationDelay = `${(Number(l.getAttribute('y1')) / 640 * 2.4 + (i % 3) * .2).toFixed(2)}s`; paths.append(s); });
+/* 3) 타우미엘 심장 박동 파문 */
+const open = sec.querySelector('.q-node.is-open .q-ring');
+if (open) for (let k = 0; k < 2; k++) { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', open.getAttribute('cx')); c.setAttribute('cy', open.getAttribute('cy')); c.setAttribute('r', '40'); c.setAttribute('class', 'q-ripple'); c.style.animationDelay = `${k * 1.6}s`; open.parentNode.insertBefore(c, open); }
+/* 4) 잠긴 껍질 글리치: 무작위 노드가 잠깐 떨리며 이름 대신 깨진 문자를 비춥니다 */
+const locked = [...sec.querySelectorAll('.q-node.is-locked')], NOISE = '▓▒░█#?!ʘ∅';
+setInterval(() => { if (!sec.classList.contains('is-awake') || document.hidden) return;
+const g = locked[Math.floor(Math.random() * locked.length)], ring = g.querySelector('.q-ring'); if (!ring) return;
+const tx = document.createElementNS(NS, 'text'); tx.setAttribute('x', ring.getAttribute('cx')); tx.setAttribute('y', String(Number(ring.getAttribute('cy')) - 14)); tx.setAttribute('class', 'q-noise');
+tx.textContent = Array.from({ length: 4 }, () => NOISE[Math.floor(Math.random() * NOISE.length)]).join(''); g.append(tx); g.classList.add('is-glitch');
+setTimeout(() => { g.classList.remove('is-glitch'); tx.remove(); }, 420); }, 1400);
+}
 })();

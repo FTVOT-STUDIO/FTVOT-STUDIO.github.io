@@ -333,8 +333,6 @@
 .minimap:not(.is-shown) { opacity: 0 !important; translate: 24px 0; pointer-events: none !important; }
 /* ── 연출 보강 ── */
 /* 장 제목: 아래에서 위로 걷히며 드러남 (clip-path) */
-.fx-wipe { clip-path: inset(0 0 100% 0); translate: 0 18px; transition: clip-path 1s cubic-bezier(.16,1,.3,1), translate 1s cubic-bezier(.16,1,.3,1); }
-.fx-wipe.is-shown { clip-path: inset(0 0 -10% 0); translate: 0 0; }
 /* 연대기 항목: 차례로 떠오름 */
 .fx-rise { opacity: 0; translate: 0 14px; transition: opacity .6s ease, translate .7s cubic-bezier(.16,1,.3,1); }
 .fx-rise.is-shown { opacity: 1; translate: 0 0; }
@@ -400,3 +398,19 @@
 .q-veil { position: fixed; inset: 0; pointer-events: none; z-index: 1; background: radial-gradient(ellipse at 50% 120%, rgb(120 10 12 / .5), rgb(0 0 0 / .85) 70%); opacity: calc(var(--qd, 0) * .6); }
 .qliphoth > * { position: relative; z-index: 2; }
 @media (prefers-reduced-motion: reduce) { .qliphoth *, .q-veil { transition: none !important; animation: none !important; } .q-node, .q-sub, .q-latin { opacity: 1; } .q-title { clip-path: none; } .q-paths line { stroke-dashoffset: 0; } }
+/* 클리포트 연출 2 */
+.q-ash { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1 !important; pointer-events: none; }
+.q-signal { stroke: #ff6a55; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 10 var(--len); stroke-dashoffset: 10; opacity: 0; }
+.qliphoth.is-awake .q-signal { animation: q-flow 4.8s linear infinite; }
+@keyframes q-flow { 0% { stroke-dashoffset: 10; opacity: 0; } 8% { opacity: 1; } 55% { stroke-dashoffset: calc(var(--len) * -1); opacity: .9; } 56%, 100% { opacity: 0; stroke-dashoffset: calc(var(--len) * -1); } }
+.q-ripple { fill: none; stroke: #c0392b; stroke-width: 1.5; transform-box: fill-box; transform-origin: center; opacity: 0; }
+.qliphoth.is-awake .q-ripple { animation: q-ripple 3.2s cubic-bezier(.16, 1, .3, 1) infinite; }
+@keyframes q-ripple { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(2.1); opacity: 0; } }
+.q-noise { fill: #ff8a7a; font-family: var(--font-mono, monospace); font-size: 10px; text-anchor: middle; }
+.q-node.is-glitch { animation: q-jitter .42s steps(2) both; }
+.q-node.is-glitch .q-ring { stroke: rgb(255 106 85 / .7); }
+@keyframes q-jitter { 0% { transform: translate(2px, -1px); } 25% { transform: translate(-3px, 1px); } 50% { transform: translate(1px, 2px); } 75% { transform: translate(-1px, -2px); } 100% { transform: none; } }
+/* QLIPHOTH 글자: 깨어난 뒤 가끔 좌우로 찢어지는 색수차 */
+.qliphoth.is-awake .q-latin { animation: q-tear 7s 3s infinite; }
+@keyframes q-tear { 0%, 94%, 100% { text-shadow: none; transform: none; } 95% { text-shadow: -4px 0 rgb(255 60 40 / .6), 4px 0 rgb(120 0 0 / .6); transform: translateX(3px) skewX(-6deg); } 97% { text-shadow: 3px 0 rgb(255 60 40 / .5), -3px 0 rgb(120 0 0 / .5); transform: translateX(-2px); } }
+@media (prefers-reduced-motion: reduce) { .q-signal, .q-ripple { display: none; } .qliphoth.is-awake .q-latin { animation: none; } }
