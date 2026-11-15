@@ -399,7 +399,7 @@ const t = (x, y, cls, text) => { const el = document.createElementNS(NS3, 'text'
 const pts = [...nodeInfo.values()];
 const minY = Math.min(...pts.map((p) => p.ty)), maxY = Math.max(...pts.map((p) => p.ty));
 t(CX, minY - 128, 'cap-title', 'ETZ HAYIM');
-t(CX, minY - 98, 'cap-ko cap-lead', '생명의 나무 · 열 개의 세피라와 스물두 개의 길');
+t(CX, minY - 98, 'cap-ko cap-lead', '- 세피로트의 나무 -');
 // 고대 문자 흐름: 나무 뒤로 히브리·룬·연금술 기호 줄이 아주 희미하게 좌우로 흘러갑니다 (CSS 애니메이션)
 const GLYPHS = Array.from('אבגדהוזחטיכלמנסעפצקרשת ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ ☉☽☿♀♂♃♄⊕△▽ ∴∵⊙⋈ '); /* Array.from: 글자 단위로 나눠야 기호가 깨지지 않습니다 */
 const rows = [minY - 40, minY + 70, CY, maxY - 70, maxY + 40];

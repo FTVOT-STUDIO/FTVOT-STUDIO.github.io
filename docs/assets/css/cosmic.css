@@ -355,3 +355,35 @@
 .project-entry > summary:hover { translate: 4px 0; }
 .lite .chapter.is-in-view .orb { animation: none; }
 @media (prefers-reduced-motion: reduce) { .fx-wipe, .fx-rise { clip-path: none; opacity: 1; translate: none; } .chapter.is-in-view .orb { animation: none; } }
+/* 세피라 별칭: 장 제목 바로 위, 장 색으로 아주 담담하게 */
+.chapter-epithet { margin: 14px 0 6px; font-size: clamp(.95rem, .85rem + .4vw, 1.15rem); letter-spacing: .04em; color: var(--sc, var(--text-2)); opacity: .85; }
+/* 클리포트의 나무: 세피로트의 거울상. 핏빛 무채 톤, 잠긴 노드는 거의 꺼진 상태 */
+.qliphoth { --q: #b3261e; position: relative; padding: clamp(96px, 12vw, 160px) clamp(20px, 5vw, 64px) clamp(64px, 8vw, 112px); background: linear-gradient(to bottom, transparent, rgb(40 4 6 / .55) 30%, rgb(14 2 3 / .85)); }
+.q-head { text-align: center; margin-bottom: clamp(32px, 5vw, 64px); }
+.q-title { margin: 0; font-size: clamp(1.8rem, 1.2rem + 2.6vw, 3.2rem); letter-spacing: -.02em; color: var(--text-1, #fafafa); text-wrap: balance; }
+.q-sub { margin: 10px 0 0; font-size: 12px; letter-spacing: .08em; color: var(--text-3, #71717a); }
+.q-body { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+.q-tree { width: 100%; max-width: 420px; justify-self: center; overflow: visible; }
+.q-paths line { stroke: rgb(255 255 255 / .07); stroke-width: 2; }
+.q-ring { fill: rgb(10 2 3 / .9); stroke: rgb(255 255 255 / .1); stroke-width: 1.5; transition: stroke .3s, fill .3s; }
+.q-lock { fill: none; stroke: rgb(255 255 255 / .22); stroke-width: 1.6; stroke-linejoin: round; }
+.q-node.is-open .q-ring { stroke: var(--q); stroke-width: 2.4; fill: rgb(60 6 8 / .9); animation: q-beat 3.2s ease-in-out infinite; }
+.q-node.is-open:hover .q-ring, .q-node.is-open:focus-visible .q-ring { fill: rgb(90 10 12 / .95); }
+.q-node.is-open:focus-visible { outline: none; }
+.q-name { fill: #fafafa; font-size: 14px; font-weight: 600; text-anchor: middle; }
+@keyframes q-beat { 50% { stroke-opacity: .45; } }
+.q-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.q-item { display: grid; grid-template-columns: 40px 1fr; gap: 14px; padding: 14px 18px; border: 1px solid rgb(255 255 255 / .06); border-radius: 14px; background: rgb(255 255 255 / .015); }
+.q-item h3 { margin: 2px 0 0; font-size: 1.05rem; font-weight: 600; }
+.q-item h3 .mono { font-size: 11px; color: var(--text-3, #71717a); letter-spacing: .06em; }
+.q-idx { font-size: 12px; color: var(--text-3, #71717a); padding-top: 3px; }
+.q-epithet { margin: 0; font-size: 13px; color: var(--text-2, #a1a1aa); }
+.q-item.is-open { border-color: rgb(179 38 30 / .45); background: rgb(80 8 10 / .25); padding: 20px 18px; }
+.q-item.is-open .q-epithet { color: #e26a60; }
+.q-desc { margin: 10px 0 0; color: var(--text-2, #a1a1aa); line-height: 1.7; word-break: keep-all; }
+.q-item.is-locked { opacity: .45; }
+.q-item.is-locked h3 { color: var(--text-3, #71717a); letter-spacing: .04em; }
+.q-item.is-open:target { animation: q-flash 1.2s ease-out; }
+@keyframes q-flash { from { background: rgb(179 38 30 / .45); } }
+@media (max-width: 860px) { .q-body { grid-template-columns: 1fr; } .q-tree { max-width: 300px; } }
+@media (prefers-reduced-motion: reduce) { .q-node.is-open .q-ring, .q-item.is-open:target { animation: none; } }
