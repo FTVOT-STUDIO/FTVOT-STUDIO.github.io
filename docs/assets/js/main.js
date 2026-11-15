@@ -4,7 +4,7 @@
 import { initIntro, initSky } from './intro.js?v=20261118b';
 import { initCosmos } from './cosmos.js?v=20261117q';
 import { initSephirot } from './sephirot.js?v=20261118i';
-import { initGalleryAdmin } from './gallery-admin.js?v=20261118a';
+import { initGalleryAdmin } from './gallery-admin.js?v=20261118b';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
 import { initChapterScenes } from './chapter-scenes.js?v=20261117q';

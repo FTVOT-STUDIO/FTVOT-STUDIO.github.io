@@ -128,6 +128,19 @@ document.body.append(dialog);
 const say = (text, tone = '') => { status.textContent = text; status.dataset.tone = tone; };
 const setBusy = (on) => { busy = on; dialog.toggleAttribute('data-busy', on); dialog.querySelectorAll('button, input').forEach((n) => { if (n !== close) n.disabled = on; }); };
 const changed = () => document.dispatchEvent(new CustomEvent('gallery:changed'));
+/* 100% 이후 자동 새로고침: 배포가 끝나 사이트에서 새 그림 파일이 열릴 때까지 5초마다 확인하고, 열리면 갤러리를 다시 그립니다 (최대 4분) */
+const waitDeploy = async (names) => {
+if (!names.length) return;
+const url = (n) => `./assets/gallery/${encodeURIComponent(n)}?check=${Date.now()}`;
+const ready = async () => { for (const n of names) { try { const r = await fetch(url(n), { method: 'HEAD', cache: 'no-store' }); if (!r.ok) return false; } catch { return false; } } return true; };
+const t0 = Date.now();
+while (Date.now() - t0 < 240000) {
+await new Promise((r) => setTimeout(r, 5000));
+if (await ready()) { changed(); say('사이트에 반영되었습니다. 갤러리를 새로 고쳤습니다.', 'ok'); progress.done('반영 완료'); return; }
+say(`사이트 반영 기다리는 중 · ${Math.round((Date.now() - t0) / 1000)}초`);
+}
+say('배포가 늦어지고 있습니다. 잠시 뒤 갤러리의 새로고침을 눌러 주세요.');
+};
 
 const renderList = () => {
 list.replaceChildren();
@@ -163,7 +176,7 @@ const upload = async (picked) => {
 const items = [...picked].filter((f) => IMAGE_RE.test(f.name));
 if (!items.length) { say('PNG · JPG · WebP · GIF · AVIF 파일만 올릴 수 있습니다.', 'error'); return; }
 setBusy(true);
-let done = 0;
+let done = 0; const uploaded = [];
 progress.reset();
 /* 진행률 배분: 파일마다 같은 몫, 그 안에서 압축 10% · 원본 전송 80% · 썸네일 10% */
 const share = 1 / items.length; let idx = 0;
@@ -183,9 +196,10 @@ await xhrJSON(`${API}${pathOf(name)}`, { method: 'PUT', token: getToken(), body:
 progress.set(base + share * .9, `썸네일 만드는 중 · ${name}`);
 const thumbBlob = await makeThumb(packed.file);
 if (thumbBlob) { try { const sha = await thumbSha(name, getToken()); await gh(thumbPath(name), getToken(), { method: 'PUT', body: JSON.stringify({ message: `Thumbnail ${name}`, content: await fileToBase64(thumbBlob), branch: BRANCH, ...(sha ? { sha } : {}) }) }); } catch { /* 썸네일이 없어도 갤러리는 원본으로 표시됩니다 */ } }
-done += 1; idx += 1; progress.set(idx * share);
+done += 1; idx += 1; uploaded.push(name); progress.set(idx * share);
 }
-await refresh(); changed(); progress.done('완료');
+await refresh(); changed(); progress.done('업로드 완료 · 사이트 반영을 기다리는 중');
+waitDeploy(uploaded);
 say(`${done}개를 올렸습니다. 배포가 끝나면(약 1분) 갤러리에 표시됩니다.`, 'ok');
 } catch (error) { say(error.message, 'error'); }
 finally { setBusy(false); fileInput.value = ''; }

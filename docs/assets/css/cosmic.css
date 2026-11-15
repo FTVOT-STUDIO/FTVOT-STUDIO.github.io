@@ -518,7 +518,7 @@ main#main { position: relative; z-index: 1; }
 /* 공용 진행률: 모노 숫자 + 2px 막대 + 한 줄 설명. 갤러리는 티페레트 색, 게임은 클리포트 핏빛 */
 .ui-progress { --up: #fafafa; --up2: #a1a1aa; display: grid; gap: 8px; padding: 14px 24px 4px; }
 .ui-progress[hidden] { display: none; }
-.ui-progress.is-tiferet { --up: #f2c46b; --up2: #e8a24a; }
+.ui-progress.is-tiferet { --up: color-mix(in oklab, var(--c6, #e8889a) 70%, #fff); --up2: var(--c6, #e8889a); } /* 티페레트 장 색(분홍빛 빨강) */
 .ui-progress.is-qliphoth { --up: #ff8a7a; --up2: #c0392b; padding-inline: 0; }
 .up-top { display: flex; gap: 12px; align-items: baseline; min-width: 0; }
 .up-pct { font-size: 22px; font-weight: 500; letter-spacing: .04em; color: #fafafa; font-variant-numeric: tabular-nums; }
