@@ -422,18 +422,26 @@ const narrow = innerWidth < 700;
 const m = Math.round(e * 1000) / 1000 + Math.round(leave * 1000) * 10; if (m === lastMorph) return; lastMorph = m;
 for (const info of nodeInfo.values()) {
 const i = Number(info.node.dataset.seph) - 1;
-const raw = Math.min(1, Math.max(0, e * 1.45 - i * (.45 / 9))); /* 시차를 조금 줄여 세피라가 더 긴 시간 동안 부드럽게 이동 */
-/* 별자리 재배치 연출: ① 세피라가 작은 빛점으로 오므라들고 ② 빛점이 새 자리로 흘러가 ③ 그 자리에서 다시 피어나며 켜집니다.
-   회전하지 않고, 나무가 한 번 흩어졌다 가로로 다시 맺히는 느낌. 세피라 순서대로 시차를 둡니다 */
+const raw = Math.min(1, Math.max(0, e * 1.25 - i * (.25 / 9))); /* 세피라 순서 시차는 작게: 함께 모였다 함께 퍼지도록 */
+/* 별자리 재배치 연출: ① 세피라가 빛점으로 오므라들며 ② 나무 중심 쪽으로 모였다가 ③ 가로 자리로 퍼져 나가 ④ 다시 피어나며 켜집니다.
+   중심을 거쳐 퍼지므로 움직임이 한쪽으로 쏠리지 않고 고르게 숨 쉬듯 모였다 흩어집니다 */
 const seg = (a, b) => Math.min(1, Math.max(0, (raw - a) / (b - a)));
-const shrinkT = seg(0, .3), moveT = seg(.18, .82), bloomT = seg(.72, 1);
+const shrinkT = seg(0, .38), moveT = seg(.12, .88), bloomT = seg(.62, 1);
 const k = narrow ? 0 : easeInOut(moveT);
-const mx = narrow ? 0 : info.tx - info.x, my = narrow ? 0 : info.ty - info.y;
-info.cx = info.x + mx * k;
-info.cy = info.y + my * k;
-/* 크기: 1 → 0.16(빛점) → 1 (피어날 때 살짝 커졌다 자리 잡음). 좁은 화면은 크기 변화 없이 제자리 점등만 */
-const sc = narrow ? 1 : (raw <= 0 || raw >= 1) ? 1 : bloomT > 0 ? .16 + .84 * settle(bloomT) : 1 - .84 * (shrinkT * shrinkT);
-info.node.classList.toggle('is-mote', !narrow && raw > 0 && raw < 1 && shrinkT >= 1 && bloomT <= 0); /* 이동 중인 빛점 상태 */
+if (narrow) { info.cx = info.x; info.cy = info.y; }
+else {
+/* 2차 베지어: 출발점 → (출발·도착의 가운데를 나무 중심 쪽으로 60% 당긴 점) → 도착점 */
+const midx = (info.x + info.tx) / 2, midy = (info.y + info.ty) / 2, ccx = midx + (CX - midx) * .6, ccy = midy + (CY - midy) * .6, u = 1 - k;
+info.cx = u * u * info.x + 2 * u * k * ccx + k * k * info.tx;
+info.cy = u * u * info.y + 2 * u * k * ccy + k * k * info.ty;
+}
+/* 크기: 1 → 0.32(빛점) → 1. 줄어들 때와 피어날 때 모두 부드러운 곡선, 두 구간이 겹치며 이어집니다 */
+const smooth = (t) => t * t * (3 - 2 * t);
+const sc = narrow ? 1 : (raw <= .001 || raw >= .999) ? 1 : Math.min(1 - .68 * smooth(shrinkT) + .68 * smooth(bloomT), 1);
+/* 빛점에 가까울수록 글자·번호가 서서히 사라졌다 돌아옵니다 (전환 중에만 직접 지정, 평소엔 원래 스타일 그대로) */
+const mote = narrow || raw <= .001 || raw >= .999 ? 0 : Math.max(0, 1 - Math.abs(sc - .32) / .68);
+const labels = info.labels ??= [...info.node.querySelectorAll('text, .node-num-bg')];
+for (const t of labels) t.style.opacity = mote > 0 ? (1 - mote).toFixed(3) : '';
 // 떠날 때: 세피라마다 다른 속도로 위로 흩어지는 시차(패럴랙스). 케테르가 가장 느리고 말쿠트가 가장 빠릅니다
 const ls = leave * leave;
 info.cx -= ls * (i - 4.5) * 6;
@@ -451,7 +459,7 @@ if (ain && K && !narrow) { const kk = easeInOut(Math.min(1, Math.max(0, e))); ai
 if (veil && !narrow) { const va = 90 * easeInOut(e); veil.setAttribute('transform', e ? `rotate(${(-va).toFixed(2)} ${CX} ${CY})` : ''); if (veilText) veilText.setAttribute('transform', e ? `rotate(${va.toFixed(2)} ${veilText.getAttribute('x')} ${veilText.getAttribute('y')})` : ''); }
 // 배경 궤도: 다 바뀐 뒤 나무 뒤를 채우는 고리와 눈금 (진하기만 e로 조절, 회전은 CSS)
 tree.style.setProperty('--laid', easeInOut(e).toFixed(3));
-if (!narrow) tree.style.setProperty('--relink', (e <= 0 || e >= 1) ? '1' : (Math.max(0, 1 - Math.sin(Math.PI * e) * 1.4)).toFixed(3)); /* 재배치 중 경로 흐림 */
+if (!narrow) tree.style.setProperty('--relink', (e <= 0 || e >= 1) ? '1' : (1 - .85 * Math.pow(Math.sin(Math.PI * e), 1.5)).toFixed(3)); /* 재배치 중 경로가 부드럽게 흐려졌다 돌아옴 */
 for (const { el, a, b } of lines) { const A = nodeInfo.get(a), B = nodeInfo.get(b); if (!A || !B) continue; el.setAttribute('x1', A.cx.toFixed(1)); el.setAttribute('y1', A.cy.toFixed(1)); el.setAttribute('x2', B.cx.toFixed(1)); el.setAttribute('y2', B.cy.toFixed(1)); }
 for (const bd of badges) { const x = bd.A.cx + (bd.B.cx - bd.A.cx) * bd.t, y = bd.A.cy + (bd.B.cy - bd.A.cy) * bd.t; bd.el.setAttribute('transform', `translate(${(x - bd.bx).toFixed(2)} ${(y - bd.by).toFixed(2)})`); }
 };
