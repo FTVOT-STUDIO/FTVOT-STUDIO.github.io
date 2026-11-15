@@ -23,8 +23,27 @@ window.removeEventListener('touchstart', close);
 window.setTimeout(() => intro.remove(), 650);
 onDone();
 };
-window.setTimeout(() => { if (!closed && state) state.textContent = 'ARCHIVE CONNECTED'; }, 800);
-window.setTimeout(close, 1550);
+// 1) 로딩: 진행 막대와 함께 퍼센트와 상태 문구가 바뀝니다 (약 1.3초)
+const pct = intro.querySelector('[data-intro-pct]'), hello = intro.querySelector('[data-intro-hello]');
+const STEPS = ['LOADING ARCHIVE', 'MOUNTING WORLDS', 'LINKING SEPHIROT', 'COMPILING'];
+const LOAD_MS = 1300, start = performance.now();
+const tick = (now) => {
+if (closed) return;
+const k = Math.min(1, (now - start) / LOAD_MS), eased = 1 - Math.pow(1 - k, 2.2);
+if (pct) pct.textContent = `${Math.round(eased * 100)}%`;
+if (state) state.textContent = STEPS[Math.min(STEPS.length - 1, Math.floor(k * STEPS.length))];
+if (k < 1) requestAnimationFrame(tick); else greet();
+};
+requestAnimationFrame(tick);
+// 2) 인사: 로딩 화면이 걷히고 Hello World! 가 한 글자씩 입력됩니다 → 잠시 머문 뒤 사이트로 들어갑니다
+const greet = () => {
+if (closed) return;
+intro.classList.add('is-greeting');
+const text = 'Hello World!';
+let n = 0;
+const type = () => { if (closed || !hello) return; hello.textContent = text.slice(0, ++n); if (n < text.length) setTimeout(type, 65); else setTimeout(close, 800); };
+setTimeout(type, 240);
+};
 intro.addEventListener('click', close);
 window.addEventListener('keydown', close, { once: true });
 window.addEventListener('wheel', close, { once: true, passive: true });

@@ -263,3 +263,12 @@
 .s-malkuth .contact-links a:hover { background: rgb(255 255 255 / .05); }
 .s-malkuth .contact-links .mono { color: var(--sc); font-size: 12px; }
 @media (max-width: 860px) { .s-malkuth .seph-body { grid-template-columns: 1fr; } .s-malkuth .contact-stage { grid-row: auto; } }
+/* 인트로: 로딩(막대·퍼센트·상태) → 걷히고 Hello World! 타이핑 */
+.intro { animation-delay: 4.6s !important; } /* 안전장치: 스크립트가 멈춰도 4.6초 뒤엔 인트로를 걷어냅니다 */
+.intro-pct { color: var(--text, #fafafa); margin-left: 6px; font-variant-numeric: tabular-nums; }
+.intro-content > :not(.intro-hello) { transition: opacity .35s ease, translate .35s ease; }
+.intro.is-greeting .intro-content > :not(.intro-hello) { animation: none !important; opacity: 0 !important; translate: 0 -8px; }
+.intro-hello { position: absolute; left: 50%; top: 50%; translate: -50% -50%; margin: 0; font: 600 clamp(32px, 6vw, 64px)/1 var(--font-mono, ui-monospace, monospace); letter-spacing: -.01em; color: #fafafa; white-space: nowrap; }
+.intro-hello:not(:empty)::after { content: ''; display: inline-block; width: .55em; height: .9em; margin-left: .08em; vertical-align: -.08em; background: #b9a3e3; animation: hello-caret .9s steps(1) infinite; }
+@keyframes hello-caret { 50% { opacity: 0; } }
+.intro-content { position: relative; }
