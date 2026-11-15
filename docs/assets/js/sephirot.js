@@ -423,29 +423,35 @@ const m = Math.round(e * 1000) / 1000 + Math.round(leave * 1000) * 10; if (m ===
 for (const info of nodeInfo.values()) {
 const i = Number(info.node.dataset.seph) - 1;
 const raw = Math.min(1, Math.max(0, e * 1.45 - i * (.45 / 9))); /* 시차를 조금 줄여 세피라가 더 긴 시간 동안 부드럽게 이동 */
-const k = settle(raw); /* 출발할 때 아주 살짝 뒤로 당겼다가, 도착할 때 조금 지나쳤다 제자리에 안착하는 자연스러운 곡선 */
-// 직선이 아니라 바깥쪽으로 부풀었다 들어오는 호
-// 세로 화면(폭 700 미만)에서는 가로로 눕히면 너무 작아지므로 제자리에서 차례로 켜지기만 합니다
-const mx = narrow ? 0 : info.tx - info.x, my = narrow ? 0 : info.ty - info.y, len = Math.hypot(mx, my) || 1;
-const bulge = Math.sin(Math.PI * Math.min(1, Math.max(0, k))) * Math.min(48, len * .2); /* 호를 조금 완만하게 */
-info.cx = info.x + mx * k + (-my / len) * bulge;
-info.cy = info.y + my * k + (mx / len) * bulge;
+/* 별자리 재배치 연출: ① 세피라가 작은 빛점으로 오므라들고 ② 빛점이 새 자리로 흘러가 ③ 그 자리에서 다시 피어나며 켜집니다.
+   회전하지 않고, 나무가 한 번 흩어졌다 가로로 다시 맺히는 느낌. 세피라 순서대로 시차를 둡니다 */
+const seg = (a, b) => Math.min(1, Math.max(0, (raw - a) / (b - a)));
+const shrinkT = seg(0, .3), moveT = seg(.18, .82), bloomT = seg(.72, 1);
+const k = narrow ? 0 : easeInOut(moveT);
+const mx = narrow ? 0 : info.tx - info.x, my = narrow ? 0 : info.ty - info.y;
+info.cx = info.x + mx * k;
+info.cy = info.y + my * k;
+/* 크기: 1 → 0.16(빛점) → 1 (피어날 때 살짝 커졌다 자리 잡음). 좁은 화면은 크기 변화 없이 제자리 점등만 */
+const sc = narrow ? 1 : (raw <= 0 || raw >= 1) ? 1 : bloomT > 0 ? .16 + .84 * settle(bloomT) : 1 - .84 * (shrinkT * shrinkT);
+info.node.classList.toggle('is-mote', !narrow && raw > 0 && raw < 1 && shrinkT >= 1 && bloomT <= 0); /* 이동 중인 빛점 상태 */
 // 떠날 때: 세피라마다 다른 속도로 위로 흩어지는 시차(패럴랙스). 케테르가 가장 느리고 말쿠트가 가장 빠릅니다
 const ls = leave * leave;
 info.cx -= ls * (i - 4.5) * 6;
 info.cy -= ls * (40 + i * 22);
-info.node.setAttribute('transform', k ? `translate(${(info.cx - info.x).toFixed(2)} ${(info.cy - info.y).toFixed(2)})` : '');
+const moved = info.cx !== info.x || info.cy !== info.y;
+info.node.setAttribute('transform', moved || sc !== 1 ? `translate(${info.cx.toFixed(2)} ${info.cy.toFixed(2)}) scale(${sc.toFixed(3)}) translate(${-info.x} ${-info.y})` : '');
 // 도착 = 점등
 const lit = raw >= .999; // 부동소수 오차로 말쿠트(마지막)가 1에 못 미쳐 켜지지 않던 문제 방지
 if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit); if (lit && treeAudible) playLayer('node-lit'); /* 나무 구간에서 실제로 켜질 때만 */ }
 }
 // 케테르 위의 아인 호(세 겹 반원)는 케테르를 따라가며 바깥쪽(왼쪽)을 향하도록 방향만 바꿉니다
 const K = nodeInfo.get('1');
-if (ain && K && !narrow) { const kk = settle(Math.min(1, Math.max(0, e * 1.45))); ain.setAttribute('transform', e ? `translate(${(K.cx - K.x).toFixed(2)} ${(K.cy - K.y).toFixed(2)}) rotate(${(-90 * kk).toFixed(2)} ${K.x} ${K.y})` : ''); }
+if (ain && K && !narrow) { const kk = easeInOut(Math.min(1, Math.max(0, e))); ain.setAttribute('transform', e ? `translate(${(K.cx - K.x).toFixed(2)} ${(K.cy - K.y).toFixed(2)}) rotate(${(-90 * kk).toFixed(2)} ${K.x} ${K.y})` : ''); }
 // 심연의 장막: 위 삼각과 아래를 가르는 가로선이 세로선으로 서서히 바뀝니다
 if (veil && !narrow) { const va = 90 * easeInOut(e); veil.setAttribute('transform', e ? `rotate(${(-va).toFixed(2)} ${CX} ${CY})` : ''); if (veilText) veilText.setAttribute('transform', e ? `rotate(${va.toFixed(2)} ${veilText.getAttribute('x')} ${veilText.getAttribute('y')})` : ''); }
 // 배경 궤도: 다 바뀐 뒤 나무 뒤를 채우는 고리와 눈금 (진하기만 e로 조절, 회전은 CSS)
 tree.style.setProperty('--laid', easeInOut(e).toFixed(3));
+if (!narrow) tree.style.setProperty('--relink', (e <= 0 || e >= 1) ? '1' : (Math.max(0, 1 - Math.sin(Math.PI * e) * 1.4)).toFixed(3)); /* 재배치 중 경로 흐림 */
 for (const { el, a, b } of lines) { const A = nodeInfo.get(a), B = nodeInfo.get(b); if (!A || !B) continue; el.setAttribute('x1', A.cx.toFixed(1)); el.setAttribute('y1', A.cy.toFixed(1)); el.setAttribute('x2', B.cx.toFixed(1)); el.setAttribute('y2', B.cy.toFixed(1)); }
 for (const bd of badges) { const x = bd.A.cx + (bd.B.cx - bd.A.cx) * bd.t, y = bd.A.cy + (bd.B.cy - bd.A.cy) * bd.t; bd.el.setAttribute('transform', `translate(${(x - bd.bx).toFixed(2)} ${(y - bd.by).toFixed(2)})`); }
 };

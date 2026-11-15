@@ -614,3 +614,8 @@ html.tree-grown #tree .nodes { animation: hero-fade 1.1s ease .45s both; }
 .is-offscreen .image-mirror, .is-offscreen .project-reflection { visibility: hidden; }
 /* 큰 장식 레이어는 독립 레이어로 분리해 스크롤 중 다시 그리는 범위를 줄입니다 */
 .sky, .q-ash, .pl-sky { contain: strict; }
+/* 별자리 재배치: 이동 중인 세피라는 빛나는 점이 되고, 경로 선·글자는 잠시 흐려집니다 */
+
+.ht-tree .node.is-mote .node-ring { fill: var(--sc, #c9a8ef); stroke-width: 6; }
+.ht-tree .node.is-mote text, .ht-tree .node.is-mote .node-num-bg { opacity: 0; }
+.ht-tree .paths, .ht-tree .path-badges, .ht-tree .badges { opacity: var(--relink, 1); }
