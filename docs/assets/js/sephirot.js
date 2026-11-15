@@ -358,11 +358,12 @@ let lastAngle = -1;
 // 케테르→말쿠트 순서로 하나씩 출발해 호를 그리며 그 자리로 옮겨 가고, 도착하는 순간 불이 켜집니다.
 // 경로선과 히브리 배지는 양 끝 세피라를 따라 다시 그려집니다. 글자는 돌지 않으므로 항상 정방향입니다.
 const CX = 200, CY = 320; // viewBox 중심
+const TREE_MID_Y = 350; // 케테르(64)와 말쿠트(636)의 가운데
 const nodeInfo = new Map();
 tree.querySelectorAll('.node').forEach((node) => {
 const ring = node.querySelector('.node-ring'); if (!ring) return;
 const x = Number(ring.getAttribute('cx')), y = Number(ring.getAttribute('cy'));
-nodeInfo.set(node.dataset.seph, { node, x, y, tx: CX + (y - CY), ty: CY - (x - CX), cx: x, cy: y, lit: false });
+nodeInfo.set(node.dataset.seph, { node, x, y, tx: CX + (y - TREE_MID_Y), ty: CY - (x - CX), cx: x, cy: y, lit: false }); /* 세로 나무의 가운데(케테르~말쿠트 중간)를 기준으로 눕혀 좌우가 대칭이 되게 */
 });
 const lines = [...tree.querySelectorAll('line.path, line.path-signal')].map((el) => ({ el, a: el.dataset.a, b: el.dataset.b }));
 const badges = [...tree.querySelectorAll('.path-badge')].map((el) => {
@@ -420,6 +421,12 @@ return x < .5 ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2 : (Math.pow(2
 const morph = (e, leave = 0) => {
 const narrow = innerWidth < 700;
 const m = Math.round(e * 1000) / 1000 + Math.round(leave * 1000) * 10; if (m === lastMorph) return; lastMorph = m;
+/* 모이는 지점 = 지금 화면의 정중앙을 SVG 좌표로 바꾼 점. 전환 중 페이지가 미끄러져도 빛점은 늘 화면 가운데로 모입니다 */
+let gather = { x: CX, y: CY };
+try { const svgEl = tree.querySelector('svg'), vb = svgEl?.viewBox?.baseVal, r = svgEl?.getBoundingClientRect();
+/* getScreenCTM은 부모의 CSS 변형(고정·확대)을 빠뜨리는 브라우저가 있어, 실제 화면 상자와 viewBox 비율로 직접 환산합니다 */
+if (vb && r && r.width && r.height) { const sc = Math.min(r.width / vb.width, r.height / vb.height), ox = r.left + (r.width - vb.width * sc) / 2, oy = r.top + (r.height - vb.height * sc) / 2;
+gather = { x: vb.x + (innerWidth / 2 - ox) / sc, y: vb.y + (innerHeight / 2 - oy) / sc }; } } catch { /* 계산 실패 시 나무 중심 */ }
 for (const info of nodeInfo.values()) {
 const i = Number(info.node.dataset.seph) - 1;
 const raw = Math.min(1, Math.max(0, e * 1.25 - i * (.25 / 9))); /* 세피라 순서 시차는 작게: 함께 모였다 함께 퍼지도록 */
@@ -431,11 +438,11 @@ const k = narrow ? 0 : easeInOut(moveT);
 if (narrow) { info.cx = info.x; info.cy = info.y; }
 else {
 /* 2차 베지어: 출발점 → (출발·도착의 가운데를 나무 중심 쪽으로 60% 당긴 점) → 도착점 */
-/* 좌우 균형: 왼쪽 기둥 세피라는 왼쪽으로, 오른쪽 기둥은 오른쪽으로, 가운데 기둥은 번갈아 좌우로 활처럼 휘며 이동해 움직임이 양쪽으로 고르게 퍼집니다 */
-const side = Math.abs(info.x - CX) > 8 ? Math.sign(info.x - CX) : (i % 2 ? -1 : 1);
-const midx = (info.x + info.tx) / 2, midy = (info.y + info.ty) / 2, ccx = midx + (CX - midx) * .45 + side * 90, ccy = midy + (CY - midy) * .45, u = 1 - k;
-info.cx = u * u * info.x + 2 * u * k * ccx + k * k * info.tx;
-info.cy = u * u * info.y + 2 * u * k * ccy + k * k * info.ty;
+/* 중앙 집결: 빛점들이 모두 나무 한가운데로 모여 작은 원을 이뤘다가, 그 자리에서 가로 배치로 다시 퍼져 나갑니다.
+   어느 한쪽으로 치우치지 않고 화면 중앙에서 접혔다 펼쳐지는 느낌 */
+const ang = (i / 10) * Math.PI * 2 - Math.PI / 2, qx = gather.x + Math.cos(ang) * 26, qy = gather.y + Math.sin(ang) * 26;
+if (moveT < .5) { const h = easeInOut(moveT * 2); info.cx = info.x + (qx - info.x) * h; info.cy = info.y + (qy - info.y) * h; }
+else { const h = easeInOut((moveT - .5) * 2); info.cx = qx + (info.tx - qx) * h; info.cy = qy + (info.ty - qy) * h; }
 }
 /* 크기: 1 → 0.32(빛점) → 1. 줄어들 때와 피어날 때 모두 부드러운 곡선, 두 구간이 겹치며 이어집니다 */
 const smooth = (t) => t * t * (3 - 2 * t);
