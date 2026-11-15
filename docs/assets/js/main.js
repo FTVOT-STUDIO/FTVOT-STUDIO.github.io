@@ -952,3 +952,13 @@ document.addEventListener('click', (e) => {
 const a = e.target instanceof Element ? e.target.closest('a[href^="#q-"]') : null;
 if (a && a.closest('.q-tree, .q-minimap')) window.__sfx?.('q-jump');
 });
+
+/* 모바일 소리 버튼 자동 숨김: 아래로 스크롤하면 숨기고, 위로 올리거나 1.2초 멈추면 다시 보입니다 */
+(() => {
+const ac = document.querySelector('.audio-controls'); if (!ac) return;
+const mq = matchMedia('(max-width: 767px)'); let lastY = scrollY, idle = 0;
+addEventListener('scroll', () => { if (!mq.matches) { ac.classList.remove('is-tucked'); return; }
+const y = scrollY, dy = y - lastY; lastY = y;
+if (dy > 4) ac.classList.add('is-tucked'); else if (dy < -4) ac.classList.remove('is-tucked');
+clearTimeout(idle); idle = setTimeout(() => ac.classList.remove('is-tucked'), 1200); }, { passive: true });
+})();
