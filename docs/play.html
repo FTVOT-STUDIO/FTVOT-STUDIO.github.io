@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<!-- Unity WebGL은 WebAssembly 실행이 필요해 이 페이지에만 wasm-unsafe-eval/unsafe-eval을 허용합니다 (메인 사이트 CSP는 그대로) -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-eval' blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' blob: data:; object-src 'none'; base-uri 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>PLAY | FTVOT_STUDIO</title>
+<link rel="stylesheet" href="./assets/css/play.css?v=20261118a">
+</head>
+<body>
+<header class="pl-bar">
+<a class="pl-back" href="./#q-gamaliel">← 가말리엘로 돌아가기</a>
+<h1 class="pl-title" data-title>불러오는 중</h1>
+<button class="pl-full" type="button" data-full aria-label="전체 화면">⛶</button>
+</header>
+<main class="pl-stage" data-stage>
+<canvas id="unity-canvas" tabindex="-1"></canvas>
+<div class="pl-load" data-load><p class="pl-log mono" data-log>> 세계를 불러오는 중</p><div class="pl-track"><div class="pl-fill" data-fill></div></div><p class="pl-pct mono" data-pct>0%</p></div>
+<p class="pl-error" data-error hidden></p>
+</main>
+<script type="module" src="./assets/js/play.js?v=20261118a"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "where-whale",
+    "title": "Where Whale",
+    "desc": "클리커 · 4인 협업",
+    "width": 540,
+    "height": 960,
+    "cover": "cover.webp",
+    "updated": "2026-11-15",
+    "chunks": {
+      "StreamingAssets/Osm/ulsan.pack": {
+        "parts": 3,
+        "size": 281784992
+      }
+    },
+    "build": {
+      "loader": "Web_Build.loader.js",
+      "data": "Web_Build.data.unityweb",
+      "framework": "Web_Build.framework.js.unityweb",
+      "wasm": "Web_Build.wasm.unityweb"
+    }
+  }
+]

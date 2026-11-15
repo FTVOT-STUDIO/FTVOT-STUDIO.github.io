@@ -5,6 +5,8 @@ import { initIntro, initSky } from './intro.js?v=20261117b';
 import { initCosmos } from './cosmos.js?v=20261117q';
 import { initSephirot } from './sephirot.js?v=20261118e';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117d';
+import { initGames } from './games.js?v=20261118a';
+import { initGameAdmin } from './game-admin.js?v=20261118a';
 import { initChapterScenes } from './chapter-scenes.js?v=20261117q';
 // 저사양·모바일 기기 감지: 코어 4개 이하, 메모리 4GB 이하, 터치 위주 화면이면 'lite' 모드로 무거운 배경 연출을 줄입니다
 const LITE = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || matchMedia('(pointer: coarse)').matches;
@@ -71,7 +73,7 @@ enhance(() => { if (document.querySelector('link[href*="cosmic.css"]')) initCosm
 enhance(initAmbientAudio);
 enhance(() => initSephirot({ scrollTo: scrollToEl }));
 enhance(() => initChapterScenes());
-enhance(() => initGalleryAdmin()); // 사이트에서 그림 올리기·이름 변경·삭제 // 세피라별 배경 연출 (좌우 여백에 선화로 그림)
+enhance(() => initGalleryAdmin()); enhance(() => initGames()); enhance(() => initGameAdmin()); // 사이트에서 그림 올리기·이름 변경·삭제 // 세피라별 배경 연출 (좌우 여백에 선화로 그림)
 enhance(initAnchors);
 enhance(initArkaReader);
 enhance(initDetails);
@@ -790,7 +792,9 @@ const sec = document.getElementById('qliphoth'); if (!sec) return;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, DUR = 1800;
 const nodes = [...sec.querySelectorAll('.q-node')];
 const ease = (t) => { /* cubic-bezier(.65,0,.15,1) 근사: 나무 바로가기 글라이드와 동일한 느낌 */ const c = (x, a, b) => 3 * a * x * (1 - x) ** 2 + 3 * b * x * x * (1 - x) + x ** 3; let lo = 0, hi = 1, x = t; for (let i = 0; i < 18; i++) { x = (lo + hi) / 2; if (c(x, .65, .15) < t) lo = x; else hi = x; } return c(x, 0, 1); };
-let busy = false, armed = true, lastY = scrollY, timers = [];
+let busy = false, armed = true, lastY = scrollY, timers = [], traced = false, glided = false;
+/* 글라이드와 점등 애니메이션이 모두 끝난 뒤 0.5초 더 잠갔다가 풉니다 */
+const tryRelease = () => { if (busy && traced && glided) setTimeout(() => { busy = false; }, 500); };
 const block = (e) => { if (busy) e.preventDefault(); };
 addEventListener('wheel', block, { passive: false }); addEventListener('touchmove', block, { passive: false });
 addEventListener('keydown', (e) => { if (busy && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space', 'End', 'Home'].includes(e.code)) e.preventDefault(); });
@@ -799,16 +803,16 @@ const light = () => { timers.forEach(clearTimeout); timers = [];
 sec.classList.add('is-awake');
 timers.push(setTimeout(() => sfx('tree-on'), 500));
 nodes.forEach((n, i) => timers.push(setTimeout(() => { n.classList.add('is-lit'); sfx('node-lit'); }, 700 + i * 150)));
-timers.push(setTimeout(() => { sec.classList.add('is-traced'); sfx('path-trace'); }, 700 + nodes.length * 150)); };
+timers.push(setTimeout(() => { sec.classList.add('is-traced'); sfx('path-trace'); traced = true; tryRelease(); }, 700 + nodes.length * 150)); };
 const dim = () => { timers.forEach(clearTimeout); timers = []; sec.classList.remove('is-awake', 'is-traced'); nodes.forEach((n) => n.classList.remove('is-lit')); };
-const descend = () => { busy = true; armed = false;
+const descend = () => { busy = true; armed = false; traced = false; glided = false;
 const from = scrollY, to = sec.getBoundingClientRect().top + scrollY, t0 = performance.now();
-if (reduce) { scrollTo(0, to); light(); busy = false; return; }
+if (reduce) { scrollTo(0, to); glided = true; light(); return; }
 document.documentElement.style.scrollBehavior = 'auto';
 const step = (t) => { const k = Math.min(1, (t - t0) / DUR), e = ease(k); scrollTo(0, from + (to - from) * e);
 document.documentElement.style.setProperty('--qd', e.toFixed(3));
 if (k >= .45 && !sec.classList.contains('is-awake')) light();
-if (k < 1) requestAnimationFrame(step); else { document.documentElement.style.scrollBehavior = ''; setTimeout(() => { busy = false; }, 500); } };
+if (k < 1) requestAnimationFrame(step); else { document.documentElement.style.scrollBehavior = ''; glided = true; tryRelease(); } };
 requestAnimationFrame(step); };
 addEventListener('scroll', () => { const y = scrollY, down = y > lastY; lastY = y; if (busy) return;
 const r = sec.getBoundingClientRect();
