@@ -141,3 +141,8 @@
 }
 @keyframes mirror-ripple { 0% { transform: scaleY(1) skewX(0deg); opacity: .26; } 50% { transform: scaleY(.94) skewX(.6deg); opacity: .2; } 100% { transform: scaleY(1.03) skewX(-.4deg); opacity: .28; } }
 @media (prefers-reduced-motion: reduce) { .image-mirror { animation: none; } }
+/* 모바일: 소리 버튼이 상단 본문 글자를 가리지 않도록 화면 왼쪽 아래로 옮깁니다 */
+@media (max-width: 699px) {
+.audio-controls { top: auto !important; height: auto; bottom: calc(12px + env(safe-area-inset-bottom)); left: 12px; right: auto !important; border: 1px solid rgb(180 160 208 / .3); border-radius: 999px; padding: 0 2px; }
+.audio-controls .music-control, .audio-controls .sound-control { min-height: 40px; }
+}
