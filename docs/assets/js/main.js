@@ -2,10 +2,13 @@
 // 빌드 없는 ES 모듈입니다. 모든 기능은 JS가 실패해도 기본 HTML이 동작하도록 "덧붙이는" 방식입니다.
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
-import { initCosmos } from './cosmos.js?v=20261117a';
-import { initSephirot } from './sephirot.js?v=20261117n';
+import { initCosmos } from './cosmos.js?v=20261117q';
+import { initSephirot } from './sephirot.js?v=20261117q';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117d';
-import { initChapterScenes } from './chapter-scenes.js?v=20261117a';
+import { initChapterScenes } from './chapter-scenes.js?v=20261117q';
+// 저사양·모바일 기기 감지: 코어 4개 이하, 메모리 4GB 이하, 터치 위주 화면이면 'lite' 모드로 무거운 배경 연출을 줄입니다
+const LITE = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || matchMedia('(pointer: coarse)').matches;
+if (LITE) document.documentElement.classList.add('lite');
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
 document.documentElement.classList.add('js');
@@ -668,3 +671,4 @@ setTimeout(() => { if (item.open) reveal(item); }, 480);
 setTimeout(() => { if (item.open) reveal(item); }, 1300); // 지연 로딩 이미지가 늦게 들어와 높이가 바뀌는 경우
 }, true);
 })();
+

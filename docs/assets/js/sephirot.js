@@ -519,6 +519,8 @@ const to = target ? heroTop + pin : heroTop;
 const span = Math.abs(target - glideAnim) || 1, k = Math.min(1, Math.abs(anim - glideAnim) / span);
 scrollTo(0, Math.round(glideFrom + (to - glideFrom) * easeInOut(k)));
 }
+// 잠금 직후 대기(0.5초)가 끝나면 다시 계산해 힌트가 다시 나타나게 합니다 (예전에는 첫 번째에만 보이던 문제)
+if (holding()) { clearTimeout(hintTimer); hintTimer = setTimeout(schedule, Math.max(30, window.__scrollHold.until - performance.now() + 30)); }
 { const show = !scrollLocked && !holding() && raw0 <= pin + 2 && (anim === 0 || anim === 1);
 hint.classList.toggle('is-shown', show);
 const label = anim >= 1 ? '아래로 스크롤하여 케테르로' : '아래로 스크롤하여 나무 깨우기';
@@ -572,7 +574,7 @@ const schedule = () => { if (!pending) pending = requestAnimationFrame(update); 
 // ── 텐션 스크롤 ───────────────────────────────────────────────
 // 가로 나무가 활성인 상태에서 아래로 스크롤하면 바로 내려가지 않고 고무줄처럼 버팁니다(tension 0→1).
 // 끝까지 당기면 스크롤을 잠근 채 케테르 장으로 탄력 있게 내려가고, 중간에 놓으면 제자리로 튕겨 돌아옵니다
-let tensionTimer = 0, tensionFrame = 0;
+let tensionTimer = 0, tensionFrame = 0, hintTimer = 0;
 // 스크롤 힌트: 비활성(세로) 상태에서는 '나무 깨우기', 활성(가로) 상태에서는 '케테르로'를 화면 아래에 띄웁니다
 const hint = document.createElement('div');
 hint.className = 'tree-hint'; hint.setAttribute('aria-hidden', 'true');

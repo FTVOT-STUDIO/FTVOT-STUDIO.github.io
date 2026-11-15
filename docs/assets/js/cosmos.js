@@ -1,5 +1,6 @@
 // 장별 장면을 같은 화면에서 서서히 겹쳐 단일 캔버스만 유지합니다.
 export function initCosmos() {
+if (document.documentElement.classList.contains('lite')) return; // 저사양 기기에서는 전체 화면 배경 캔버스를 쓰지 않습니다
 const chapters = [...document.querySelectorAll('.chapter')];
 const canvas = document.createElement('canvas');
 canvas.className = 'cosmos-stage'; canvas.setAttribute('aria-hidden', 'true');
@@ -8,6 +9,7 @@ const c = canvas.getContext('2d');
 if (!c) { canvas.remove(); return; }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const visible = new Set();
+const colors=new Map(); const colorOf=(el)=>{ if(!colors.has(el)) colors.set(el,getComputedStyle(el).getPropertyValue('--sc').trim()); return colors.get(el); }; // 매 프레임 스타일 계산을 피하려고 색을 한 번만 읽습니다
 let w=0,h=0,frame=0,last=0,time=0,mx=0,my=0;
 const draw = (now) => {
 frame=0;
@@ -21,7 +23,7 @@ const r=section.getBoundingClientRect();
 const overlap=Math.max(0,Math.min(h,r.bottom)-Math.max(0,r.top))/h;
 if(!overlap)continue;
 const scene=worlds[section.id];if(!scene)continue;
-const color=getComputedStyle(section).getPropertyValue('--sc').trim();
+const color=colorOf(section);
 c.save(); c.strokeStyle=color; c.fillStyle=color; c.lineWidth=.8;
 c.globalAlpha=Math.pow(overlap,1.45)*.66;
 c.translate(reduced.matches?0:mx*9,reduced.matches?0:my*6);

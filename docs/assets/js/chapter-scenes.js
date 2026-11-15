@@ -11,11 +11,13 @@ if (!ctx) { canvas.remove(); return; }
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 const visible = new Set();
 const fades = new Map(); // 장면별 현재 불투명도 (0~1)
+const FPS = document.documentElement.classList.contains('lite') ? 12 : 24; // 저사양에서는 절반 프레임
+const colors = new Map(); const colorOf = (el) => { if (!colors.has(el)) colors.set(el, getComputedStyle(el).getPropertyValue('--sc').trim()); return colors.get(el); };
 let width = 0, height = 0, frame = 0, last = 0, time = 0;
 const resize = () => {
 width = innerWidth; height = innerHeight;
 // 레티나 배율을 따라 확대하지 않고 실제 버퍼의 긴 변을 1600px 이내로 제한합니다.
-const scale = Math.min(1, 1600 / Math.max(width, height));
+const scale = Math.min(1, (document.documentElement.classList.contains('lite') ? 900 : 1600) / Math.max(width, height));
 canvas.width = Math.round(width * scale); canvas.height = Math.round(height * scale);
 ctx.setTransform(scale, 0, 0, scale, 0, 0);
 request();
@@ -23,7 +25,7 @@ request();
 const draw = (now) => {
 frame = 0;
 if (document.hidden) { last = 0; return; }
-if (!reduce.matches && last && now - last < 1000 / 24) { frame = requestAnimationFrame(draw); return; }
+if (!reduce.matches && last && now - last < 1000 / FPS) { frame = requestAnimationFrame(draw); return; }
 const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
 if (!reduce.matches) time += dt;
 last = now;
@@ -43,7 +45,7 @@ const next = value + ((chapter === selected ? 1 : 0) - value) * step;
 if (next < 0.01 && chapter !== selected) { fades.delete(chapter); continue; }
 fades.set(chapter, next); active = true;
 const scene = scenes[chapter.id]; if (!scene) continue;
-const color = getComputedStyle(chapter).getPropertyValue('--sc').trim();
+const color = colorOf(chapter);
 ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.1;
 const mobile = width < 768;
 const size = mobile ? Math.min(width * 0.46, 180) : Math.min(width * 0.26, 340);
@@ -233,31 +235,51 @@ line(c, 0, 410, 300, 410);
 const graves = 3 + Math.floor(cycle(t, 42) * 9); for (let i = 0; i < graves; i++) { const x = 18 + i * 31; line(c, x, 470, x, 440); line(c, x - 8, 450, x + 8, 450); }
 c.save(); c.translate(250, 410); line(c, 0, 0, 0, -120); c.beginPath(); c.moveTo(0, -120); c.quadraticCurveTo(25, -125 + Math.sin(t * 2) * 6, 45, -112); c.lineTo(42, -88); c.quadraticCurveTo(22, -95 + Math.sin(t * 2 + 1) * 6, 0, -92); c.stroke(); c.restore();
 },
-// 호드: 뒤에서 일한 것들에게 바치는 영광. 월계관 아래로 도구 이름이 엔딩 크레딧처럼 천천히 올라가고,
-// 작은 빛 알갱이들이 감사의 표시처럼 위로 떠오릅니다
+// 호드: 벌레들의 약육강식이 끝없이 되풀이되는 먹이사슬.
+// 풀잎 사이를 기어다니는 벌레 → 거미가 벌레를 낚아채고 → 새가 거미를 채가고 → 새는 떨어져 흙이 되고 → 흙에서 풀이 자라 다시 벌레가 모입니다 (14초 주기)
 hod(c, t) {
-// 월계관: 좌우 가지에 잎이 차례로 붙어 있고 아주 느리게 숨 쉬듯 커졌다 작아집니다
-const breathe = 1 + Math.sin(t * .6) * .02;
-c.save(); c.translate(150, 96); c.scale(breathe, breathe);
-for (const side of [-1, 1]) {
-c.beginPath(); c.arc(0, 0, 54, side < 0 ? Math.PI * .55 : Math.PI * .45, side < 0 ? Math.PI * 1.35 : -Math.PI * .35, side > 0); c.stroke();
-for (let k = 0; k < 7; k++) { const a = (side < 0 ? Math.PI * .6 : Math.PI * .4) + side * -k * .13 * Math.PI; const x = Math.cos(a) * 54, y = Math.sin(a) * 54; ellipse(c, x + side * 6 * Math.sin(a), y, 7, 3, a + side * .9); }
+const T = 14, p = (t % T) / T, cyc = Math.floor(t / T);
+const ground = 430;
+// 땅과 풀: 순환 마지막에 새 풀이 자라납니다
+line(c, 0, ground, 300, ground);
+const regrow = p > .82 ? (p - .82) / .18 : 1;
+for (let i = 0; i < 18; i++) { const x = 8 + i * 16.5, h = (10 + rand(i + cyc) * 16) * (i % 3 === cyc % 3 ? regrow : 1), sw = Math.sin(t * 1.4 + i) * 2.5; c.beginPath(); c.moveTo(x, ground); c.quadraticCurveTo(x + sw, ground - h * .6, x + sw * 1.6, ground - h); c.stroke(); }
+// 거미줄: 왼쪽 위 가지에 매달린 줄
+line(c, 40, 120, 40, 200); line(c, 20, 120, 120, 120);
+const webCx = 78, webCy = 205;
+for (let r = 8; r <= 32; r += 8) { c.beginPath(); for (let k = 0; k <= 8; k++) { const a = k / 8 * TAU; const x = webCx + Math.cos(a) * r, y = webCy + Math.sin(a) * r; k ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke(); }
+for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; line(c, webCx, webCy, webCx + Math.cos(a) * 34, webCy + Math.sin(a) * 34); }
+// 1) 벌레 무리: 땅 위를 기어다니고, 그중 한 마리가 날아올라 거미줄에 걸립니다
+for (let i = 0; i < 6; i++) { const x = (rand(i) * 300 + t * (8 + rand(i + 3) * 10) * (i % 2 ? 1 : -1) + 600) % 300, y = ground - 4 - Math.abs(Math.sin(t * 6 + i)) * 1.5; insect(c, x, y, .35, t + i); }
+const caught = p < .3 ? p / .3 : 1;
+let preyX = lerp(200, webCx + 10, caught), preyY = lerp(ground - 20, webCy + 6, caught) - Math.sin(caught * Math.PI) * 60;
+const spiderAt = p < .3 ? 0 : Math.min(1, (p - .3) / .12);
+if (p < .42) { c.save(); butterfly(c, preyX, preyY, t * 2, .45); c.restore(); }
+// 2) 거미: 거미줄 중앙에서 내려와 벌레를 잡고 다시 올라갑니다
+const spiderVisible = p < .62;
+let sx = webCx, sy = lerp(webCy - 30, webCy + 4, spiderAt);
+if (p > .42 && p < .62) sy = webCy - 2 + Math.sin(t * 3) * 2;
+if (spiderVisible) { line(c, sx, 120, sx, sy); circle(c, sx, sy, 5); circle(c, sx, sy - 6, 3); for (let k = 0; k < 4; k++) { const off = (k - 1.5) * 3; line(c, sx - 4, sy + off, sx - 11, sy + off - 4 + Math.sin(t * 8 + k)); line(c, sx + 4, sy + off, sx + 11, sy + off - 4 + Math.sin(t * 8 + k + 1)); } if (p > .42) dot(c, sx, sy + 8, 2.5); }
+// 3) 새: 오른쪽에서 날아와 거미를 채가고 위로 날아갑니다
+if (p > .45 && p < .78) {
+const q = (p - .45) / .33, bx = q < .5 ? lerp(330, sx + 6, q * 2) : lerp(sx + 6, 250, (q - .5) * 2), by = q < .5 ? lerp(70, sy, q * 2) : lerp(sy, 40, (q - .5) * 2);
+const flap = Math.sin(t * 9) * 8;
+c.beginPath(); c.moveTo(bx - 18, by - flap); c.quadraticCurveTo(bx - 8, by, bx, by); c.quadraticCurveTo(bx + 8, by, bx + 18, by - flap); c.stroke(); circle(c, bx, by + 2, 3);
+if (q > .5) { line(c, bx, by + 5, bx, by + 12); circle(c, bx, by + 14, 3); }
 }
+// 4) 쇠약: 늙은 새가 떨어져 땅에 눕고, 흙으로 흩어지며 새싹을 남깁니다
+if (p > .7) {
+const q = Math.min(1, (p - .7) / .12), fx = 230, fy = lerp(60, ground - 4, q * q);
+c.save(); c.globalAlpha *= 1 - Math.max(0, (p - .86) / .14);
+c.beginPath(); c.moveTo(fx - 12, fy - 2); c.lineTo(fx, fy); c.lineTo(fx + 12, fy - 2); c.stroke(); circle(c, fx, fy + 1, 2.5);
+if (q >= 1) for (let k = 0; k < 10; k++) { const a = rand(k + cyc) * Math.PI, r = (p - .82) * 120 * rand(k + 2); dot(c, fx + Math.cos(a) * r, ground - 2 - Math.sin(a) * r * .3, 1); }
 c.restore();
-c.save(); c.globalAlpha *= .8; c.font = '10px monospace'; c.textAlign = 'center'; c.fillText('IN GRATITUDE', 150, 100); c.restore();
-// 엔딩 크레딧: 이름이 아래에서 올라오며 위쪽 끝에서 사라집니다
-const names = ['UNITY', 'C#', 'VS CODE', 'GIT', 'GITHUB', 'ASEPRITE', 'AUDIOTOOL', 'NOTION', 'UBUNTU', 'RASPBERRY PI', 'FIREBASE', 'FABLEFORGE', 'MOE PET', 'STUDIO-DESKTOP', 'MELONEST', 'TERMINAL'];
-const gap = 30, span = names.length * gap, offset = (t * 9) % span;
-c.save(); c.font = '11px monospace'; c.textAlign = 'center';
-names.forEach((name, k) => {
-const y = 470 - ((k * gap + offset) % span);
-if (y < 175 || y > 470) return;
-const fade = Math.min(1, (y - 175) / 60, (470 - y) / 40);
-c.globalAlpha = .55 * fade; c.fillText(name, 150, y);
-});
-c.restore();
-// 떠오르는 빛 알갱이
-for (let i = 0; i < 26; i++) { const sp = 10 + rand(i) * 14, y = 480 - ((t * sp + rand(i + 4) * 480) % 480), x = 20 + rand(i + 8) * 260 + Math.sin(t * .8 + i) * 6; c.save(); c.globalAlpha *= .5 * Math.min(1, y / 120); dot(c, x, y, .8 + rand(i + 2) * 1.2); c.restore(); }
+}
+// 순환을 보여주는 작은 고리 표시: 풀 → 벌레 → 거미 → 새 → 흙 (현재 단계가 진하게)
+const stages = ['풀', '벌레', '거미', '새', '흙'], cur = p < .3 ? 1 : p < .45 ? 2 : p < .7 ? 3 : p < .86 ? 4 : 0;
+c.save(); c.font = '9px sans-serif'; c.textAlign = 'center';
+stages.forEach((name, k) => { const a = -Math.PI / 2 + k / 5 * TAU, x = 230 + Math.cos(a) * 34, y = 300 + Math.sin(a) * 34; c.globalAlpha = k === cur ? .9 : .3; circle(c, x, y, k === cur ? 4 : 2.5); c.fillText(name, x, y - 9); });
+c.globalAlpha = .3; circle(c, 230, 300, 34); c.restore();
 },
 // 예소드: 관측하는 눈, 최면 나선과 진자, 가지를 치며 하나만 실현되는 미래 시간선
 yesod(c, t) {
