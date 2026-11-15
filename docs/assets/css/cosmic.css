@@ -537,3 +537,12 @@ main#main { position: relative; z-index: 1; }
 .ap-pct { font-size: 20px; color: #fafafa; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
 .ap-track { width: min(140px, 70%); height: 2px; border-radius: 2px; background: rgb(255 255 255 / .08); overflow: hidden; }
 .ap-fill { display: block; height: 100%; transform-origin: left; transform: scaleX(0); background: linear-gradient(90deg, var(--c6, #e8889a), color-mix(in oklab, var(--c6, #e8889a) 70%, #fff)); transition: transform .5s ease-out; }
+/* 인트로 → 메인 전환: 인트로가 걷히는 동안 나무 전체가 한 덩어리로 서서히 떠오르고,
+   경로가 그어지는 흐름에 맞춰 세피라·문구가 뒤따라 나타납니다 (세피라만 먼저 튀어나오지 않게) */
+html.js:not(.tree-grown) #tree { opacity: 0; }
+html.js:not(.tree-grown) #tree .nodes { opacity: 0; }
+html.tree-grown #tree { animation: hero-rise 1.6s cubic-bezier(.16, 1, .3, 1) both; }
+html.tree-grown #tree .nodes { animation: hero-fade 1.1s ease .45s both; }
+@keyframes hero-rise { from { opacity: 0; transform: scale(.985) translateY(10px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes hero-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { html.tree-grown #tree, html.tree-grown #tree .nodes { animation: none; } }
