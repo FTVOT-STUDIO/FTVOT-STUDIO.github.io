@@ -779,12 +779,37 @@ s.setAttribute('class', 'q-signal'); s.style.setProperty('--len', len.toFixed(0)
 /* 3) 타우미엘 심장 박동 파문 */
 const open = sec.querySelector('.q-node.is-open .q-ring');
 if (open) for (let k = 0; k < 2; k++) { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', open.getAttribute('cx')); c.setAttribute('cy', open.getAttribute('cy')); c.setAttribute('r', '40'); c.setAttribute('class', 'q-ripple'); c.style.animationDelay = `${k * 1.6}s`; open.parentNode.insertBefore(c, open); }
-/* 4) 잠긴 껍질 글리치: 무작위 노드가 잠깐 떨리며 이름 대신 깨진 문자를 비춥니다 */
-const locked = [...sec.querySelectorAll('.q-node.is-locked')], NOISE = '▓▒░█#?!ʘ∅';
-setInterval(() => { if (!sec.classList.contains('is-awake') || document.hidden) return;
-const g = locked[Math.floor(Math.random() * locked.length)], ring = g.querySelector('.q-ring'); if (!ring) return;
-const tx = document.createElementNS(NS, 'text'); tx.setAttribute('x', ring.getAttribute('cx')); tx.setAttribute('y', String(Number(ring.getAttribute('cy')) - 14)); tx.setAttribute('class', 'q-noise');
-tx.textContent = Array.from({ length: 4 }, () => NOISE[Math.floor(Math.random() * NOISE.length)]).join(''); g.append(tx); g.classList.add('is-glitch');
-setTimeout(() => { g.classList.remove('is-glitch'); tx.remove(); }, 420); }, 1400);
+
 }
+})();
+
+/* 클리포트 하강: 말쿠트 아래로 내려가면 스크롤을 막고, 땅이 갈라지며 클리포트로 떨어지는 장면을 재생합니다 */
+(() => {
+const sec = document.getElementById('qliphoth'); if (!sec) return;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ov = document.createElement('div'); ov.className = 'q-descent'; ov.setAttribute('aria-hidden', 'true');
+ov.innerHTML = '<div class="qd-half qd-top"></div><div class="qd-half qd-bot"></div><div class="qd-crack"></div><div class="qd-abyss"><span>QLIPHOTH</span></div>';
+document.body.append(ov);
+let busy = false, armed = true, lastY = scrollY;
+const block = (e) => { if (busy) e.preventDefault(); };
+const keys = (e) => { if (busy && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space', 'End', 'Home'].includes(e.code)) e.preventDefault(); };
+addEventListener('wheel', block, { passive: false }); addEventListener('touchmove', block, { passive: false }); addEventListener('keydown', keys);
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const descend = async () => {
+busy = true; armed = false; document.documentElement.classList.add('q-locked');
+if (window.__scrollHold) window.__scrollHold.until = performance.now() + 4000;
+if (!reduce) { ov.classList.add('is-crack'); await wait(700); ov.classList.add('is-split'); await wait(900); }
+/* 장막 뒤에서 순간 이동: 클리포트 꼭대기로 */
+const top = sec.getBoundingClientRect().top + scrollY;
+document.documentElement.style.scrollBehavior = 'auto'; scrollTo(0, top); document.documentElement.style.scrollBehavior = '';
+sec.classList.add('is-awake', 'is-impact');
+if (!reduce) { ov.classList.add('is-fall'); await wait(1100); }
+ov.classList.remove('is-crack', 'is-split', 'is-fall'); ov.classList.add('is-out'); await wait(600); ov.classList.remove('is-out');
+await wait(500); /* 착지 후 0.5초 더 잠금 */
+busy = false; document.documentElement.classList.remove('q-locked'); setTimeout(() => sec.classList.remove('is-impact'), 1500);
+};
+addEventListener('scroll', () => { const y = scrollY, down = y > lastY; lastY = y; if (busy) return;
+const r = sec.getBoundingClientRect();
+if (r.top > innerHeight) armed = true; /* 다시 위로 올라가면 재무장 */
+if (armed && down && r.top < innerHeight * 0.92 && r.top > innerHeight * 0.1) descend(); }, { passive: true });
 })();
