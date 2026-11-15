@@ -305,7 +305,7 @@ p.after(signal);
 // 회전량은 스크롤 위치로만 계산해서, 위로 되돌아가면 같은 경로로 다시 일어섭니다.
 const ROTATE_RATIO = 0.1;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
 const PIN_RATIO = 0.44;     // 가로로 다 바뀔 때까지 나무를 화면에 붙잡아 두는 스크롤 길이 (#tree margin-bottom과 같은 값)
-const MORPH_SECONDS = 1.8; // 가로로 바뀌는 데 걸리는 시간
+const MORPH_SECONDS = 3.2; // 가로로 바뀌는 데 걸리는 시간 (행성 공전이 눈으로 따라갈 수 있는 속도)
 let treeAudible = false, wantDown = false, wantUp = false, lockDir = -1, glideAnim = 0, reversing = false, anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0, tension = 0, snapping = false;
 
 const LOCK_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar']);
@@ -433,7 +433,7 @@ const narrow = innerWidth < 700;
 const m = Math.round(e * 1000) / 1000 + Math.round(leave * 1000) * 10; if (m === lastMorph) return; lastMorph = m;
 for (const info of nodeInfo.values()) {
 const i = Number(info.node.dataset.seph) - 1;
-const raw = Math.min(1, Math.max(0, e * 1.6 - i * (.6 / 9)));
+const raw = Math.min(1, Math.max(0, e * 1.3 - i * (.3 / 9)));
 const k = easeInOut(raw);
 // 직선이 아니라 바깥쪽으로 부풀었다 들어오는 호
 // 세로 화면(폭 700 미만)에서는 가로로 눕히면 너무 작아지므로 제자리에서 차례로 켜지기만 합니다
@@ -449,7 +449,7 @@ info.cx = ox + Math.cos(a) * r; info.cy = oy + Math.sin(a) * r;
 }
 /* 자전: 공전하는 동안 기호가 제자리에서 한 바퀴 돕니다 */
 const sym = info.sym ??= info.node.querySelector('.node-sym');
-if (sym) sym.setAttribute('transform', !narrow && k > 0 && k < 1 ? `rotate(${(360 * k).toFixed(1)} ${info.x} ${info.y - 11})` : '');
+if (sym) sym.setAttribute("transform", !narrow && k > 0 && raw < .999 ? `rotate(${(180 * k).toFixed(1)} ${info.x} ${info.y - 11})` : '');
 // 떠날 때: 세피라마다 다른 속도로 위로 흩어지는 시차(패럴랙스). 케테르가 가장 느리고 말쿠트가 가장 빠릅니다
 const ls = leave * leave;
 info.cx -= ls * (i - 4.5) * 6;
@@ -461,7 +461,7 @@ if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit
 }
 // 케테르 위의 아인 호(세 겹 반원)는 케테르를 따라가며 바깥쪽(왼쪽)을 향하도록 방향만 바꿉니다
 const K = nodeInfo.get('1');
-if (ain && K && !narrow) { const kk = easeInOut(Math.min(1, Math.max(0, e * 1.6))); ain.setAttribute('transform', e ? `translate(${(K.cx - K.x).toFixed(2)} ${(K.cy - K.y).toFixed(2)}) rotate(${(-90 * kk).toFixed(2)} ${K.x} ${K.y})` : ''); }
+if (ain && K && !narrow) { const kk = easeInOut(Math.min(1, Math.max(0, e * 1.3))); ain.setAttribute('transform', e ? `translate(${(K.cx - K.x).toFixed(2)} ${(K.cy - K.y).toFixed(2)}) rotate(${(-90 * kk).toFixed(2)} ${K.x} ${K.y})` : ''); }
 // 심연의 장막: 위 삼각과 아래를 가르는 가로선이 세로선으로 서서히 바뀝니다
 if (veil && !narrow) { const va = 90 * easeInOut(e); veil.setAttribute('transform', e ? `rotate(${(-va).toFixed(2)} ${CX} ${CY})` : ''); if (veilText) veilText.setAttribute('transform', e ? `rotate(${va.toFixed(2)} ${veilText.getAttribute('x')} ${veilText.getAttribute('y')})` : ''); }
 // 배경 궤도: 다 바뀐 뒤 나무 뒤를 채우는 고리와 눈금 (진하기만 e로 조절, 회전은 CSS)
