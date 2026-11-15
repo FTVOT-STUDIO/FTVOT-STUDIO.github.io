@@ -37,3 +37,7 @@ body { min-height: 100svh; display: grid; grid-template-rows: auto 1fr auto; col
 .pl-error { position: absolute; inset: auto 24px; padding: 18px 20px; border: 1px solid rgb(255 106 85 / .45); border-radius: 14px; background: #120304; line-height: 1.7; word-break: keep-all; font-size: 14px; }
 .pl-foot { padding: 10px 16px 18px; text-align: center; font-size: 11px; letter-spacing: .06em; color: var(--text-3); }
 @media (max-width: 600px) { .pl-bar { grid-template-columns: auto 1fr auto; } .pl-back { font-size: 0; gap: 0; } .pl-back span { font-size: 18px; } .pl-kicker { display: none; } }
+/* 홈으로 돌아갈 때 어둠 속으로 가라앉기 */
+body::after { content: ''; position: fixed; inset: 0; z-index: 50; background: #050102; opacity: 0; pointer-events: none; transition: opacity .45s ease; }
+body.is-leaving::after { opacity: 1; }
+body.is-leaving .pl-frame { transform: scale(.97); transition: transform .45s ease; }

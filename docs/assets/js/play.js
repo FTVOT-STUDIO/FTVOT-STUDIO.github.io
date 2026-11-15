@@ -65,3 +65,13 @@ log('ready');
 showError(`게임을 시작하지 못했습니다. ${String(e?.message || e).slice(0, 200)}`);
 }
 })();
+
+/* 돌아가기 전환: 화면이 어둡게 가라앉은 뒤 홈으로 이동하고, 홈에서는 같은 어둠에서 클리포트가 떠오르며 이어집니다 */
+document.querySelector('.pl-back')?.addEventListener('click', (e) => {
+if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+e.preventDefault();
+try { sessionStorage.setItem('ftvot-return', 'play'); } catch { /* 저장소 없음 */ }
+document.body.classList.add('is-leaving');
+const href = e.currentTarget.href; /* setTimeout 안에서는 currentTarget이 비므로 미리 담아 둡니다 */
+setTimeout(() => { location.href = href; }, 450);
+});

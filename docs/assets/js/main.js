@@ -1,7 +1,7 @@
 // FTVOT_STUDIO — main.js
 // 빌드 없는 ES 모듈입니다. 모든 기능은 JS가 실패해도 기본 HTML이 동작하도록 "덧붙이는" 방식입니다.
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
-import { initIntro, initSky } from './intro.js?v=20261118b';
+import { initIntro, initSky } from './intro.js?v=20261120a';
 import { initCosmos } from './cosmos.js?v=20261117q';
 import { initSephirot } from './sephirot.js?v=20261120b';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261119d';
@@ -1013,4 +1013,15 @@ if (!('IntersectionObserver' in window)) return;
 const io = new IntersectionObserver((entries) => entries.forEach((e) => e.target.classList.toggle('is-offscreen', !e.isIntersecting)), { rootMargin: '200px 0px' });
 document.querySelectorAll('#tree, #qliphoth, section.chapter, .sky').forEach((el) => io.observe(el));
 document.addEventListener('visibilitychange', () => document.documentElement.classList.toggle('is-tab-hidden', document.hidden));
+})();
+
+/* 게임에서 돌아왔을 때: 어두운 장막 아래에서 가말리엘 장 위치를 잡고 클리포트를 깨운 뒤, 장막을 걷으며 내용이 떠오르게 합니다 */
+(() => {
+const html = document.documentElement; if (!html.classList.contains('is-returning')) return;
+try { sessionStorage.removeItem('ftvot-return'); } catch { /* 저장소 없음 */ }
+const target = document.getElementById('q-gamaliel'), sec = document.getElementById('qliphoth');
+const place = () => { if (target) { html.style.scrollBehavior = 'auto'; scrollTo(0, target.getBoundingClientRect().top + scrollY - 110); html.style.scrollBehavior = ''; } };
+place(); requestAnimationFrame(place);
+setTimeout(() => { place(); sec?.classList.add('is-awake', 'is-traced'); sec?.querySelectorAll('.q-node').forEach((n) => n.classList.add('is-lit'));
+html.classList.add('is-returned'); setTimeout(() => html.classList.remove('is-returning', 'is-returned'), 1300); }, 250);
 })();

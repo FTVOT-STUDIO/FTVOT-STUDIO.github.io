@@ -5,7 +5,7 @@ const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
 export function initIntro(onDone) {
 const intro = document.querySelector('[data-intro]');
 const state = document.querySelector('[data-intro-state]');
-if (!intro || reduceMotion.matches) {
+if (!intro || reduceMotion.matches || document.documentElement.classList.contains('is-returning')) { /* 게임에서 돌아올 때는 인트로를 건너뜁니다 */
 intro?.remove();
 onDone();
 return;
