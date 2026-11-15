@@ -738,3 +738,17 @@ sounds.forEach((src) => fetch(src, { cache: 'force-cache', credentials: 'same-or
 if (!saveData) images.forEach((src, i) => setTimeout(() => { const img = new Image(); img.decoding = 'async'; img.src = src; }, i * 40));
 });
 })();
+
+/* 클리포트 하강 연출: 섹션이 가까워질수록 화면을 붉게 덮고, 충분히 들어오면 균열·나무를 깨웁니다 */
+(() => {
+const sec = document.getElementById('qliphoth'); if (!sec) return;
+const veil = document.createElement('div'); veil.className = 'q-veil'; veil.setAttribute('aria-hidden', 'true'); document.body.append(veil);
+let raf = 0;
+const update = () => { raf = 0; const r = sec.getBoundingClientRect(), h = innerHeight;
+/* 섹션 윗변이 화면 아래 → 화면 30% 지점으로 오는 동안 0 → 1 */
+const p = Math.min(1, Math.max(0, (h - r.top) / (h * 0.7)));
+document.documentElement.style.setProperty('--qd', p.toFixed(3));
+if (p > 0.55) sec.classList.add('is-awake'); };
+addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
+update();
+})();
