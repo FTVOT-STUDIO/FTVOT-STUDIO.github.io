@@ -697,3 +697,29 @@ if (next !== current) { current = next; history.replaceState(history.state, '', 
 addEventListener('scroll', () => { if (!frame) frame = requestAnimationFrame(sync); }, { passive: true });
 sync();
 })();
+
+// ── 연출 보강 ─────────────────────────────────────────────
+// 1) 장 제목이 처음 보일 때 아래에서 위로 '걷히듯' 드러납니다
+// 2) 기록 숫자(출시·완성작 등)가 보일 때 0부터 올라갑니다
+// 3) 연대기 항목이 하나씩 차례로 나타납니다
+(() => {
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduce || !('IntersectionObserver' in window)) return;
+const once = (els, onShow, margin = '0px 0px -12% 0px') => {
+const io = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) { io.unobserve(e.target); onShow(e.target); } }), { rootMargin: margin });
+els.forEach((el) => io.observe(el));
+};
+const statements = [...document.querySelectorAll('.chapter-statement')];
+statements.forEach((el) => el.classList.add('fx-wipe'));
+once(statements, (el) => el.classList.add('is-shown'));
+const numbers = [...document.querySelectorAll('.bi-stats dd')];
+once(numbers, (el) => {
+const target = parseInt(el.textContent, 10); if (!Number.isFinite(target)) return;
+const start = performance.now(), dur = 900 + target * 60;
+const step = (now) => { const k = Math.min(1, (now - start) / dur), v = Math.round(target * (1 - Math.pow(1 - k, 3))); el.textContent = String(v); if (k < 1) requestAnimationFrame(step); };
+el.textContent = '0'; requestAnimationFrame(step);
+});
+const rings = [...document.querySelectorAll('.bi-rings li')];
+rings.forEach((el, i) => { el.classList.add('fx-rise'); el.style.transitionDelay = `${i * 90}ms`; });
+once(rings, (el) => el.classList.add('is-shown'));
+})();

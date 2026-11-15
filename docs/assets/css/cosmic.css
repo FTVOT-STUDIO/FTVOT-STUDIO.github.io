@@ -331,3 +331,27 @@
 /* 미니맵: 케테르 장부터 오른쪽에서 살짝 밀려 들어오며 나타납니다 */
 .minimap { transition: opacity .6s ease, translate .7s cubic-bezier(.16,1,.3,1) !important; }
 .minimap:not(.is-shown) { opacity: 0 !important; translate: 24px 0; pointer-events: none !important; }
+/* ── 연출 보강 ── */
+/* 장 제목: 아래에서 위로 걷히며 드러남 (clip-path) */
+.fx-wipe { clip-path: inset(0 0 100% 0); translate: 0 18px; transition: clip-path 1s cubic-bezier(.16,1,.3,1), translate 1s cubic-bezier(.16,1,.3,1); }
+.fx-wipe.is-shown { clip-path: inset(0 0 -10% 0); translate: 0 0; }
+/* 연대기 항목: 차례로 떠오름 */
+.fx-rise { opacity: 0; translate: 0 14px; transition: opacity .6s ease, translate .7s cubic-bezier(.16,1,.3,1); }
+.fx-rise.is-shown { opacity: 1; translate: 0 0; }
+/* 기록 숫자는 자릿수가 바뀌어도 흔들리지 않게 */
+.bi-stats dd { font-variant-numeric: tabular-nums; }
+/* 캐릭터 원: 장이 보이는 동안 천천히 떠다니며 숨 쉬기 */
+.chapter.is-in-view .orb { animation: orb-float 6s ease-in-out infinite; }
+@keyframes orb-float { 50% { translate: 0 -6px; } }
+/* 상단 읽기 진행 막대: 지금 장의 색으로 */
+.topbar[data-seph="1"] ~ .reading-progress { background: var(--c1); } .topbar[data-seph="2"] ~ .reading-progress { background: var(--c2); }
+.topbar[data-seph="3"] ~ .reading-progress { background: var(--c3); } .topbar[data-seph="4"] ~ .reading-progress { background: var(--c4); }
+.topbar[data-seph="5"] ~ .reading-progress { background: var(--c5); } .topbar[data-seph="6"] ~ .reading-progress { background: var(--c6); }
+.topbar[data-seph="7"] ~ .reading-progress { background: var(--c7); } .topbar[data-seph="8"] ~ .reading-progress { background: var(--c8); }
+.topbar[data-seph="9"] ~ .reading-progress { background: var(--c9); } .topbar[data-seph="10"] ~ .reading-progress { background: var(--c10); }
+.reading-progress { transition: background .6s ease; }
+/* 프로젝트·도구 항목: 마우스를 올리면 살짝 떠오름 */
+.project-entry > summary, .hod-credits li { transition: translate .25s cubic-bezier(.34,1.56,.64,1); }
+.project-entry > summary:hover { translate: 4px 0; }
+.lite .chapter.is-in-view .orb { animation: none; }
+@media (prefers-reduced-motion: reduce) { .fx-wipe, .fx-rise { clip-path: none; opacity: 1; translate: none; } .chapter.is-in-view .orb { animation: none; } }
