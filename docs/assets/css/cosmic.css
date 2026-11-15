@@ -298,20 +298,23 @@
 .s-malkuth .contact-send:hover { background: color-mix(in oklab, var(--sc) 26%, transparent); transform: translateY(-2px); }
 .s-malkuth .contact-address button { transition: border-color .2s, color .2s; }
 .s-malkuth .contact-address button:hover { border-color: var(--sc); color: #fafafa; }
-.malkuth-journey { grid-column: 1 / -1; margin-top: clamp(40px, 6vw, 80px); padding-top: 40px; border-top: 1px solid rgb(255 255 255 / .08); display: grid; gap: 28px; justify-items: center; text-align: center; }
-.journey-path { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0; margin: 0; padding: 0; list-style: none; counter-reset: j; }
-.journey-path li { display: flex; align-items: center; }
-.journey-path li + li::before { content: ''; width: clamp(10px, 2vw, 28px); height: 1px; background: rgb(255 255 255 / .18); }
-.journey-path a { position: relative; display: grid; place-items: center; width: 44px; height: 44px; border: 1.5px solid var(--sc); border-radius: 50%; color: transparent; font-size: 0; text-decoration: none; background: color-mix(in oklab, var(--sc) 14%, transparent); transition: transform .25s cubic-bezier(.34,1.56,.64,1), background .25s; }
-.journey-path a::before { counter-increment: j; content: counter(j); color: var(--sc); font: 600 12px var(--font-mono, ui-monospace, monospace); }
-.journey-path a:hover { transform: scale(1.12); background: color-mix(in oklab, var(--sc) 30%, transparent); }
-
-.journey-path li:last-child a { box-shadow: 0 0 0 4px rgb(255 255 255 / .06); }
+/* 여정의 끝: 왼쪽에 가로로 누운 작은 생명의 나무(열 세피라 모두 켜짐), 오른쪽에 마무리 문구와 돌아가기 버튼 */
+.malkuth-journey { grid-column: 1 / -1; margin-top: clamp(48px, 7vw, 96px); padding: clamp(24px, 3.4vw, 44px); display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; border: 1px solid rgb(255 255 255 / .09); border-radius: 22px; background: linear-gradient(135deg, rgb(255 255 255 / .035), rgb(255 255 255 / .01)); }
+.journey-tree { width: 100%; height: auto; overflow: visible; }
+.journey-tree line { stroke: rgb(255 255 255 / .16); stroke-width: 1.5; }
+.journey-tree a { outline: none; }
+.journey-tree .jt-dot { fill: color-mix(in oklab, var(--sc) 22%, #0b0b0e); stroke: var(--sc); stroke-width: 2.2; transition: transform .3s cubic-bezier(.34,1.56,.64,1), fill .25s; transform-box: fill-box; transform-origin: center; }
+.journey-tree .jt-num { fill: #fafafa; font: 600 15px var(--font-mono, ui-monospace, monospace); text-anchor: middle; pointer-events: none; }
+.journey-tree .jt-halo { fill: none; stroke: var(--sc); stroke-width: 1.2; opacity: .45; animation: jt-pulse 2.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.journey-tree a:hover .jt-dot, .journey-tree a:focus-visible .jt-dot { transform: scale(1.18); fill: color-mix(in oklab, var(--sc) 45%, #0b0b0e); }
+@keyframes jt-pulse { 50% { transform: scale(1.18); opacity: .15; } }
+.journey-end { text-align: left; }
 .journey-end .mono { margin: 0; color: var(--sc); font-size: 11px; letter-spacing: .24em; }
-.journey-line { margin: 10px 0 0; color: #d4d4d8; font-size: 15px; }
-.journey-return { display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; min-height: 48px; padding: 0 22px; border: 1px solid rgb(255 255 255 / .16); border-radius: 999px; color: #fafafa; text-decoration: none; font-size: 14px; transition: border-color .2s, transform .2s; }
-.journey-return:hover { border-color: var(--sc); transform: translateY(-2px); }
-@media (max-width: 560px) { .journey-path a { width: 34px; height: 34px; } .journey-path li + li::before { width: 6px; } }
+.journey-line { margin: 14px 0 0; color: #fafafa; font-size: clamp(18px, 1.8vw, 24px); font-weight: 600; line-height: 1.5; word-break: keep-all; }
+.journey-return { display: inline-flex; align-items: center; gap: 10px; margin-top: 26px; min-height: 48px; padding: 0 22px; border: 1px solid var(--sc); border-radius: 999px; color: #fafafa; text-decoration: none; font-size: 14px; background: color-mix(in oklab, var(--sc) 12%, transparent); transition: background .2s, transform .2s; }
+.journey-return:hover { background: color-mix(in oklab, var(--sc) 24%, transparent); transform: translateY(-2px); }
+@media (max-width: 760px) { .malkuth-journey { grid-template-columns: 1fr; } .journey-end { text-align: center; } }
+@media (prefers-reduced-motion: reduce) { .journey-tree .jt-halo { animation: none; } }
 .s-malkuth .contact-links a { display: grid !important; grid-template-columns: 88px minmax(0, 1fr) 20px !important; grid-template-rows: auto !important; grid-auto-flow: column !important; align-items: center !important; }
 .s-malkuth .contact-links a > * { margin: 0 !important; }
 .s-malkuth .contact-links a > span { grid-column: auto !important; grid-row: auto !important; } /* 모바일 2줄 배치 규칙을 무시하고 한 줄로 */
