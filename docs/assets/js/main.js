@@ -455,7 +455,7 @@ grid.replaceChildren();
 if (count) count.textContent = `ART COLLECTION / ${String(files.length).padStart(2, '0')}`;
 pager.hidden = pages <= 1; pager.querySelector('[data-art-pos]').textContent = `${page + 1} / ${pages}`;
 if (!files.length) {
-showState('첫 작품을 전시해 주세요.', '그림 업로드 버튼에서 작품을 올릴 수 있습니다.');
+showState('첫 작품을 전시해 주세요.', '‘그림 올리기’ 버튼으로 작품을 올릴 수 있습니다.');
 return;
 }
 state.hidden = true;
