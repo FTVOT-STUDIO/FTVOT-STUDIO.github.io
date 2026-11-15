@@ -636,5 +636,5 @@ html.is-returning #intro { display: none; }
 .q-latin { font-size: clamp(2rem, 1rem + 4vw, 4.4rem); }
 .q-title { margin-top: 10px; font-size: clamp(1.3rem, .9rem + 1.4vw, 2rem); }
 .q-sub { margin-top: 8px; font-size: 13px; }
-.q-tree { width: auto; height: calc(100svh - 76px - 222px); max-height: 980px; min-height: 360px; max-width: 100%; }
+.q-tree { width: auto; height: calc(100svh - 76px - 212px); margin-top: -6px; max-height: 980px; min-height: 360px; max-width: 100%; }
 @media (max-width: 600px) { .q-tree { height: auto; width: min(100%, calc((100svh - 230px) * .571)); } }

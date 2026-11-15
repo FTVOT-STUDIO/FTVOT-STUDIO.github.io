@@ -892,7 +892,7 @@ const nodes = [...sec.querySelectorAll('.q-node')];
 const easeOut = (t) => 1 - Math.pow(1 - t, 3); /* 출발 속도가 가장 빠르고 끝에서 부드럽게 멈춤 = 손의 스크롤을 이어받는 느낌 */
 let busy = false, timers = [], animDone = false, glided = false, touchY = null;
 const release = () => { if (busy && animDone && glided) setTimeout(() => { busy = false; }, 500); };
-const sfx = (id) => window.__sfx?.(id);
+const sfx = (id) => { if (!window.__qQuiet) window.__sfx?.(id); }; /* 게임에서 돌아오는 중에는 클리포트 소리를 내지 않음 */
 const clear = () => { timers.forEach(clearTimeout); timers = []; };
 const light = () => { clear(); sec.classList.add('is-awake');
 nodes.forEach((n, i) => timers.push(setTimeout(() => { n.classList.add('is-lit'); sfx('node-lit'); }, 500 + i * 150)));
@@ -1018,6 +1018,7 @@ document.addEventListener('visibilitychange', () => document.documentElement.cla
 /* 게임에서 돌아왔을 때: 어두운 장막 아래에서 가말리엘 장 위치를 잡고 클리포트를 깨운 뒤, 장막을 걷으며 내용이 떠오르게 합니다 */
 (() => {
 const html = document.documentElement; if (!html.classList.contains('is-returning')) return;
+window.__qQuiet = true; setTimeout(() => { window.__qQuiet = false; }, 4000); /* 돌아올 때 점등음·경로음이 울리지 않게 */
 try { sessionStorage.removeItem('ftvot-return'); } catch { /* 저장소 없음 */ }
 const target = document.getElementById('q-gamaliel'), sec = document.getElementById('qliphoth');
 const place = () => { if (target) { html.style.scrollBehavior = 'auto'; scrollTo(0, target.getBoundingClientRect().top + scrollY - 110); html.style.scrollBehavior = ''; } };
