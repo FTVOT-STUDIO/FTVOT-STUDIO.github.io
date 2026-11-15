@@ -3,7 +3,8 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261115a';
-import { initSephirot } from './sephirot.js?v=20261117c';
+import { initSephirot } from './sephirot.js?v=20261117d';
+import { initGalleryAdmin } from './gallery-admin.js?v=20261117a';
 import { initChapterScenes } from './chapter-scenes.js?v=20261116a';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
@@ -66,7 +67,8 @@ enhance(initSky);
 enhance(() => { if (document.querySelector('link[href*="cosmic.css"]')) initCosmos(); });
 enhance(initAmbientAudio);
 enhance(() => initSephirot({ scrollTo: scrollToEl }));
-enhance(() => initChapterScenes()); // 세피라별 배경 연출 (좌우 여백에 선화로 그림)
+enhance(() => initChapterScenes());
+enhance(() => initGalleryAdmin()); // 사이트에서 그림 올리기·이름 변경·삭제 // 세피라별 배경 연출 (좌우 여백에 선화로 그림)
 enhance(initAnchors);
 enhance(initArkaReader);
 enhance(initDetails);
@@ -476,6 +478,7 @@ refresh.disabled = false;
 };
 refresh.hidden = false;
 refresh.addEventListener('click', () => load(true));
+document.addEventListener('gallery:changed', () => load(true)); // 관리 창에서 바꾸면 목록을 바로 다시 불러옵니다
 // 갤러리를 열 때만 요청해 불필요한 네트워크 호출을 줄입니다.
 if ('IntersectionObserver' in window) {
 const observer = new IntersectionObserver((entries) => {

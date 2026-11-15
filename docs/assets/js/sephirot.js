@@ -382,6 +382,26 @@ mk('line', { x1: CX - 620, y1: CY, x2: CX + 620, y2: CY, class: 'b-horizon' });
 [300, 390, 480].forEach((r, i) => mk('circle', { cx: CX + r, cy: CY, r: 3, class: `b-sat b-s${i}` }));
 svg.insertBefore(g, svg.querySelector('title')?.nextSibling || svg.firstChild);
 })();
+// 활성화된 가로 나무 주변 문구: 제목, 세 삼각(트라이어드)과 왕국의 이름표, 아래로 내려가라는 안내
+(() => {
+const svg = tree.querySelector('svg'); if (!svg) return;
+const NS3 = 'http://www.w3.org/2000/svg', cap = document.createElementNS(NS3, 'g'); cap.setAttribute('class', 'ht-captions'); cap.setAttribute('aria-hidden', 'true');
+const t = (x, y, cls, text) => { const el = document.createElementNS(NS3, 'text'); el.setAttribute('x', x.toFixed(1)); el.setAttribute('y', y.toFixed(1)); el.setAttribute('class', cls); el.textContent = text; cap.append(el); return el; };
+const pts = [...nodeInfo.values()];
+const minY = Math.min(...pts.map((p) => p.ty)), maxY = Math.max(...pts.map((p) => p.ty));
+t(CX, minY - 92, 'cap-title', 'ETZ HAYIM');
+t(CX, minY - 72, 'cap-ko', '생명의 나무 · 열 개의 세피라와 스물두 개의 길');
+const groups = [[['1', '2', '3'], 'SUPERNAL TRIAD', '천상의 삼각'], [['4', '5', '6'], 'ETHICAL TRIAD', '윤리의 삼각'], [['7', '8', '9'], 'ASTRAL TRIAD', '아스트랄 삼각'], [['10'], 'KINGDOM', '왕국']];
+for (const [ids, en, ko] of groups) {
+const g = ids.map((id) => nodeInfo.get(id)).filter(Boolean); if (!g.length) continue;
+const x = g.reduce((a, p) => a + p.tx, 0) / g.length;
+const x0 = Math.min(...g.map((p) => p.tx)) - 34, x1 = Math.max(...g.map((p) => p.tx)) + 34, y = maxY + 62;
+const br = document.createElementNS(NS3, 'path'); br.setAttribute('class', 'cap-bracket'); br.setAttribute('d', `M${x0} ${y - 22} V${y - 16} H${x1} V${y - 22}`); cap.append(br);
+t(x, y, 'cap-group', en); t(x, y + 16, 'cap-ko', ko);
+}
+t(CX, maxY + 120, 'cap-hint', 'SCROLL TO DESCEND ↓');
+svg.append(cap);
+})();
 const morph = (e, leave = 0) => {
 const narrow = innerWidth < 700;
 const m = Math.round(e * 1000) / 1000 + Math.round(leave * 1000) * 10; if (m === lastMorph) return; lastMorph = m;
