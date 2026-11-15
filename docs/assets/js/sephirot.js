@@ -82,6 +82,7 @@ if (link && SEPH_IDS.has(link.getAttribute('href').slice(1))) playLayer('nav-jum
 });
 
 // 겹쳐 울려도 되는 소리: 다른 효과음을 끊지 않고 위에 얹어 재생합니다 (나무 활성 소리 위로 점등음이 겹치도록)
+window.__sfx = (sid) => playLayer(sid); /* 클리포트 하강 등 다른 모듈에서 같은 효과음 체계를 쓰도록 공개 */
 function playLayer(sid) {
 if (!soundOn || !SFX_IDS.includes(sid)) return;
 const ctx = getAudioContext(), prepared = buffers.get(sid);

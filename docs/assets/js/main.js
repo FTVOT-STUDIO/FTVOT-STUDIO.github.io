@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261117b';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261118d';
+import { initSephirot } from './sephirot.js?v=20261118e';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117d';
 import { initChapterScenes } from './chapter-scenes.js?v=20261117q';
 // 저사양·모바일 기기 감지: 코어 4개 이하, 메모리 4GB 이하, 터치 위주 화면이면 'lite' 모드로 무거운 배경 연출을 줄입니다
@@ -748,7 +748,7 @@ const update = () => { raf = 0; const r = sec.getBoundingClientRect(), h = inner
 /* 섹션 윗변이 화면 아래 → 화면 30% 지점으로 오는 동안 0 → 1 */
 const p = Math.min(1, Math.max(0, (h - r.top) / (h * 0.7)));
 document.documentElement.style.setProperty('--qd', p.toFixed(3));
-if (p > 0.55) sec.classList.add('is-awake'); };
+};
 addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
 update();
 })();
@@ -783,33 +783,35 @@ if (open) for (let k = 0; k < 2; k++) { const c = document.createElementNS(NS, '
 }
 })();
 
-/* 클리포트 하강: 말쿠트 아래로 내려가면 스크롤을 막고, 땅이 갈라지며 클리포트로 떨어지는 장면을 재생합니다 */
+/* 클리포트 하강: 세피로트 나무와 같은 언어로 — 스크롤 잠금 → 1.8초 비단 글라이드(같은 이징) → 실루엣이던 껍질이 순서대로 점등.
+   소리도 나무와 같습니다: 0.5초 뒤 활성음, 껍질마다 점등음, 경로가 그려질 때 경로음 */
 (() => {
 const sec = document.getElementById('qliphoth'); if (!sec) return;
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const ov = document.createElement('div'); ov.className = 'q-descent'; ov.setAttribute('aria-hidden', 'true');
-ov.innerHTML = '<div class="qd-half qd-top"></div><div class="qd-half qd-bot"></div><div class="qd-crack"></div><div class="qd-abyss"><span>QLIPHOTH</span></div>';
-document.body.append(ov);
-let busy = false, armed = true, lastY = scrollY;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, DUR = 1800;
+const nodes = [...sec.querySelectorAll('.q-node')];
+const ease = (t) => { /* cubic-bezier(.65,0,.15,1) 근사: 나무 바로가기 글라이드와 동일한 느낌 */ const c = (x, a, b) => 3 * a * x * (1 - x) ** 2 + 3 * b * x * x * (1 - x) + x ** 3; let lo = 0, hi = 1, x = t; for (let i = 0; i < 18; i++) { x = (lo + hi) / 2; if (c(x, .65, .15) < t) lo = x; else hi = x; } return c(x, 0, 1); };
+let busy = false, armed = true, lastY = scrollY, timers = [];
 const block = (e) => { if (busy) e.preventDefault(); };
-const keys = (e) => { if (busy && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space', 'End', 'Home'].includes(e.code)) e.preventDefault(); };
-addEventListener('wheel', block, { passive: false }); addEventListener('touchmove', block, { passive: false }); addEventListener('keydown', keys);
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const descend = async () => {
-busy = true; armed = false; document.documentElement.classList.add('q-locked');
-if (window.__scrollHold) window.__scrollHold.until = performance.now() + 4000;
-if (!reduce) { ov.classList.add('is-crack'); await wait(700); ov.classList.add('is-split'); await wait(900); }
-/* 장막 뒤에서 순간 이동: 클리포트 꼭대기로 */
-const top = sec.getBoundingClientRect().top + scrollY;
-document.documentElement.style.scrollBehavior = 'auto'; scrollTo(0, top); document.documentElement.style.scrollBehavior = '';
-sec.classList.add('is-awake', 'is-impact');
-if (!reduce) { ov.classList.add('is-fall'); await wait(1100); }
-ov.classList.remove('is-crack', 'is-split', 'is-fall'); ov.classList.add('is-out'); await wait(600); ov.classList.remove('is-out');
-await wait(500); /* 착지 후 0.5초 더 잠금 */
-busy = false; document.documentElement.classList.remove('q-locked'); setTimeout(() => sec.classList.remove('is-impact'), 1500);
-};
+addEventListener('wheel', block, { passive: false }); addEventListener('touchmove', block, { passive: false });
+addEventListener('keydown', (e) => { if (busy && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space', 'End', 'Home'].includes(e.code)) e.preventDefault(); });
+const sfx = (id) => window.__sfx?.(id);
+const light = () => { timers.forEach(clearTimeout); timers = [];
+sec.classList.add('is-awake');
+timers.push(setTimeout(() => sfx('tree-on'), 500));
+nodes.forEach((n, i) => timers.push(setTimeout(() => { n.classList.add('is-lit'); sfx('node-lit'); }, 700 + i * 150)));
+timers.push(setTimeout(() => { sec.classList.add('is-traced'); sfx('path-trace'); }, 700 + nodes.length * 150)); };
+const dim = () => { timers.forEach(clearTimeout); timers = []; sec.classList.remove('is-awake', 'is-traced'); nodes.forEach((n) => n.classList.remove('is-lit')); };
+const descend = () => { busy = true; armed = false;
+const from = scrollY, to = sec.getBoundingClientRect().top + scrollY, t0 = performance.now();
+if (reduce) { scrollTo(0, to); light(); busy = false; return; }
+document.documentElement.style.scrollBehavior = 'auto';
+const step = (t) => { const k = Math.min(1, (t - t0) / DUR), e = ease(k); scrollTo(0, from + (to - from) * e);
+document.documentElement.style.setProperty('--qd', e.toFixed(3));
+if (k >= .45 && !sec.classList.contains('is-awake')) light();
+if (k < 1) requestAnimationFrame(step); else { document.documentElement.style.scrollBehavior = ''; setTimeout(() => { busy = false; }, 500); } };
+requestAnimationFrame(step); };
 addEventListener('scroll', () => { const y = scrollY, down = y > lastY; lastY = y; if (busy) return;
 const r = sec.getBoundingClientRect();
-if (r.top > innerHeight) armed = true; /* 다시 위로 올라가면 재무장 */
+if (r.top > innerHeight) { if (!armed) dim(); armed = true; }
 if (armed && down && r.top < innerHeight * 0.92 && r.top > innerHeight * 0.1) descend(); }, { passive: true });
 })();
