@@ -617,3 +617,7 @@ html.tree-grown #tree .nodes { animation: hero-fade 1.1s ease .45s both; }
 .ht-tree .paths, .ht-tree .path-badges, .ht-tree .badges { opacity: var(--relink, 1); }
 /* 재배치 변형은 SVG 좌표 기준으로 직접 계산하므로, 세피라 그룹의 변형 기준점을 화면 원점으로 둡니다 (fill-box 중심이면 축소할 때 엉뚱하게 밀림) */
 .js .ht-tree .nodes > .node { transform-box: view-box; transform-origin: 0 0; }
+/* 세피로트 ↔ 클리포트 미니맵 교대는 옆으로 미끄러지지 않고 제자리에서 교차 페이드 */
+.minimap.is-yielded, .q-minimap:not(.is-shown) { translate: 0 -50% !important; }
+.minimap.is-yielded { opacity: 0 !important; }
+.minimap, .q-minimap { transition: opacity .7s ease, translate .7s cubic-bezier(.16,1,.3,1) !important; }

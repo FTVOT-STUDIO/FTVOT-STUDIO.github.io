@@ -541,7 +541,8 @@ const inHero = raw0 <= pin + 2;
 
 if (!inHero && target === 1) anim = 1; // 링크로 멀리 점프한 경우: 잠그지 않고 즉시 완료
 // 변형 중에는 양방향 모두 입력을 잠그고, 연출 진행에 맞춰 페이지를 목적지(가로=고정 끝 / 세로=맨 위)로 미끄러뜨립니다
-const shouldLock = inHero && anim !== target && !reduceMotion.matches;
+if (window.__navGliding && target === 1) anim = 1; /* 바로가기 이동 중에는 나무 잠금·글라이드가 끼어들지 않고 즉시 완료 */
+const shouldLock = inHero && anim !== target && !reduceMotion.matches && !window.__navGliding;
 if (shouldLock && (!scrollLocked || lockDir !== target)) { glideFrom = scrollY; glideAnim = anim; lockDir = target; if (target === 1 && anim < .05) { setTimeout(() => playLayer('tree-on'), 500); /* 0.5초 뒤 재생 */ prepareSfx('node-lit'); } }
 if (shouldLock !== scrollLocked) { if (!shouldLock) holdFor(500); setScrollLock(shouldLock); }
 if (scrollLocked) {

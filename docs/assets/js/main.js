@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261118b';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261119o';
+import { initSephirot } from './sephirot.js?v=20261120a';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261119d';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
@@ -20,8 +20,9 @@ const TOPBAR = 56;
 
 /** 섹션으로 부드럽게 이동 (모션 축소 설정이면 즉시) */
 function scrollToEl(el) {
-const top = el.id === 'tree' ? 0 : el.getBoundingClientRect().top + window.scrollY - TOPBAR;
-if (window.__glideTo) window.__glideTo(top); else window.scrollTo({ top, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+const resolve = () => (el.id === 'tree' ? 0 : Math.max(0, el.getBoundingClientRect().top + window.scrollY - TOPBAR));
+const top = resolve();
+if (window.__glideTo) window.__glideTo(top, resolve); else window.scrollTo({ top, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
 }
 
 /** 일반 앵커(#tree, #tiferet 등)도 같은 방식으로 이동합니다. 나무 노드는 sephirot.js가 처리합니다 */
@@ -713,18 +714,29 @@ const block = (event) => { if ((gliding || holding()) && event.cancelable) event
 window.addEventListener('wheel', block, { passive: false, capture: true });
 window.addEventListener('touchmove', block, { passive: false, capture: true });
 window.addEventListener('keydown', (event) => { if ((gliding || holding()) && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Spacebar', 'Home', 'End'].includes(event.key)) event.preventDefault(); }, { capture: true });
-const glideTo = (to) => {
-gliding = true;
+/* 목적지 추적 글라이드: 이동하는 동안 그림이 늦게 뜨거나 위쪽 내용 높이가 바뀌어도 매 프레임 목적지를 다시 재서 정확히 도착합니다.
+   새로 누르면 진행 중인 이동을 이어받아 바로 새 목적지로 갑니다. 이동 중에는 나무·클리포트의 스크롤 잠금이 끼어들지 않도록 표시합니다 */
+let glideRaf = 0;
+const glideTo = (to, resolve) => {
+cancelAnimationFrame(glideRaf);
+gliding = true; window.__navGliding = true;
 const from = scrollY, start = performance.now();
-const duration = Math.min(1700, Math.max(900, 700 + Math.sqrt(Math.abs(to - from)) * 12)); // 먼 거리도 지루하지 않게
+const dest = () => (resolve ? resolve() : to);
+const duration = Math.min(1700, Math.max(900, 700 + Math.sqrt(Math.abs(dest() - from)) * 12)); // 먼 거리도 지루하지 않게
 const step = (now) => {
-const x = Math.min(1, (now - start) / duration);
-scrollTo(0, Math.round(from + (to - from) * silky(x)));
-if (x < 1) requestAnimationFrame(step); else { gliding = false; holdFor(500); }
+const x = Math.min(1, (now - start) / duration), target = dest();
+scrollTo(0, Math.round(from + (target - from) * silky(x)));
+if (x < 1) { glideRaf = requestAnimationFrame(step); return; }
+/* 도착 후 한 번 더 확인: 마지막 순간 레이아웃이 바뀌었으면 짧게 보정 */
+const off = dest() - scrollY;
+if (Math.abs(off) > 4 && resolve && !step.fixed) { step.fixed = true; const f0 = scrollY, t0 = performance.now(); const fix = (n) => { const k = Math.min(1, (n - t0) / 260); scrollTo(0, Math.round(f0 + (dest() - f0) * silky(k))); if (k < 1) glideRaf = requestAnimationFrame(fix); else done(); }; glideRaf = requestAnimationFrame(fix); return; }
+done();
 };
-requestAnimationFrame(step);
+const done = () => { gliding = false; holdFor(500); setTimeout(() => { if (!gliding) window.__navGliding = false; }, 520); };
+glideRaf = requestAnimationFrame(step);
 };
-window.__glideTo = (top) => { if (reduce.matches) { scrollTo(0, top); return; } if (!gliding) glideTo(top); };
+/* top: 숫자, resolve: 매 프레임 목적지를 다시 계산하는 함수(선택) */
+window.__glideTo = (top, resolve) => { if (reduce.matches) { scrollTo(0, resolve ? resolve() : top); return; } glideTo(top, resolve); };
 })();
 
 // 펼침 목록(details)을 열면, 펼침 애니메이션이 끝난 뒤 부드럽게 미끄러지며 내용을 화면에 맞춰 줍니다.
@@ -904,7 +916,7 @@ glide(top(), (k) => { document.documentElement.style.setProperty('--qd', easeOut
 const ascend = () => { if (busy) return; busy = true; animDone = false; dim(true);
 glide(Math.max(0, top() - innerHeight), (k) => document.documentElement.style.setProperty('--qd', (1 - easeOut(k)).toFixed(3))); };
 /* 의도 판단: 클리포트가 화면 아래쪽에 보이기 시작했는데 내려가려 하면 하강, 클리포트 맨 위에서 올라가려 하면 상승 */
-const intent = (dir) => { const r = sec.getBoundingClientRect();
+const intent = (dir) => { if (window.__navGliding) return false; const r = sec.getBoundingClientRect();
 if (dir > 0 && !isDown() && r.top < innerHeight && r.top > 0) { descend(); return true; }
 if (dir < 0 && isDown() && r.top > -60 && r.top < innerHeight * .5) { ascend(); return true; }
 return false; };
@@ -918,7 +930,7 @@ if (intent(e.shiftKey && e.code === 'Space' ? -1 : keys[e.code])) e.preventDefau
 /* 스크롤바·앵커 이동처럼 의도 신호 없이 넘어온 경우: 상태만 맞춰 둡니다 */
 addEventListener('scroll', () => { if (busy) return; const r = sec.getBoundingClientRect();
 if (r.top > innerHeight && isDown()) { dim(false); document.documentElement.style.setProperty('--qd', '0'); }
-else if (r.top <= innerHeight * .2 && !isDown()) { busy = true; animDone = false; glided = true; light(); } }, { passive: true });
+else if (r.top <= innerHeight * .2 && !isDown()) { if (window.__navGliding) { light(); animDone = true; } else { busy = true; animDone = false; glided = true; light(); } } }, { passive: true });
 })();
 
 /* 클리포트 미니맵: 클리포트가 깨어나면 오른쪽 세피로트 미니맵이 물러나고, 같은 모양의 핏빛 클리포트 미니맵이 그 자리에 들어옵니다.
