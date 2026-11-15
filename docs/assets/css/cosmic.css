@@ -511,3 +511,7 @@ main#main { position: relative; z-index: 1; }
 /* 상단 바: 클리포트에서는 번호 원과 진행 막대를 핏빛으로 */
 .topbar.is-qliphoth .tb-num { color: #ff8a7a; border-color: #c0392b; }
 .topbar.is-qliphoth ~ .reading-progress { background: linear-gradient(90deg, #c0392b, #ff8a7a) !important; }
+/* 경로 선 가시성: 미니맵(세피로트·클리포트)과 클리포트 나무의 연결선을 또렷하게 */
+.minimap .mini-svg .path { stroke: rgb(200 186 228 / .55); stroke-width: 5; opacity: 1; }
+.q-minimap .mini-svg .path { stroke: rgb(220 80 64 / .6) !important; stroke-width: 5; opacity: 1; }
+.qliphoth .q-paths line:not(.q-signal) { stroke: rgb(220 80 64 / .5); stroke-width: 2.2; }
