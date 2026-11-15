@@ -909,7 +909,7 @@ document.documentElement.style.scrollBehavior = 'auto';
 const step = (t) => { const k = Math.min(1, (t - t0) / DUR), e = easeOut(k); scrollTo(0, from + (to - from) * e); onProgress?.(k);
 if (k < 1) requestAnimationFrame(step); else { document.documentElement.style.scrollBehavior = ''; glided = true; release(); } };
 requestAnimationFrame(step); };
-const top = () => sec.getBoundingClientRect().top + scrollY;
+const top = () => { const h = sec.querySelector('.q-head'); return (h || sec).getBoundingClientRect().top + scrollY - 76; }; /* 제목부터 나무 끝까지 한 화면에 들어오도록 제목이 상단바 바로 아래 오게 */
 const descend = () => { if (busy) return; busy = true; animDone = false; let lit = false;
 sfx('q-enter'); /* 진입음: 내려가기 시작하는 순간 바로 */
 glide(top(), (k) => { document.documentElement.style.setProperty('--qd', easeOut(k).toFixed(3)); if (k >= .35 && !lit) { lit = true; light(); } }); };

@@ -1,14 +1,7 @@
-/* 차원 균열 전환 */
-html.portal-in body::before { content: ''; position: fixed; inset: 0; z-index: 9998; background: #070102; } /* 스크립트가 붙기 전 첫 프레임 덮개 */
+/* 차원 균열 전환: 나가는 장면의 마지막 프레임 = 도착 페이지의 첫 프레임(같은 배경·같은 마법진·같은 각도)이라 끊기지 않습니다 */
+html.portal-in body::before { content: ''; position: fixed; inset: 0; z-index: 9998; background: url("../portal-sigil.svg") center / min(70vmin, 520px) no-repeat, radial-gradient(circle at 50% 50%, #3a0608 0, #120203 45%, #050102 80%); }
 .portal { position: fixed; inset: 0; z-index: 10000; pointer-events: none; clip-path: circle(0px at 50% 50%); }
 .portal.is-full { clip-path: none; }
-.portal-bg { position: absolute; inset: 0; background: radial-gradient(circle at var(--px, 50%) var(--py, 50%), #3a0608 0, #120203 45%, #050102 80%); }
-.portal-sigil { position: absolute; left: 50%; top: 50%; width: min(70vmin, 520px); height: auto; transform: translate(-50%, -50%); overflow: visible; }
-.portal-sigil .ps-line { fill: none; stroke: rgb(255 120 100 / .55); stroke-width: .8; }
-.portal-sigil .ps-dash { fill: none; stroke: rgb(255 120 100 / .35); stroke-width: .6; stroke-dasharray: 2 5; animation: ps-spin 9s linear infinite; transform-origin: 0 0; }
-.portal-sigil .ps-text { font: 7px/1 "Geist Mono", ui-monospace, monospace; letter-spacing: .3em; fill: rgb(255 150 130 / .7); animation: ps-spin 14s linear infinite; transform-origin: 0 0; }
-.portal-sigil .ps-inner { animation: ps-spin 7s linear infinite reverse; transform-origin: 0 0; }
-.portal-sigil .ps-star { fill: none; stroke: rgb(255 120 100 / .4); stroke-width: .6; }
-.portal-sigil .ps-core { fill: #ff8a7a; }
-@keyframes ps-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .portal { display: none; } }
+.portal-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, #3a0608 0, #120203 45%, #050102 80%); }
+.portal-sigil { position: absolute; left: 50%; top: 50%; width: min(70vmin, 520px); height: auto; transform: translate(-50%, -50%); }
+@media (prefers-reduced-motion: reduce) { .portal, html.portal-in body::before { display: none; } }

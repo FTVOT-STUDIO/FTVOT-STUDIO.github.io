@@ -5,11 +5,7 @@ const KEY = 'ftvot-portal';
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const build = () => {
 const el = document.createElement('div'); el.className = 'portal'; el.setAttribute('aria-hidden', 'true');
-const glyph = 'GAMALIEL · ✶ · QLIPHOTH · ☽ · ';
-el.innerHTML = `<div class="portal-bg"></div><svg class="portal-sigil" viewBox="-100 -100 200 200">
-<circle r="92" class="ps-line"/><circle r="84" class="ps-dash"/><path id="ps-path" d="M -76 0 a 76 76 0 1 1 152 0 a 76 76 0 1 1 -152 0" fill="none"/>
-<text class="ps-text"><textPath href="#ps-path">${glyph.repeat(3)}</textPath></text>
-<g class="ps-inner"><circle r="56" class="ps-line"/><polygon class="ps-star" points="${Array.from({ length: 10 }, (_, k) => { const a = (k * 3 * Math.PI * 2) / 10 - Math.PI / 2; return `${(52 * Math.cos(a)).toFixed(1)},${(52 * Math.sin(a)).toFixed(1)}`; }).join(' ')}"/><circle r="6" class="ps-core"/></g></svg>`;
+el.innerHTML = '<div class="portal-bg"></div><img class="portal-sigil" src="./assets/portal-sigil.svg" alt="" decoding="sync">'; /* 첫 프레임 덮개와 같은 그림이라 페이지가 바뀌어도 이어 보입니다 */
 document.body.append(el); return el;
 };
 /* 나가기: (x, y)에서 균열이 열려 화면을 덮은 뒤 이동 */
@@ -17,7 +13,6 @@ window.__portalGo = (href, x = innerWidth / 2, y = innerHeight / 2) => {
 try { sessionStorage.setItem(KEY, '1'); } catch { /* 저장소 없음 */ }
 if (reduce) { location.href = href; return; }
 const el = build(), r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-el.style.setProperty('--px', `${x}px`); el.style.setProperty('--py', `${y}px`);
 el.animate([{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${r}px at ${x}px ${y}px)` }], { duration: 650, easing: 'cubic-bezier(.7, 0, .3, 1)', fill: 'forwards' });
 el.querySelector('.portal-sigil').animate([{ transform: 'translate(-50%, -50%) scale(.2) rotate(-90deg)', opacity: 0 }, { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1 }], { duration: 650, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'forwards' });
 window.__sfx?.('q-enter');

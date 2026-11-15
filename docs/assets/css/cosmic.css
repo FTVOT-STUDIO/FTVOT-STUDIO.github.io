@@ -630,3 +630,11 @@ html.tree-grown #tree .nodes { animation: hero-fade 1.1s ease .45s both; }
 html.is-returning #q-gamaliel { opacity: 0; translate: 0 28px; }
 html.is-returning.is-returned #q-gamaliel { opacity: 1; translate: 0 0; transition: opacity 1s ease .2s, translate 1.1s cubic-bezier(.16, 1, .3, 1) .2s; }
 html.is-returning #intro { display: none; }
+/* 클리포트의 나무는 제목부터 말쿠트 자리(네헤모트)까지 한 화면에: 제목을 줄이고 나무 높이를 화면 높이에 맞춥니다 */
+.qliphoth { padding-top: clamp(72px, 9vw, 120px); }
+.q-head { margin-bottom: 12px; }
+.q-latin { font-size: clamp(2rem, 1rem + 4vw, 4.4rem); }
+.q-title { margin-top: 10px; font-size: clamp(1.3rem, .9rem + 1.4vw, 2rem); }
+.q-sub { margin-top: 8px; font-size: 13px; }
+.q-tree { width: auto; height: calc(100svh - 76px - 222px); max-height: 980px; min-height: 360px; max-width: 100%; }
+@media (max-width: 600px) { .q-tree { height: auto; width: min(100%, calc((100svh - 230px) * .571)); } }
