@@ -431,7 +431,9 @@ const k = narrow ? 0 : easeInOut(moveT);
 if (narrow) { info.cx = info.x; info.cy = info.y; }
 else {
 /* 2차 베지어: 출발점 → (출발·도착의 가운데를 나무 중심 쪽으로 60% 당긴 점) → 도착점 */
-const midx = (info.x + info.tx) / 2, midy = (info.y + info.ty) / 2, ccx = midx + (CX - midx) * .6, ccy = midy + (CY - midy) * .6, u = 1 - k;
+/* 좌우 균형: 왼쪽 기둥 세피라는 왼쪽으로, 오른쪽 기둥은 오른쪽으로, 가운데 기둥은 번갈아 좌우로 활처럼 휘며 이동해 움직임이 양쪽으로 고르게 퍼집니다 */
+const side = Math.abs(info.x - CX) > 8 ? Math.sign(info.x - CX) : (i % 2 ? -1 : 1);
+const midx = (info.x + info.tx) / 2, midy = (info.y + info.ty) / 2, ccx = midx + (CX - midx) * .45 + side * 90, ccy = midy + (CY - midy) * .45, u = 1 - k;
 info.cx = u * u * info.x + 2 * u * k * ccx + k * k * info.tx;
 info.cy = u * u * info.y + 2 * u * k * ccy + k * k * info.ty;
 }
