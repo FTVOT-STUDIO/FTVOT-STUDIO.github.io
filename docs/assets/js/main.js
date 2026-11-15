@@ -1023,5 +1023,12 @@ const target = document.getElementById('q-gamaliel'), sec = document.getElementB
 const place = () => { if (target) { html.style.scrollBehavior = 'auto'; scrollTo(0, target.getBoundingClientRect().top + scrollY - 110); html.style.scrollBehavior = ''; } };
 place(); requestAnimationFrame(place);
 setTimeout(() => { place(); sec?.classList.add('is-awake', 'is-traced'); sec?.querySelectorAll('.q-node').forEach((n) => n.classList.add('is-lit'));
-html.classList.add('is-returned'); setTimeout(() => html.classList.remove('is-returning', 'is-returned'), 1300); }, 250);
+html.classList.add('is-returned'); window.__portalOpen?.(); setTimeout(() => html.classList.remove('is-returning', 'is-returned'), 1300); }, 250);
 })();
+
+/* 게임 카드를 누르면 그 자리에서 차원 균열이 열리며 플레이 화면으로 넘어갑니다 */
+document.addEventListener('click', (e) => {
+const a = e.target instanceof Element ? e.target.closest('a.game-card') : null;
+if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || !window.__portalGo) return;
+e.preventDefault(); window.__portalGo(a.href, e.clientX, e.clientY);
+});

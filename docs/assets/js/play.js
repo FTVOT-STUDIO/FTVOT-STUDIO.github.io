@@ -71,7 +71,6 @@ document.querySelector('.pl-back')?.addEventListener('click', (e) => {
 if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
 e.preventDefault();
 try { sessionStorage.setItem('ftvot-return', 'play'); } catch { /* 저장소 없음 */ }
-document.body.classList.add('is-leaving');
-const href = e.currentTarget.href; /* setTimeout 안에서는 currentTarget이 비므로 미리 담아 둡니다 */
-setTimeout(() => { location.href = href; }, 450);
+const href = e.currentTarget.href;
+if (window.__portalGo) window.__portalGo(href, e.clientX, e.clientY); else location.href = href;
 });
