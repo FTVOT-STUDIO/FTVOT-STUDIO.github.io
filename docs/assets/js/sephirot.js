@@ -450,7 +450,7 @@ const sc = narrow ? 1 : (raw <= .001 || raw >= .999) ? 1 : Math.min(1 - .68 * sm
 /* 빛점에 가까울수록 글자·번호가 서서히 사라졌다 돌아옵니다 (전환 중에만 직접 지정, 평소엔 원래 스타일 그대로) */
 const mote = narrow || raw <= .001 || raw >= .999 ? 0 : Math.max(0, 1 - Math.abs(sc - .32) / .68);
 const labels = info.labels ??= [...info.node.querySelectorAll('text, .node-num-bg')];
-for (const t of labels) t.style.opacity = mote > 0 ? (1 - mote).toFixed(3) : '';
+for (const t of labels) t.style.filter = mote > 0 ? `opacity(${(1 - mote).toFixed(3)})` : ''; /* opacity 대신 filter: 원래 숨겨진 글자(수수께끼/이름)는 그대로 숨긴 채 곱해서 흐리게 → 글자 겹침 방지 */
 // 떠날 때: 세피라마다 다른 속도로 위로 흩어지는 시차(패럴랙스). 케테르가 가장 느리고 말쿠트가 가장 빠릅니다
 const ls = leave * leave;
 info.cx -= ls * (i - 4.5) * 6;
