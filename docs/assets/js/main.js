@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
 import { initCosmos } from './cosmos.js?v=20261115a';
-import { initSephirot } from './sephirot.js?v=20261117e';
+import { initSephirot } from './sephirot.js?v=20261117k';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117b';
 import { initChapterScenes } from './chapter-scenes.js?v=20261116a';
 
@@ -639,4 +639,28 @@ if (x < 1) requestAnimationFrame(step); else { gliding = false; holdFor(500); }
 requestAnimationFrame(step);
 };
 window.__glideTo = (top) => { if (reduce.matches) { scrollTo(0, top); return; } if (!gliding) glideTo(top); };
+})();
+
+// 펼침 목록(details)을 열면, 펼쳐진 내용이 화면 안에 잘 보이도록 자동으로 스크롤합니다.
+// 내용이 화면보다 길면 제목이 상단바 바로 아래에 오게, 짧으면 끝까지 보이는 만큼만 내립니다.
+(() => {
+const TOP_GAP = 72, BOTTOM_GAP = 24;
+const reveal = (item) => {
+const rect = item.getBoundingClientRect();
+const room = innerHeight - TOP_GAP - BOTTOM_GAP;
+let delta = 0;
+if (rect.height > room || rect.top < TOP_GAP) delta = rect.top - TOP_GAP;          // 길거나 위로 잘림 → 제목을 위에 맞춤
+else if (rect.bottom > innerHeight - BOTTOM_GAP) delta = rect.bottom - (innerHeight - BOTTOM_GAP); // 아래로 잘림 → 끝이 보이게
+if (Math.abs(delta) < 4) return;
+const top = scrollY + delta;
+if (window.__glideTo) window.__glideTo(top); else scrollTo({ top, behavior: 'smooth' });
+};
+document.addEventListener('toggle', (event) => {
+const item = event.target;
+if (!(item instanceof HTMLDetailsElement) || !item.open) return;
+// 다른 항목이 닫히며 위치가 바뀌거나 펼침 애니메이션이 끝난 뒤 다시 한 번 맞춥니다
+requestAnimationFrame(() => reveal(item));
+setTimeout(() => { if (item.open) reveal(item); }, 480);
+setTimeout(() => { if (item.open) reveal(item); }, 1300); // 지연 로딩 이미지가 늦게 들어와 높이가 바뀌는 경우
+}, true);
 })();
