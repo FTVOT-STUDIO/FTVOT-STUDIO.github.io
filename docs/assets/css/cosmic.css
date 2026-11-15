@@ -223,3 +223,10 @@
 .js .hero-tree:not(.is-laid) .ht-tree .path-badge { opacity: 0 !important; }
 /* 넓은 화면: 소개 글이 화면 왼쪽 끝에 붙어 나무와 멀어지지 않도록, 나무 쪽(오른쪽)으로 붙여 둡니다 */
 @media (min-width: 1024px) { .hero-tree .ht-copy { justify-self: end; padding-right: clamp(40px, 5vw, 96px); } }
+/* 호드 감사 크레딧: 영화 엔딩 크레딧처럼 가운데 정렬된 이름들 */
+.hod-credits { width: min(1120px, calc(100% - 2 * clamp(20px, 5vw, 64px))); margin: clamp(64px, 9vw, 120px) auto 0; padding-top: 48px; border-top: 1px solid rgb(255 255 255 / .08); text-align: center; }
+.hod-credits-title { margin: 0 0 28px; color: var(--sc); font-size: 11px; letter-spacing: .32em; }
+.hod-credits ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 36px; margin: 0; padding: 0; list-style: none; }
+.hod-credits li { color: var(--text, #fafafa); font-size: clamp(15px, 1.4vw, 19px); font-weight: 500; letter-spacing: .02em; opacity: .85; transition: opacity .3s, color .3s; }
+.hod-credits li:hover { opacity: 1; color: var(--sc); }
+.hod-credits-note { margin: 32px 0 0; color: var(--text-3, #8a8a94); font-size: 13px; }

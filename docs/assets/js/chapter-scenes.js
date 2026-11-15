@@ -233,19 +233,31 @@ line(c, 0, 410, 300, 410);
 const graves = 3 + Math.floor(cycle(t, 42) * 9); for (let i = 0; i < graves; i++) { const x = 18 + i * 31; line(c, x, 470, x, 440); line(c, x - 8, 450, x + 8, 450); }
 c.save(); c.translate(250, 410); line(c, 0, 0, 0, -120); c.beginPath(); c.moveTo(0, -120); c.quadraticCurveTo(25, -125 + Math.sin(t * 2) * 6, 45, -112); c.lineTo(42, -88); c.quadraticCurveTo(22, -95 + Math.sin(t * 2 + 1) * 6, 0, -92); c.stroke(); c.restore();
 },
-// 호드: 세대가 태어나 자라고 늙어 사라지는 순환과, 풀 → 곤충 → 새 → 여우로 이어지는 먹이사슬
+// 호드: 뒤에서 일한 것들에게 바치는 영광. 월계관 아래로 도구 이름이 엔딩 크레딧처럼 천천히 올라가고,
+// 작은 빛 알갱이들이 감사의 표시처럼 위로 떠오릅니다
 hod(c, t) {
-for (let g = 0; g < 4; g++) { const p = cycle(t, 20, g / 4), x = 30 + p * 240, s = lerp(.35, 1.1, seg(p, 0, .4)) * (1 - seg(p, .85, 1) * .3); c.save(); c.globalAlpha *= Math.sin(p * Math.PI); person(c, x, 130, s, seg(p, .7, 1) * .4); if (p > .45 && p < .55) { c.save(); c.globalAlpha *= Math.sin(seg(p, .45, .55) * Math.PI); circle(c, x + 18, 120, 6); c.restore(); } c.restore(); }
-line(c, 20, 148, 280, 148); c.font = '9px monospace'; c.save(); c.globalAlpha *= .6; c.fillText('BIRTH', 20, 162); c.fillText('DEATH', 248, 162); c.restore();
-const tiers = [[150, 440, 'grass'], [150, 370, 'insect'], [150, 295, 'bird'], [150, 220, 'fox']];
-c.beginPath(); c.moveTo(50, 460); c.lineTo(250, 460); c.lineTo(150, 195); c.closePath(); c.stroke();
-for (let i = 1; i < 4; i++) line(c, 50 + i * 26.5, 460 - i * 68, 250 - i * 26.5, 460 - i * 68);
-for (let i = 0; i < 5; i++) { const x = 100 + i * 25; c.beginPath(); c.moveTo(x, 455); c.quadraticCurveTo(x + Math.sin(t * 2 + i) * 4, 440, x + Math.sin(t * 2 + i) * 6, 428); c.stroke(); }
-insect(c, 150, 370, .5, t);
-c.save(); c.translate(150, 300); const fl = Math.sin(t * 6) * 6; c.beginPath(); c.moveTo(-18, -fl); c.quadraticCurveTo(-8, 0, 0, 0); c.quadraticCurveTo(8, 0, 18, -fl); c.stroke(); circle(c, 0, 0, 3); c.restore();
-c.save(); c.translate(150, 235); c.beginPath(); c.moveTo(-14, 6); c.lineTo(0, -8); c.lineTo(14, 6); c.lineTo(0, 12); c.closePath(); c.stroke(); line(c, -8, -2, -12, -14); line(c, 8, -2, 12, -14); c.restore();
-for (let i = 0; i < 3; i++) { const y1 = tiers[i][1] - 12, y2 = tiers[i + 1][1] + 14; for (let d = 0; d < 2; d++) { const f = cycle(t, 3, d / 2 + i * .2); dot(c, 260, lerp(y1, y2, f), 1.8); } line(c, 260, y1, 260, y2); line(c, 256, y2 + 5, 260, y2); line(c, 264, y2 + 5, 260, y2); }
-const back = cycle(t, 8); c.save(); c.globalAlpha *= .5; c.beginPath(); c.moveTo(40, 220); c.quadraticCurveTo(10, 330, 40, 440); c.stroke(); dot(c, 40 - Math.sin(back * Math.PI) * 22, lerp(220, 440, back), 2); c.restore();
+// 월계관: 좌우 가지에 잎이 차례로 붙어 있고 아주 느리게 숨 쉬듯 커졌다 작아집니다
+const breathe = 1 + Math.sin(t * .6) * .02;
+c.save(); c.translate(150, 96); c.scale(breathe, breathe);
+for (const side of [-1, 1]) {
+c.beginPath(); c.arc(0, 0, 54, side < 0 ? Math.PI * .55 : Math.PI * .45, side < 0 ? Math.PI * 1.35 : -Math.PI * .35, side > 0); c.stroke();
+for (let k = 0; k < 7; k++) { const a = (side < 0 ? Math.PI * .6 : Math.PI * .4) + side * -k * .13 * Math.PI; const x = Math.cos(a) * 54, y = Math.sin(a) * 54; ellipse(c, x + side * 6 * Math.sin(a), y, 7, 3, a + side * .9); }
+}
+c.restore();
+c.save(); c.globalAlpha *= .8; c.font = '10px monospace'; c.textAlign = 'center'; c.fillText('IN GRATITUDE', 150, 100); c.restore();
+// 엔딩 크레딧: 이름이 아래에서 올라오며 위쪽 끝에서 사라집니다
+const names = ['UNITY', 'C#', 'VS CODE', 'GIT', 'GITHUB', 'ASEPRITE', 'AUDIOTOOL', 'NOTION', 'UBUNTU', 'RASPBERRY PI', 'FIREBASE', 'FABLEFORGE', 'MOE PET', 'STUDIO-DESKTOP', 'MELONEST', 'TERMINAL'];
+const gap = 30, span = names.length * gap, offset = (t * 9) % span;
+c.save(); c.font = '11px monospace'; c.textAlign = 'center';
+names.forEach((name, k) => {
+const y = 470 - ((k * gap + offset) % span);
+if (y < 175 || y > 470) return;
+const fade = Math.min(1, (y - 175) / 60, (470 - y) / 40);
+c.globalAlpha = .55 * fade; c.fillText(name, 150, y);
+});
+c.restore();
+// 떠오르는 빛 알갱이
+for (let i = 0; i < 26; i++) { const sp = 10 + rand(i) * 14, y = 480 - ((t * sp + rand(i + 4) * 480) % 480), x = 20 + rand(i + 8) * 260 + Math.sin(t * .8 + i) * 6; c.save(); c.globalAlpha *= .5 * Math.min(1, y / 120); dot(c, x, y, .8 + rand(i + 2) * 1.2); c.restore(); }
 },
 // 예소드: 관측하는 눈, 최면 나선과 진자, 가지를 치며 하나만 실현되는 미래 시간선
 yesod(c, t) {

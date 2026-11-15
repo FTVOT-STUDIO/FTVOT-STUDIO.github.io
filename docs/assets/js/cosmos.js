@@ -96,11 +96,8 @@ for(let i=0;i<8;i++){const px=i*w/7,base=h*.93,blade=45+(i*29)%95;c.save();c.tra
 for(let i=0;i<4;i++){const px=i%2?w-32-i*22:25+i*23,yy=h*.47+i*35;line(c,px,yy,px,h*.88);c.beginPath();c.moveTo(px,yy);c.bezierCurveTo(px+25,yy+Math.sin(t*.65+i)*8,px+42,yy-3,px+55,yy+8);c.lineTo(px+49,yy+55);c.lineTo(px,yy+47);c.stroke();}
 const p=phase(t,17);if(p<.18){c.save();c.globalAlpha*=Math.sin(p/.18*Math.PI)*.45;line(c,w*.01,h*.74,w*.23,h*.3);line(c,w*.81,h*.7,w*.99,h*.35);c.restore();}
 },
-hod(c,w,h,t){
-for(let side=0;side<2;side++){const edge=side?w-65:65,dir=side?-1:1;
-for(let i=0;i<5;i++){const x=edge+Math.sin(i*2)*35,y=h*.17+i*h*.145,r=7+i*3,p=phase(t,21,i*.18);c.save();c.globalAlpha*=Math.sin(p*Math.PI)**2;oval(c,x,y,r,r*1.5);oval(c,x,y,r*.4,r);for(let j=0;j<3;j++)oval(c,x+dir*(28+j*12),y+23,2,4);c.restore();if(i<4){const nx=edge+Math.sin((i+1)*2)*35,ny=y+h*.145;c.beginPath();c.moveTo(x,y+r);c.quadraticCurveTo(x+dir*60,y+h*.08,nx,ny-r);c.stroke();const f=phase(t,11,i*.2);dot(c,x+(nx-x)*f+dir*Math.sin(f*Math.PI)*30,y+(ny-y)*f,2*(1-f)+.5);}}
-}
-},
+// 호드의 배경(월계관·크레딧)은 chapter-scenes.js가 그립니다. 겹치지 않게 비워 둡니다
+hod(){},
 yesod(c,w,h,t){
 const x=w*.94,y=h*.48,r=Math.min(w*.25,240);
 for(let i=0;i<7;i++){c.save();c.globalAlpha*=.55;ring(c,x,y,r*(.2+i*.13));c.restore();}

@@ -2,10 +2,10 @@
 // 빌드 없는 ES 모듈입니다. 모든 기능은 JS가 실패해도 기본 HTML이 동작하도록 "덧붙이는" 방식입니다.
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261114n';
-import { initCosmos } from './cosmos.js?v=20261115a';
+import { initCosmos } from './cosmos.js?v=20261117a';
 import { initSephirot } from './sephirot.js?v=20261117n';
-import { initGalleryAdmin } from './gallery-admin.js?v=20261117c';
-import { initChapterScenes } from './chapter-scenes.js?v=20261116a';
+import { initGalleryAdmin } from './gallery-admin.js?v=20261117d';
+import { initChapterScenes } from './chapter-scenes.js?v=20261117a';
 
 // 등장 연출용 CSS를 켭니다. JS가 실패하면 이 클래스가 없어서 내용이 전부 보입니다
 document.documentElement.classList.add('js');
@@ -407,7 +407,10 @@ link.href = url;
 link.target = '_blank';
 link.rel = 'noopener noreferrer';
 const image = document.createElement('img');
-image.src = url;
+// 목록에는 가벼운 썸네일(thumbs/이름.webp)을 쓰고, 없으면 원본으로 대신합니다. 누르면 원본이 열립니다
+const thumb = `./assets/gallery/thumbs/${encodeURIComponent(file.name.replace(/\.[^.]+$/, ''))}.webp?v=${encodeURIComponent(file.sha)}`;
+image.src = thumb;
+image.addEventListener('error', () => { if (image.src.includes('/thumbs/')) image.src = url; }, { once: true });
 image.alt = title;
 image.loading = 'lazy';
 image.decoding = 'async';
@@ -429,7 +432,8 @@ const mirror = document.createElement('span');
 mirror.className = 'image-mirror';
 mirror.setAttribute('aria-hidden', 'true');
 const reflection = document.createElement('img');
-reflection.src = url;
+reflection.src = thumb;
+reflection.addEventListener('error', () => { reflection.src = url; }, { once: true });
 reflection.alt = '';
 reflection.loading = 'lazy';
 mirror.append(reflection);

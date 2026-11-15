@@ -72,6 +72,20 @@ if (!blob || blob.size >= file.size) return { file, name: file.name };
 return { file: blob, name: file.name.replace(/\.[^.]+$/, '.webp') };
 } catch { return { file, name: file.name }; }
 }
+// 갤러리 목록용 썸네일(긴 변 900px, WebP)을 브라우저에서 만듭니다. 실패하면 썸네일 없이 진행합니다
+async function makeThumb(file) {
+try {
+const bitmap = await createImageBitmap(file);
+const scale = Math.min(1, 900 / Math.max(bitmap.width, bitmap.height));
+const canvas = document.createElement('canvas');
+canvas.width = Math.round(bitmap.width * scale); canvas.height = Math.round(bitmap.height * scale);
+canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close?.();
+return await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.8));
+} catch { return null; }
+}
+const thumbPath = (name) => `/contents/${DIR}/thumbs/${encodeURIComponent(name.replace(/\.[^.]+$/, ''))}.webp`;
+// 썸네일 파일의 현재 sha (교체·삭제에 필요). 없으면 null
+async function thumbSha(name, token) { try { return (await gh(`${thumbPath(name)}?ref=${BRANCH}`, token)).sha; } catch { return null; } }
 const pathOf = (name) => `/contents/${DIR}/${encodeURIComponent(name)}`;
 
 function el(tag, attrs = {}, ...children) {
@@ -119,7 +133,7 @@ if (!files.length) { list.append(el('li', { class: 'ga-empty', text: '아직 전
 for (const file of files) {
 const ext = extOf(file.name);
 const nameInput = el('input', { class: 'ga-input ga-name', value: file.name.replace(/\.[^.]+$/, ''), 'aria-label': `${file.name} 새 이름` });
-const thumb = el('img', { class: 'ga-thumb', src: `./assets/gallery/${encodeURIComponent(file.name)}?v=${file.sha}`, alt: '', loading: 'lazy' });
+const thumb = el('img', { class: 'ga-thumb', src: `./assets/gallery/thumbs/${encodeURIComponent(file.name.replace(/\.[^.]+$/, ''))}.webp?v=${file.sha}`, alt: '', loading: 'lazy' });
 thumb.addEventListener('error', () => thumb.classList.add('is-missing'), { once: true });
 const renameBtn = el('button', { type: 'button', class: 'ga-btn', text: '이름 변경' });
 const deleteBtn = el('button', { type: 'button', class: 'ga-btn ga-danger', text: '삭제' });
@@ -159,6 +173,8 @@ say(`올리는 중 (${done + 1}/${items.length}) ${name}${packed.file !== file ?
 const existing = files.find((f) => f.name === name);
 const content = await fileToBase64(packed.file);
 await gh(pathOf(name), getToken(), { method: 'PUT', body: JSON.stringify({ message: `${existing ? 'Replace' : 'Add'} artwork ${name}`, content, branch: BRANCH, ...(existing ? { sha: existing.sha } : {}) }) });
+const thumbBlob = await makeThumb(packed.file);
+if (thumbBlob) { try { const sha = await thumbSha(name, getToken()); await gh(thumbPath(name), getToken(), { method: 'PUT', body: JSON.stringify({ message: `Thumbnail ${name}`, content: await fileToBase64(thumbBlob), branch: BRANCH, ...(sha ? { sha } : {}) }) }); } catch { /* 썸네일이 없어도 갤러리는 원본으로 표시됩니다 */ } }
 done += 1;
 }
 await refresh(); changed();
@@ -176,6 +192,8 @@ try {
 const blob = await gh(`/git/blobs/${file.sha}`, getToken());
 await gh(pathOf(next), getToken(), { method: 'PUT', body: JSON.stringify({ message: `Rename artwork ${file.name} → ${next}`, content: String(blob.content).replace(/\s/g, ''), branch: BRANCH }) });
 await gh(pathOf(file.name), getToken(), { method: 'DELETE', body: JSON.stringify({ message: `Rename artwork ${file.name} → ${next} (remove old)`, sha: file.sha, branch: BRANCH }) });
+// 썸네일도 새 이름으로 옮깁니다 (없으면 건너뜀)
+try { const sha = await thumbSha(file.name, getToken()); if (sha) { const tb = await gh(`/git/blobs/${sha}`, getToken()); await gh(thumbPath(next), getToken(), { method: 'PUT', body: JSON.stringify({ message: `Thumbnail ${next}`, content: String(tb.content).replace(/\s/g, ''), branch: BRANCH }) }); await gh(thumbPath(file.name), getToken(), { method: 'DELETE', body: JSON.stringify({ message: `Remove thumbnail ${file.name}`, sha, branch: BRANCH }) }); } } catch { /* 썸네일 정리는 실패해도 괜찮습니다 */ }
 await refresh(); changed();
 say('이름을 바꿨습니다.', 'ok');
 } catch (error) { say(error.message, 'error'); }
@@ -188,6 +206,7 @@ if (button.dataset.confirm !== '1') { button.dataset.confirm = '1'; button.textC
 setBusy(true); say(`${file.name}을(를) 지우고 있습니다…`);
 try {
 await gh(pathOf(file.name), getToken(), { method: 'DELETE', body: JSON.stringify({ message: `Delete artwork ${file.name}`, sha: file.sha, branch: BRANCH }) });
+try { const sha = await thumbSha(file.name, getToken()); if (sha) await gh(thumbPath(file.name), getToken(), { method: 'DELETE', body: JSON.stringify({ message: `Remove thumbnail ${file.name}`, sha, branch: BRANCH }) }); } catch { /* 썸네일 정리는 실패해도 괜찮습니다 */ }
 await refresh(); changed();
 say('삭제했습니다. (GitHub 커밋 기록에서는 되살릴 수 있습니다)', 'ok');
 } catch (error) { say(error.message, 'error'); }
