@@ -948,7 +948,7 @@ a.classList.remove('node', 'is-current'); a.classList.add('qm-node', open ? 'is-
 if (open) { a.setAttribute('href', `#${open[0]}`); a.setAttribute('aria-label', `${k}. ${open[1]}`); }
 else { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); a.setAttribute('aria-label', `${k}. 봉인됨`); a.setAttribute('tabindex', '-1'); } });
 src.after(qm);
-const sync = () => { const on = sec.classList.contains('is-awake'); src.classList.toggle('is-yielded', on); qm.classList.toggle('is-shown', on);
+const sync = () => { const on = sec.classList.contains('is-awake') || sec.getBoundingClientRect().top < innerHeight * .5; /* 깨어나기를 기다리지 않고 클리포트가 화면 절반을 넘는 순간 교대 */ src.classList.toggle('is-yielded', on); qm.classList.toggle('is-shown', on);
 /* 지금 보고 있는 열린 껍질을 강조 */
 let cur = ''; for (const id of ['q-gamaliel', 'q-thaumiel']) { const r = document.getElementById(id)?.getBoundingClientRect(); if (r && r.top < innerHeight * .55) { cur = id; break; } }
 qm.querySelectorAll('.qm-node.is-open').forEach((a) => a.classList.toggle('is-current', a.getAttribute('href') === `#${cur}`));

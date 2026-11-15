@@ -32,7 +32,7 @@ const slug = new URLSearchParams(location.search).get('g') || '';
 if (!SLUG_RE.test(slug)) { showError('잘못된 게임 주소입니다.'); return; }
 const game = (await loadManifest()).find((g) => g.slug === slug);
 if (!game) { showError('이 게임을 찾지 못했습니다. 목록에서 다시 선택해 주세요.'); return; }
-document.title = `${game.title} | FTVOT_STUDIO`; $('[data-title]').textContent = game.title;
+document.title = `${game.title} | FTVOT STUDIO`; $('[data-title]').textContent = game.title;
 const w = Number(game.width) || 1280, h = Number(game.height) || 720;
 document.documentElement.style.setProperty('--ar', `${w} / ${h}`); document.documentElement.style.setProperty('--arn', String(w / h));
 const base = `${BUILD_ORIGIN || '.'}/games/${slug}/Build/`, b = game.build || {};
