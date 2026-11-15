@@ -4,7 +4,7 @@
 import { initIntro, initSky } from './intro.js?v=20261118b';
 import { initCosmos } from './cosmos.js?v=20261117q';
 import { initSephirot } from './sephirot.js?v=20261118i';
-import { initGalleryAdmin } from './gallery-admin.js?v=20261118b';
+import { initGalleryAdmin } from './gallery-admin.js?v=20261118c';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
 import { initChapterScenes } from './chapter-scenes.js?v=20261117q';
@@ -425,13 +425,26 @@ link.append(image);
 const pending = document.createElement('span');
 pending.className = 'artwork-pending';
 pending.hidden = true;
-pending.textContent = '배포가 끝나면 그림이 표시됩니다.';
+/* 배포 대기 표시: 막 올린 그림은 사이트 배포(보통 1~2분)가 끝나야 열립니다. 예상 진행률(퍼센트+막대)을 보여 주고,
+   4초마다 실제로 열리는지 확인해 열리는 즉시 그림으로 바꿉니다 */
+pending.innerHTML = '<span class="ap-label">사이트에 반영하는 중</span><span class="ap-pct mono">000%</span><span class="ap-track"><span class="ap-fill"></span></span>';
 link.append(pending);
+let waiting = false, fails = 0;
 image.addEventListener('error', () => {
+fails += 1; if (waiting || fails < 2) return; /* 첫 실패는 썸네일→원본 전환 중이라 아직 대기 아님. 원본까지 없으면 배포 대기 */
+waiting = true;
 figure.classList.add('is-pending');
 link.setAttribute('aria-disabled', 'true');
 link.tabIndex = -1;
 pending.hidden = false;
+let since = Date.now(); try { since = Number(sessionStorage.getItem('ftvot-deploy-start')) || since; } catch { /* 저장소 없음 */ }
+const pct = pending.querySelector('.ap-pct'), fill = pending.querySelector('.ap-fill');
+const est = () => { const f = .95 * (1 - Math.exp(-(Date.now() - since) / 40000)); pct.textContent = `${String(Math.round(f * 100)).padStart(3, '0')}%`; fill.style.transform = `scaleX(${f})`; };
+est(); const anim = setInterval(est, 500);
+const probe = setInterval(() => { const t = new Image(); t.onload = () => { clearInterval(probe); clearInterval(anim); pct.textContent = '100%'; fill.style.transform = 'scaleX(1)';
+setTimeout(() => { image.src = t.src; reflection.src = t.src; figure.classList.remove('is-pending'); link.removeAttribute('aria-disabled'); link.removeAttribute('tabindex'); pending.hidden = true; }, 300); };
+t.src = `${url}&r=${Date.now()}`; }, 4000);
+setTimeout(() => clearInterval(probe), 300000);
 });
 const mirror = document.createElement('span');
 mirror.className = 'image-mirror';

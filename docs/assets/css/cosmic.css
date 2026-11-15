@@ -530,3 +530,10 @@ main#main { position: relative; z-index: 1; }
 .intro-progress { position: relative; width: min(260px, 70vw) !important; height: 2px; animation: none; background: rgb(149 115 181 / .18); border-radius: 2px; overflow: hidden; }
 .intro-fill { position: absolute; inset: 0; transform-origin: left; transform: scaleX(0); background: linear-gradient(90deg, #6d4f8f, #c9a8ef); transition: transform .2s ease-out; }
 .intro-pct { font-variant-numeric: tabular-nums; }
+/* 갤러리 배포 대기 타일: 티페레트 색 퍼센트 + 막대 */
+.artwork-pending { display: grid !important; align-content: center; justify-items: center; gap: 8px; }
+.artwork-pending[hidden] { display: none !important; }
+.ap-label { font-size: 12px; color: var(--text-2, #a1a1aa); }
+.ap-pct { font-size: 20px; color: #fafafa; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+.ap-track { width: min(140px, 70%); height: 2px; border-radius: 2px; background: rgb(255 255 255 / .08); overflow: hidden; }
+.ap-fill { display: block; height: 100%; transform-origin: left; transform: scaleX(0); background: linear-gradient(90deg, var(--c6, #e8889a), color-mix(in oklab, var(--c6, #e8889a) 70%, #fff)); transition: transform .5s ease-out; }
