@@ -4,7 +4,7 @@
 import { initIntro, initSky } from './intro.js?v=20261118b';
 import { initCosmos } from './cosmos.js?v=20261117q';
 import { initSephirot } from './sephirot.js?v=20261118i';
-import { initGalleryAdmin } from './gallery-admin.js?v=20261119a';
+import { initGalleryAdmin } from './gallery-admin.js?v=20261119b';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
 import { initChapterScenes } from './chapter-scenes.js?v=20261117q';
@@ -389,18 +389,33 @@ state.hidden = false;
 state.querySelector('p').textContent = title;
 state.querySelector('span:last-child').textContent = detail;
 };
-const render = (files) => {
-files = files.filter(validFile);
+/* 갤러리 페이지: 한 페이지에 9점(3×3). 9점을 넘으면 그리드 아래 이전/다음 버튼과 쪽수로 넘깁니다 */
+const PER_PAGE = 9; let page = 0, allFiles = [];
+const pager = document.createElement('nav'); pager.className = 'art-pager'; pager.setAttribute('aria-label', '갤러리 페이지'); pager.hidden = true;
+pager.innerHTML = '<button type="button" data-art-page="-1" aria-label="이전 페이지">←</button><span class="mono" data-art-pos>1 / 1</span><button type="button" data-art-page="1" aria-label="다음 페이지">→</button>';
+grid.after(pager);
+pager.addEventListener('click', (e) => { const b = e.target instanceof Element ? e.target.closest('[data-art-page]') : null; if (!b) return;
+const pages = Math.ceil(allFiles.length / PER_PAGE); page = (page + Number(b.dataset.artPage) + pages) % pages; render(allFiles, true);
+const top = grid.getBoundingClientRect().top + scrollY - 120; if (window.__glideTo) window.__glideTo(top); else scrollTo({ top, behavior: 'smooth' }); });
+/* 방금 올린 그림: 목록 API가 늦게 갱신돼도 10분 동안은 바로 보이게 합쳐 둡니다 */
+const withExtras = (files) => { let extra = []; try { extra = JSON.parse(sessionStorage.getItem('ftvot-gallery-extra') || '[]').filter((x) => x && typeof x.name === 'string' && Date.now() - (x.time || 0) < 600000); } catch { /* 없음 */ }
+const names = new Set(files.map((f) => f.name)); return [...files, ...extra.filter((x) => !names.has(x.name)).map(({ name, sha }) => ({ name, sha: String(sha) }))].sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true })); };
+const render = (files, keepPage = false) => {
+files = withExtras(files.filter(validFile)).filter(validFile);
+allFiles = files;
+const pages = Math.max(1, Math.ceil(files.length / PER_PAGE)); if (!keepPage) page = Math.min(page, pages - 1);
 artObserver.disconnect();
 grid.replaceChildren();
 if (count) count.textContent = `ART COLLECTION / ${String(files.length).padStart(2, '0')}`;
+pager.hidden = pages <= 1; pager.querySelector('[data-art-pos]').textContent = `${page + 1} / ${pages}`;
 if (!files.length) {
 showState('첫 작품을 전시해 주세요.', '그림 업로드 버튼에서 작품을 올릴 수 있습니다.');
 return;
 }
 state.hidden = true;
 const fragment = document.createDocumentFragment();
-files.forEach((file, i) => {
+const offset = page * PER_PAGE;
+files.slice(offset, offset + PER_PAGE).forEach((file, j) => { const i = offset + j;
 const title = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
 const url = `https://raw.githubusercontent.com/FTVOT-STUDIO/FTVOT-STUDIO.github.io/main/docs/assets/gallery/${encodeURIComponent(file.name)}?v=${encodeURIComponent(file.sha)}`;
 const figure = document.createElement('figure');

@@ -128,21 +128,7 @@ document.body.append(dialog);
 const say = (text, tone = '') => { status.textContent = text; status.dataset.tone = tone; };
 const setBusy = (on) => { busy = on; dialog.toggleAttribute('data-busy', on); dialog.querySelectorAll('button, input').forEach((n) => { if (n !== close) n.disabled = on; }); };
 const changed = () => document.dispatchEvent(new CustomEvent('gallery:changed'));
-/* 100% 이후 자동 새로고침: 배포가 끝나 사이트에서 새 그림 파일이 열릴 때까지 5초마다 확인하고, 열리면 갤러리를 다시 그립니다 (최대 4분) */
-const waitDeploy = async (names) => {
-if (!names.length) return;
-const url = (n) => `https://raw.githubusercontent.com/FTVOT-STUDIO/FTVOT-STUDIO.github.io/main/docs/assets/gallery/${encodeURIComponent(n)}?check=${Date.now()}`; /* 커밋 즉시 열리는 GitHub 원본 주소로 확인 */
-const ready = async () => { for (const n of names) { try { const r = await fetch(url(n), { method: 'HEAD', cache: 'no-store' }); if (!r.ok) return false; } catch { return false; } } return true; };
-const t0 = Date.now(); try { sessionStorage.setItem('ftvot-deploy-start', String(t0)); } catch { /* 저장소 없음 */ }
-/* 반영 단계도 같은 막대로: 예상 진행률(보통 1~2분)을 그리다가 실제로 열리면 100% */
-progress.reset(); const est = setInterval(() => progress.set(.95 * (1 - Math.exp(-(Date.now() - t0) / 40000)), `사이트 반영 중 · ${Math.round((Date.now() - t0) / 1000)}초`), 500);
-while (Date.now() - t0 < 240000) {
-await new Promise((r) => setTimeout(r, 5000));
-if (await ready()) { clearInterval(est); changed(); say('사이트에 반영되었습니다. 갤러리를 새로 고쳤습니다.', 'ok'); progress.done('반영 완료'); return; }
-}
-clearInterval(est);
-say('배포가 늦어지고 있습니다. 잠시 뒤 갤러리의 새로고침을 눌러 주세요.');
-};
+
 
 const renderList = () => {
 list.replaceChildren();
@@ -194,15 +180,19 @@ say(`올리는 중 (${done + 1}/${items.length}) ${name}${packed.file !== file ?
 const existing = files.find((f) => f.name === name);
 const content = await fileToBase64(packed.file);
 progress.set(base + share * .1, `올리는 중 ${idx + 1}/${items.length} · ${name}`);
-await xhrJSON(`${API}${pathOf(name)}`, { method: 'PUT', token: getToken(), body: JSON.stringify({ message: `${existing ? 'Replace' : 'Add'} artwork ${name}`, content, branch: BRANCH, ...(existing ? { sha: existing.sha } : {}) }), onProgress: (f) => progress.set(base + share * (.1 + .8 * f)) });
+const putRes = await xhrJSON(`${API}${pathOf(name)}`, { method: 'PUT', token: getToken(), body: JSON.stringify({ message: `${existing ? 'Replace' : 'Add'} artwork ${name}`, content, branch: BRANCH, ...(existing ? { sha: existing.sha } : {}) }), onProgress: (f) => progress.set(base + share * (.1 + .8 * f)) });
 progress.set(base + share * .9, `썸네일 만드는 중 · ${name}`);
 const thumbBlob = await makeThumb(packed.file);
 if (thumbBlob) { try { const sha = await thumbSha(name, getToken()); await gh(thumbPath(name), getToken(), { method: 'PUT', body: JSON.stringify({ message: `Thumbnail ${name}`, content: await fileToBase64(thumbBlob), branch: BRANCH, ...(sha ? { sha } : {}) }) }); } catch { /* 썸네일이 없어도 갤러리는 원본으로 표시됩니다 */ } }
-done += 1; idx += 1; uploaded.push(name); progress.set(idx * share);
+done += 1; idx += 1; uploaded.push({ name, sha: putRes?.content?.sha || String(Date.now()) }); progress.set(idx * share);
 }
 await refresh(); changed(); progress.done('업로드 완료');
 say('업로드가 끝났습니다. 사이트에 반영하는 중입니다.', 'ok');
-waitDeploy(uploaded);
+/* 업로드가 끝나면 자동 새로고침: 방금 올린 그림을 기억해 두고(목록 API가 1분가량 늦게 갱신될 때 대비) 갤러리 위치로 다시 엽니다 */
+try { const prev = JSON.parse(sessionStorage.getItem('ftvot-gallery-extra') || '[]'); sessionStorage.setItem('ftvot-gallery-extra', JSON.stringify([...prev.filter((p) => !uploaded.some((u) => u.name === p.name)), ...uploaded.map((u) => ({ ...u, time: Date.now() }))]));
+Object.keys(sessionStorage).filter((k) => (k.startsWith('ftvot-artwork-gallery') || (k.startsWith('ftvot-gallery') && k !== 'ftvot-gallery-extra' && k !== 'ftvot-gallery-token'))).forEach((k) => sessionStorage.removeItem(k)); } catch { /* 저장소 없음 */ }
+say('업로드가 끝났습니다. 잠시 후 새로고침합니다.', 'ok');
+setTimeout(() => { location.hash = 'tiferet'; location.reload(); }, 1200);
 say(`${done}개를 올렸습니다. 배포가 끝나면(약 1분) 갤러리에 표시됩니다.`, 'ok');
 } catch (error) { say(error.message, 'error'); }
 finally { setBusy(false); fileInput.value = ''; }
