@@ -608,3 +608,9 @@ html.tree-grown #tree .nodes { animation: hero-fade 1.1s ease .45s both; }
 /* 확대 보기: 다음 그림을 받는 중이면 가운데에 작은 진행 고리 */
 .viewer-dialog.is-loading .viewer-stage::after, dialog.is-loading .viewer-stage::after { content: ''; position: absolute; left: 50%; top: 50%; width: 28px; height: 28px; margin: -14px 0 0 -14px; border: 2px solid rgb(255 255 255 / .15); border-top-color: var(--c6, #e8889a); border-radius: 50%; animation: viewer-spin .8s linear infinite; }
 @keyframes viewer-spin { to { transform: rotate(360deg); } }
+/* 화면 밖·백그라운드 탭에서는 장식 애니메이션 정지 (성능) */
+.is-offscreen, .is-offscreen *, .is-offscreen *::before, .is-offscreen *::after, html.is-tab-hidden *, html.is-tab-hidden *::before, html.is-tab-hidden *::after { animation-play-state: paused !important; }
+/* 반사(box-reflect)·흐림은 비싼 효과라 화면 밖 그림에서는 그리지 않습니다 */
+.is-offscreen .image-mirror, .is-offscreen .project-reflection { visibility: hidden; }
+/* 큰 장식 레이어는 독립 레이어로 분리해 스크롤 중 다시 그리는 범위를 줄입니다 */
+.sky, .q-ash, .pl-sky { contain: strict; }

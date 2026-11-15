@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261118b';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261119b';
+import { initSephirot } from './sephirot.js?v=20261119c';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261119d';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
@@ -265,7 +265,7 @@ if (!('HTMLDialogElement' in window)) return;
 const dialog = document.createElement('dialog');
 dialog.className = 'image-viewer';
 dialog.setAttribute('aria-label', '이미지 확대 보기');
-dialog.innerHTML = '<div class="viewer-toolbar"><span class="mono" data-viewer-count></span><button type="button" data-viewer-close aria-label="확대 보기 닫기">닫기 <span aria-hidden="true">×</span></button></div><div class="viewer-stage"><button type="button" data-viewer-prev aria-label="이전 이미지">←</button><img alt=""><button type="button" data-viewer-next aria-label="다음 이미지">→</button></div><p class="viewer-caption"></p><p class="viewer-hint mono">← → 이동 · ESC 닫기</p>';
+dialog.innerHTML = '<div class="viewer-toolbar"><span class="mono" data-viewer-count></span><button type="button" data-viewer-close aria-label="확대 보기 닫기">닫기 <span aria-hidden="true">×</span></button></div><div class="viewer-stage"><button type="button" data-viewer-prev aria-label="이전 이미지">←</button><img alt=""><button type="button" data-viewer-next aria-label="다음 이미지">→</button></div><p class="viewer-caption"></p>';
 document.body.append(dialog);
 const image = dialog.querySelector('img');
 const caption = dialog.querySelector('.viewer-caption');
@@ -992,4 +992,13 @@ addEventListener('scroll', () => { if (!mq.matches) { ac.classList.remove('is-tu
 const y = scrollY, dy = y - lastY; lastY = y;
 if (dy > 4) ac.classList.add('is-tucked'); else if (dy < -4) ac.classList.remove('is-tucked');
 clearTimeout(idle); idle = setTimeout(() => ac.classList.remove('is-tucked'), 1200); }, { passive: true });
+})();
+
+/* 성능: 화면 밖에 있는 영역의 CSS 애니메이션(고대 문자 흐름, 마법진 회전, 궤도, 맥박 등)은 멈춰 두었다가 보일 때 다시 돌립니다.
+   SVG 안의 큰 회전·이동은 GPU 합성이 안 돼 매 프레임 다시 그려지므로, 안 보이는 곳까지 돌리면 스크롤이 버벅입니다 */
+(() => {
+if (!('IntersectionObserver' in window)) return;
+const io = new IntersectionObserver((entries) => entries.forEach((e) => e.target.classList.toggle('is-offscreen', !e.isIntersecting)), { rootMargin: '200px 0px' });
+document.querySelectorAll('#tree, #qliphoth, section.chapter, .sky').forEach((el) => io.observe(el));
+document.addEventListener('visibilitychange', () => document.documentElement.classList.toggle('is-tab-hidden', document.hidden));
 })();
