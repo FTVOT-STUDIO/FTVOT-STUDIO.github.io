@@ -262,7 +262,7 @@ soundOn = true;
 const sync = () => {
 if (!toggle) return;
 toggle.setAttribute('aria-pressed', String(soundOn));
-toggle.textContent = soundOn ? '효과음 끄기' : '효과음 켜기';
+{ const label = soundOn ? '효과음 끄기' : '효과음 켜기'; const sr = toggle.querySelector('[data-sound-label]'); if (sr) sr.textContent = label; else toggle.textContent = label; toggle.title = label; } // 아이콘은 그대로 두고 읽기용 글자만 바꿉니다
 };
 sync();
 toggle?.addEventListener('click', () => {

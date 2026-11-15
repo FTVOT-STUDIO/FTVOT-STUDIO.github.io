@@ -315,3 +315,13 @@
 .s-malkuth .contact-links a { display: grid !important; grid-template-columns: 88px minmax(0, 1fr) 20px !important; grid-template-rows: auto !important; grid-auto-flow: column !important; align-items: center !important; }
 .s-malkuth .contact-links a > * { margin: 0 !important; }
 .s-malkuth .contact-links a > span { grid-column: auto !important; grid-row: auto !important; } /* 모바일 2줄 배치 규칙을 무시하고 한 줄로 */
+/* 소리 버튼: 글자 대신 아이콘. 켜짐/꺼짐은 aria-pressed로 아이콘 모양을 바꿉니다 (음표에 사선 / 스피커 물결 ↔ X) */
+.audio-controls .music-control, .audio-controls .sound-control { width: 44px; min-width: 44px; justify-content: center; padding: 0 !important; gap: 0 !important; }
+.audio-controls .music-wave { display: none; }
+.ac-icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.music-control .ac-slash { opacity: 1; transition: opacity .2s; }
+.music-control[aria-pressed="true"] .ac-slash { opacity: 0; }
+.music-control[aria-pressed="true"] { color: var(--text, #fafafa); }
+.sound-control .ac-off { display: none; }
+.sound-control[aria-pressed="false"] .ac-on { display: none; }
+.sound-control[aria-pressed="false"] .ac-off { display: inline; }

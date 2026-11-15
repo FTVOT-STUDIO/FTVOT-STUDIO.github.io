@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261117b';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261117q';
+import { initSephirot } from './sephirot.js?v=20261118a';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117d';
 import { initChapterScenes } from './chapter-scenes.js?v=20261117q';
 // 저사양·모바일 기기 감지: 코어 4개 이하, 메모리 4GB 이하, 터치 위주 화면이면 'lite' 모드로 무거운 배경 연출을 줄입니다
@@ -551,6 +551,7 @@ const playing = !audio.paused && !audio.ended;
 button.setAttribute('aria-pressed', String(playing));
 button.classList.toggle('is-playing', playing);
 button.querySelector('[data-music-label]').textContent = playing ? '배경음 끄기' : '배경음 켜기';
+button.title = playing ? '배경음 끄기' : '배경음 켜기'; // 아이콘 버튼이라 마우스를 올리면 설명이 보이게
 };
 const stop = () => {
 audio.pause();
