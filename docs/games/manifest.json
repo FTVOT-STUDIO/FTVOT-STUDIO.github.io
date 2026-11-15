@@ -8,8 +8,12 @@
     "cover": "cover.webp",
     "updated": "2026-11-15",
     "chunks": {
+      "Build/Web_Build.data.unityweb": {
+        "parts": 4,
+        "size": 82913845
+      },
       "StreamingAssets/Osm/ulsan.pack": {
-        "parts": 3,
+        "parts": 12,
         "size": 281784992
       }
     },

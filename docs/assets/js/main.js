@@ -6,7 +6,7 @@ import { initCosmos } from './cosmos.js?v=20261117q';
 import { initSephirot } from './sephirot.js?v=20261118e';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117d';
 import { initGames } from './games.js?v=20261118a';
-import { initGameAdmin } from './game-admin.js?v=20261118a';
+import { initGameAdmin } from './game-admin.js?v=20261118b';
 import { initChapterScenes } from './chapter-scenes.js?v=20261117q';
 // 저사양·모바일 기기 감지: 코어 4개 이하, 메모리 4GB 이하, 터치 위주 화면이면 'lite' 모드로 무거운 배경 연출을 줄입니다
 const LITE = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || matchMedia('(pointer: coarse)').matches;

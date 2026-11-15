@@ -1,4 +1,4 @@
-// 게임 서비스 워커: GitHub는 100MB가 넘는 파일을 못 올리므로 큰 파일을 90MB 조각(.part0, .part1 …)으로 나눠 둡니다.
+// 게임 서비스 워커: Cloudflare Workers는 25MiB, GitHub는 100MB가 넘는 파일을 못 올리므로 큰 파일을 24MB 조각(.part0, .part1 …)으로 나눠 둡니다.
 // 게임이 원래 파일 주소를 요청하면 여기서 조각들을 이어 붙여 하나의 파일처럼 돌려줍니다. 게임 코드는 손대지 않아도 됩니다.
 const MANIFEST = './games/manifest.json';
 let table = null; // { 절대 URL 경로: { parts, size } }

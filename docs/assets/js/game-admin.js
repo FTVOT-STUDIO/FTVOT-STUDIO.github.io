@@ -6,8 +6,8 @@ const BRANCH = 'main';
 const API = `https://api.github.com/repos/${REPO}`;
 const TOKEN_KEY = 'ftvot-gallery-token';
 const ROOT = 'docs/games';
-const MAX_FILE = 95 * 1024 * 1024; // GitHub 파일 한도(100MB) 바로 아래
-const CHUNK = 90 * 1024 * 1024;    // 이보다 큰 파일은 90MB 조각으로 나눠 올리고, game-sw.js가 이어 붙입니다
+const MAX_FILE = 24 * 1024 * 1024; // Cloudflare Workers 정적 에셋 한도(25MiB) 아래로 유지
+const CHUNK = 24 * 1024 * 1024;    // 이보다 큰 파일은 24MB 조각으로 나눠 올리고, game-sw.js가 이어 붙입니다
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,47}$/;
 const COVER_RE = /\.(png|jpe?g|webp|gif|avif)$/i;
 
