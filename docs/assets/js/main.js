@@ -281,6 +281,7 @@ dialog.querySelector('[data-viewer-prev]').disabled = galleryLinks.length < 2;
 dialog.querySelector('[data-viewer-next]').disabled = galleryLinks.length < 2;
 imageAnimation?.cancel();
 if (!reduceMotion.matches && !slideDir) imageAnimation = image.animate([{ opacity: 0, transform: 'scale(0.98)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 260, easing: 'ease-out' });
+setTimeout(() => preloadAround(), 0);
 };
 /* 이전/다음: 지금 그림은 옆으로 밀려 나가고 새 그림이 반대쪽에서 미끄러져 들어오는 슬라이더 */
 let slideDir = 0;
@@ -295,9 +296,19 @@ Object.assign(ghost.style, { left: `${box.left - sb.left}px`, top: `${box.top - 
 stage.append(ghost);
 const dist = Math.min(sb.width * .6, 420);
 ghost.animate([{ transform: 'translateX(0)', opacity: 1 }, { transform: `translateX(${-direction * dist}px)`, opacity: 0 }], SLIDE).finished.finally(() => ghost.remove());
+/* 새 그림이 다 받아진 뒤에 들어오게: 받는 동안 예전 그림이 비치지 않도록 숨겨 두고, 준비되면 미끄러져 들어옵니다 */
+const next = loadImg(galleryLinks[current].href);
+image.style.opacity = '0';
 slideDir = direction; render(); slideDir = 0;
-imageAnimation = image.animate([{ transform: `translateX(${direction * dist}px)`, opacity: 0 }, { transform: 'translateX(0)', opacity: 1 }], SLIDE);
+const token = ++slideToken;
+const enter = () => { if (token !== slideToken) return; image.style.opacity = ''; dialog.classList.remove('is-loading');
+imageAnimation = image.animate([{ transform: `translateX(${direction * dist * .6}px)`, opacity: 0 }, { transform: 'translateX(0)', opacity: 1 }], SLIDE); };
+if (next.complete && next.naturalWidth) enter(); else { dialog.classList.add('is-loading'); next.decode().then(enter, enter); }
 };
+/* 미리 받기: 보고 있는 그림의 앞뒤 2장씩을 미리 받아 두어 넘길 때 바로 보이게 합니다 */
+const imgCache = new Map(); let slideToken = 0;
+const loadImg = (href) => { let im = imgCache.get(href); if (!im) { im = new Image(); im.decoding = 'async'; im.src = href; imgCache.set(href, im); if (imgCache.size > 30) imgCache.delete(imgCache.keys().next().value); } return im; };
+const preloadAround = () => { const n = galleryLinks.length; [1, -1, 2, -2].forEach((d) => { if (n > 1) loadImg(galleryLinks[(current + d + n) % n].href); }); };
 document.addEventListener('click', (event) => {
 const link = event.target instanceof Element ? event.target.closest('.project-gallery figure > a, .artwork-grid .artwork-card > a') : null;
 if (!link || dialog.open) return;

@@ -605,3 +605,6 @@ html.tree-grown #tree .nodes { animation: hero-fade 1.1s ease .45s both; }
 /* 확대 보기 슬라이더: 나가는 그림(유령)을 같은 자리에 겹쳐 두고 옆으로 밀어냅니다 */
 .viewer-stage { position: relative; overflow: hidden; }
 .viewer-ghost { position: absolute; margin: 0; object-fit: contain; pointer-events: none; z-index: 0; }
+/* 확대 보기: 다음 그림을 받는 중이면 가운데에 작은 진행 고리 */
+.viewer-dialog.is-loading .viewer-stage::after, dialog.is-loading .viewer-stage::after { content: ''; position: absolute; left: 50%; top: 50%; width: 28px; height: 28px; margin: -14px 0 0 -14px; border: 2px solid rgb(255 255 255 / .15); border-top-color: var(--c6, #e8889a); border-radius: 50%; animation: viewer-spin .8s linear infinite; }
+@keyframes viewer-spin { to { transform: rotate(360deg); } }
