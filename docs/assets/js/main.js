@@ -421,8 +421,10 @@ const h0 = grid.offsetHeight; grid.style.height = `${h0}px`; grid.dataset.turn =
 setTimeout(() => { page = (page + dir + pages) % pages; render(allFiles, true); grid.dataset.turn = dir > 0 ? 'in-next' : 'in-prev';
 /* 높이도 부드럽게: 새 페이지의 실제 높이를 재고, 예전 높이에서 그 높이로 0.5초 동안 늘이거나 줄여 아래 장(네차흐)이 휙 올라오지 않게 */
 grid.style.height = 'auto'; const h1 = grid.offsetHeight; grid.style.height = `${h0}px`; void grid.offsetHeight;
-grid.style.transition = 'height .5s cubic-bezier(.22, .8, .2, 1), opacity .22s ease, translate .38s cubic-bezier(.16, 1, .3, 1)'; grid.style.height = `${h1}px`;
-requestAnimationFrame(() => requestAnimationFrame(() => { grid.dataset.turn = ''; setTimeout(() => { grid.style.height = ''; grid.style.transition = ''; turning = false; }, 520); }));
+/* 순서: 줄어들 때는 그림이 먼저 자리 잡은 뒤(0.4초) 높이가 줄어 아래 장이 따라 올라오고, 늘어날 때는 공간을 먼저 벌린 뒤 그림이 들어옵니다 */
+const shrink = h1 < h0, hDelay = shrink ? .4 : 0, inDelay = shrink ? 0 : .35;
+grid.style.transition = `height .5s cubic-bezier(.22, .8, .2, 1) ${hDelay}s, opacity .3s ease ${inDelay}s, translate .4s cubic-bezier(.16, 1, .3, 1) ${inDelay}s`; grid.style.height = `${h1}px`;
+requestAnimationFrame(() => requestAnimationFrame(() => { grid.dataset.turn = ''; setTimeout(() => { grid.style.height = ''; grid.style.transition = ''; turning = false; }, 950); }));
 /* 그리드 윗부분이 화면 위로 지나가 있을 때만 그리드 시작점으로 부드럽게 올려 줍니다 */
 const top = grid.getBoundingClientRect().top; if (top < 80) { const y = top + scrollY - 120; if (window.__glideTo) window.__glideTo(y); else scrollTo({ top: y, behavior: 'smooth' }); } }, 220); });
 let turning = false;
