@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261117b';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261118h';
+import { initSephirot } from './sephirot.js?v=20261118i';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117d';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118b';
@@ -733,7 +733,7 @@ once(rings, (el) => el.classList.add('is-shown'));
 // 브라우저 캐시에 들어가 두면, 나무를 깨우거나 장에 들어갈 때 소리와 그림이 바로 나옵니다
 (() => {
 const ids = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth'];
-const sounds = ['./assets/tree-on.mp3?v=2', './assets/tree-off.mp3?v=2', './assets/node-lit.mp3', './assets/path-trace.mp3?v=2', './assets/nav-jump.mp3?v=2', './assets/q-enter.mp3?v=2', './assets/q-exit.mp3', './assets/q-jump.mp3', ...ids.map((id) => `./assets/sfx/${id}.mp3`)];
+const sounds = ['./assets/tree-on.mp3?v=2', './assets/tree-off.mp3?v=2', './assets/node-lit.mp3', './assets/path-trace.mp3?v=2', './assets/nav-jump.mp3?v=2', './assets/q-enter.mp3?v=3', './assets/q-exit.mp3', './assets/q-jump.mp3', ...ids.map((id) => `./assets/sfx/${id}.mp3`)];
 const images = ids.flatMap((id) => [`./assets/sephirot/${id}-0.webp`, `./assets/sephirot/${id}-1.webp`]);
 const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
 const saveData = navigator.connection?.saveData;

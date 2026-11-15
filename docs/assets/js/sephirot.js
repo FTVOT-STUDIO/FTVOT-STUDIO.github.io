@@ -82,7 +82,8 @@ if (link && SEPH_IDS.has(link.getAttribute('href').slice(1))) playLayer('nav-jum
 });
 
 // 겹쳐 울려도 되는 소리: 다른 효과음을 끊지 않고 위에 얹어 재생합니다 (나무 활성 소리 위로 점등음이 겹치도록)
-window.__sfx = (sid) => playLayer(sid); /* 클리포트 하강 등 다른 모듈에서 같은 효과음 체계를 쓰도록 공개 */
+window.__sfx = (sid) => playLayer(sid);
+setTimeout(() => { try { ['q-enter', 'q-exit', 'q-jump'].forEach((id) => prepareSfx(id)); } catch { /* 준비 실패 시 재생 시점에 다시 시도 */ } }, 3000); /* 클리포트 소리 미리 디코딩: 첫 재생 지연 제거 */ /* 클리포트 하강 등 다른 모듈에서 같은 효과음 체계를 쓰도록 공개 */
 function playLayer(sid) {
 if (!soundOn || !SFX_IDS.includes(sid)) return;
 const ctx = getAudioContext(), prepared = buffers.get(sid);
@@ -97,7 +98,7 @@ const audio = new Audio(soundPath(sid)); audio.volume = volumeOf(sid); audio.pla
 function soundPath(sid) {
 if (sid === 'ui-click') return './assets/ui-click.mp3?v=2';
 if (sid === 'node-lit') return './assets/node-lit.mp3'; // 나무에서 세피라가 켜질 때
-if (sid === 'q-enter') return './assets/q-enter.mp3?v=2'; if (sid === 'q-exit') return './assets/q-exit.mp3'; if (sid === 'q-jump') return './assets/q-jump.mp3'; /* 클리포트 진입·이탈 */
+if (sid === 'q-enter') return './assets/q-enter.mp3?v=3'; if (sid === 'q-exit') return './assets/q-exit.mp3'; if (sid === 'q-jump') return './assets/q-jump.mp3'; /* 클리포트 진입·이탈 */
 if (sid === 'tree-on' || sid === 'tree-off' || sid === 'nav-jump' || sid === 'path-trace') return `./assets/${sid}.mp3?v=2`; /* 파일 교체 시 v 값을 올려 캐시를 새로 받습니다 */ // 나무 활성/비활성
 return `${SFX_PATH}/${sid}.mp3`;
 }
