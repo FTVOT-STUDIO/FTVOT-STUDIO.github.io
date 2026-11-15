@@ -1,0 +1,3 @@
+# Cloudflare Workers에 올리지 않을 파일: 게임 빌드는 GitHub Pages(ftvot-studio.github.io)에서 빠르게 받습니다
+games/*/Build/
+games/*/StreamingAssets/

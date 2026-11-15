@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261117b';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261118e';
+import { initSephirot } from './sephirot.js?v=20261118f';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117d';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118b';
@@ -730,7 +730,7 @@ once(rings, (el) => el.classList.add('is-shown'));
 // 브라우저 캐시에 들어가 두면, 나무를 깨우거나 장에 들어갈 때 소리와 그림이 바로 나옵니다
 (() => {
 const ids = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth'];
-const sounds = ['./assets/tree-on.mp3?v=2', './assets/tree-off.mp3?v=2', './assets/node-lit.mp3', './assets/path-trace.mp3?v=2', './assets/nav-jump.mp3?v=2', ...ids.map((id) => `./assets/sfx/${id}.mp3`)];
+const sounds = ['./assets/tree-on.mp3?v=2', './assets/tree-off.mp3?v=2', './assets/node-lit.mp3', './assets/path-trace.mp3?v=2', './assets/nav-jump.mp3?v=2', './assets/q-enter.mp3', './assets/q-exit.mp3', ...ids.map((id) => `./assets/sfx/${id}.mp3`)];
 const images = ids.flatMap((id) => [`./assets/sephirot/${id}-0.webp`, `./assets/sephirot/${id}-1.webp`]);
 const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
 const saveData = navigator.connection?.saveData;
@@ -788,37 +788,53 @@ if (open) for (let k = 0; k < 2; k++) { const c = document.createElementNS(NS, '
 }
 })();
 
-/* 클리포트 하강: 세피로트 나무와 같은 언어로 — 스크롤 잠금 → 1.8초 비단 글라이드(같은 이징) → 실루엣이던 껍질이 순서대로 점등.
-   소리도 나무와 같습니다: 0.5초 뒤 활성음, 껍질마다 점등음, 경로가 그려질 때 경로음 */
+/* 클리포트 하강·상승: 세피로트 나무와 같은 언어로 — 스크롤 잠금 → 글라이드 → 껍질 순차 점등(내려갈 때) / 역순 소등(올라갈 때).
+   글라이드는 지금 스크롤 위치에서 바로 출발하는 감속 곡선이라, 사용자의 스크롤이 끊기지 않고 그대로 이어집니다.
+   소리도 나무와 같습니다: 0.5초 뒤 활성음(올라갈 땐 비활성음), 껍질마다 점등음, 경로가 그려질 때 경로음 */
 (() => {
 const sec = document.getElementById('qliphoth'); if (!sec) return;
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, DUR = 1800;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, DUR = 1500;
 const nodes = [...sec.querySelectorAll('.q-node')];
-const ease = (t) => { /* cubic-bezier(.65,0,.15,1) 근사: 나무 바로가기 글라이드와 동일한 느낌 */ const c = (x, a, b) => 3 * a * x * (1 - x) ** 2 + 3 * b * x * x * (1 - x) + x ** 3; let lo = 0, hi = 1, x = t; for (let i = 0; i < 18; i++) { x = (lo + hi) / 2; if (c(x, .65, .15) < t) lo = x; else hi = x; } return c(x, 0, 1); };
-let busy = false, armed = true, lastY = scrollY, timers = [], traced = false, glided = false;
-/* 글라이드와 점등 애니메이션이 모두 끝난 뒤 0.5초 더 잠갔다가 풉니다 */
-const tryRelease = () => { if (busy && traced && glided) setTimeout(() => { busy = false; }, 500); };
-const block = (e) => { if (busy) e.preventDefault(); };
-addEventListener('wheel', block, { passive: false }); addEventListener('touchmove', block, { passive: false });
-addEventListener('keydown', (e) => { if (busy && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space', 'End', 'Home'].includes(e.code)) e.preventDefault(); });
+const easeOut = (t) => 1 - Math.pow(1 - t, 3); /* 출발 속도가 가장 빠르고 끝에서 부드럽게 멈춤 = 손의 스크롤을 이어받는 느낌 */
+let busy = false, timers = [], animDone = false, glided = false, touchY = null;
+const release = () => { if (busy && animDone && glided) setTimeout(() => { busy = false; }, 500); };
 const sfx = (id) => window.__sfx?.(id);
-const light = () => { timers.forEach(clearTimeout); timers = [];
-sec.classList.add('is-awake');
-timers.push(setTimeout(() => sfx('tree-on'), 500));
-nodes.forEach((n, i) => timers.push(setTimeout(() => { n.classList.add('is-lit'); sfx('node-lit'); }, 700 + i * 150)));
-timers.push(setTimeout(() => { sec.classList.add('is-traced'); sfx('path-trace'); traced = true; tryRelease(); }, 700 + nodes.length * 150)); };
-const dim = () => { timers.forEach(clearTimeout); timers = []; sec.classList.remove('is-awake', 'is-traced'); nodes.forEach((n) => n.classList.remove('is-lit')); };
-const descend = () => { busy = true; armed = false; traced = false; glided = false;
-const from = scrollY, to = sec.getBoundingClientRect().top + scrollY, t0 = performance.now();
-if (reduce) { scrollTo(0, to); glided = true; light(); return; }
+const clear = () => { timers.forEach(clearTimeout); timers = []; };
+const light = () => { clear(); sec.classList.add('is-awake');
+sfx('q-enter'); /* 진입: 마법 충격음 */
+nodes.forEach((n, i) => timers.push(setTimeout(() => { n.classList.add('is-lit'); sfx('node-lit'); }, 500 + i * 150)));
+timers.push(setTimeout(() => { sec.classList.add('is-traced'); sfx('path-trace'); animDone = true; release(); }, 500 + nodes.length * 150)); };
+const dim = (animated) => { clear(); sec.classList.remove('is-traced');
+if (!animated) { sec.classList.remove('is-awake'); nodes.forEach((n) => n.classList.remove('is-lit')); return; }
+sfx('q-exit'); /* 이탈: 장면 전환음 */
+[...nodes].reverse().forEach((n, i) => timers.push(setTimeout(() => n.classList.remove('is-lit'), i * 90)));
+timers.push(setTimeout(() => { sec.classList.remove('is-awake'); animDone = true; release(); }, nodes.length * 90 + 200)); };
+const isDown = () => sec.classList.contains('is-awake');
+const glide = (to, onProgress) => { const from = scrollY, t0 = performance.now(); glided = false;
+if (reduce || Math.abs(to - from) < 2) { scrollTo(0, to); onProgress?.(1); glided = true; release(); return; }
 document.documentElement.style.scrollBehavior = 'auto';
-const step = (t) => { const k = Math.min(1, (t - t0) / DUR), e = ease(k); scrollTo(0, from + (to - from) * e);
-document.documentElement.style.setProperty('--qd', e.toFixed(3));
-if (k >= .45 && !sec.classList.contains('is-awake')) light();
-if (k < 1) requestAnimationFrame(step); else { document.documentElement.style.scrollBehavior = ''; glided = true; tryRelease(); } };
+const step = (t) => { const k = Math.min(1, (t - t0) / DUR), e = easeOut(k); scrollTo(0, from + (to - from) * e); onProgress?.(k);
+if (k < 1) requestAnimationFrame(step); else { document.documentElement.style.scrollBehavior = ''; glided = true; release(); } };
 requestAnimationFrame(step); };
-addEventListener('scroll', () => { const y = scrollY, down = y > lastY; lastY = y; if (busy) return;
-const r = sec.getBoundingClientRect();
-if (r.top > innerHeight) { if (!armed) dim(); armed = true; }
-if (armed && down && r.top < innerHeight * 0.92 && r.top > innerHeight * 0.1) descend(); }, { passive: true });
+const top = () => sec.getBoundingClientRect().top + scrollY;
+const descend = () => { if (busy) return; busy = true; animDone = false; let lit = false;
+glide(top(), (k) => { document.documentElement.style.setProperty('--qd', easeOut(k).toFixed(3)); if (k >= .35 && !lit) { lit = true; light(); } }); };
+const ascend = () => { if (busy) return; busy = true; animDone = false; dim(true);
+glide(Math.max(0, top() - innerHeight), (k) => document.documentElement.style.setProperty('--qd', (1 - easeOut(k)).toFixed(3))); };
+/* 의도 판단: 클리포트가 화면 아래쪽에 보이기 시작했는데 내려가려 하면 하강, 클리포트 맨 위에서 올라가려 하면 상승 */
+const intent = (dir) => { const r = sec.getBoundingClientRect();
+if (dir > 0 && !isDown() && r.top < innerHeight && r.top > 0) { descend(); return true; }
+if (dir < 0 && isDown() && r.top > -60 && r.top < innerHeight * .5) { ascend(); return true; }
+return false; };
+addEventListener('wheel', (e) => { if (busy) { e.preventDefault(); return; } if (Math.abs(e.deltaY) > 2 && intent(Math.sign(e.deltaY))) e.preventDefault(); }, { passive: false });
+addEventListener('touchstart', (e) => { touchY = e.touches[0]?.clientY ?? null; }, { passive: true });
+addEventListener('touchmove', (e) => { if (busy) { e.preventDefault(); return; } if (touchY == null) return; const dy = touchY - (e.touches[0]?.clientY ?? touchY);
+if (Math.abs(dy) > 12 && intent(Math.sign(dy))) { e.preventDefault(); touchY = null; } }, { passive: false });
+addEventListener('keydown', (e) => { const keys = { ArrowDown: 1, PageDown: 1, Space: 1, ArrowUp: -1, PageUp: -1 };
+if (!(e.code in keys)) return; if (busy) { e.preventDefault(); return; } if (e.target instanceof HTMLElement && e.target.closest('input, textarea, select, [contenteditable]')) return;
+if (intent(e.shiftKey && e.code === 'Space' ? -1 : keys[e.code])) e.preventDefault(); });
+/* 스크롤바·앵커 이동처럼 의도 신호 없이 넘어온 경우: 상태만 맞춰 둡니다 */
+addEventListener('scroll', () => { if (busy) return; const r = sec.getBoundingClientRect();
+if (r.top > innerHeight && isDown()) { dim(false); document.documentElement.style.setProperty('--qd', '0'); }
+else if (r.top <= innerHeight * .2 && !isDown()) { busy = true; animDone = false; glided = true; light(); } }, { passive: true });
 })();

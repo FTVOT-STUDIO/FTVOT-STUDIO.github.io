@@ -13,7 +13,7 @@ const volumeOf = (sid) => Math.min(1, SFX_VOLUME * (SFX_BOOST[sid] || 1));
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
 const GROW_STEP = 120;
 
-const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click', 'node-lit', 'tree-on', 'tree-off', 'nav-jump', 'path-trace'];
+const SFX_IDS = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth', 'ui-click', 'node-lit', 'tree-on', 'tree-off', 'nav-jump', 'path-trace', 'q-enter', 'q-exit'];
 const audioCache = new Map();
 const buffers = new Map();
 const loadingSounds = new Map();
@@ -97,6 +97,7 @@ const audio = new Audio(soundPath(sid)); audio.volume = volumeOf(sid); audio.pla
 function soundPath(sid) {
 if (sid === 'ui-click') return './assets/ui-click.mp3?v=2';
 if (sid === 'node-lit') return './assets/node-lit.mp3'; // 나무에서 세피라가 켜질 때
+if (sid === 'q-enter' || sid === 'q-exit') return `./assets/${sid}.mp3`; /* 클리포트 진입·이탈 */
 if (sid === 'tree-on' || sid === 'tree-off' || sid === 'nav-jump' || sid === 'path-trace') return `./assets/${sid}.mp3?v=2`; /* 파일 교체 시 v 값을 올려 캐시를 새로 받습니다 */ // 나무 활성/비활성
 return `${SFX_PATH}/${sid}.mp3`;
 }
