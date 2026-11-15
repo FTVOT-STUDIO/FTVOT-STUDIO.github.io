@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261118b';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261119a';
+import { initSephirot } from './sephirot.js?v=20261119b';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261119d';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
@@ -270,11 +270,11 @@ document.body.append(dialog);
 const image = dialog.querySelector('img');
 const caption = dialog.querySelector('.viewer-caption');
 const count = dialog.querySelector('[data-viewer-count]');
-let galleryLinks = [], current = 0, trigger = null, imageAnimation = null;
+let galleryLinks = [], current = 0, trigger = null, imageAnimation = null, viewingArt = false;
 const render = () => {
 const link = galleryLinks[current];
 image.src = link.href;
-image.alt = link.querySelector('img').alt;
+image.alt = link.alt;
 caption.textContent = image.alt;
 count.textContent = `${String(current + 1).padStart(2, '0')} / ${String(galleryLinks.length).padStart(2, '0')}`;
 dialog.querySelector('[data-viewer-prev]').disabled = galleryLinks.length < 2;
@@ -289,8 +289,11 @@ if (!link || dialog.open) return;
 if (link.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return; }
 if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
 event.preventDefault();
-galleryLinks = [...link.closest('.project-gallery, .artwork-grid').querySelectorAll('figure > a')].filter((item) => item.getAttribute('aria-disabled') !== 'true');
-current = galleryLinks.indexOf(link);
+/* 갤러리 그림은 지금 페이지뿐 아니라 모든 페이지의 그림을 이전/다음으로 넘겨 볼 수 있게 전체 목록을 씁니다 */
+const isArt = !!link.closest('.artwork-grid');
+galleryLinks = isArt && window.__artworkItems ? window.__artworkItems() : [...link.closest('.project-gallery, .artwork-grid').querySelectorAll('figure > a')].filter((item) => item.getAttribute('aria-disabled') !== 'true').map((a) => ({ href: a.href, alt: a.querySelector('img')?.alt || '' }));
+current = galleryLinks.findIndex((item) => item.href === link.href);
+viewingArt = isArt;
 if (current < 0) return;
 trigger = link;
 render();
@@ -298,6 +301,8 @@ dialog.showModal();
 document.body.classList.add('viewer-open');
 });
 dialog.querySelector('[data-viewer-close]').addEventListener('click', () => dialog.close());
+/* 확대 보기에서 다른 페이지 그림까지 넘겨 봤다면, 닫을 때 갤러리도 그 그림이 있는 페이지로 맞춥니다 */
+dialog.addEventListener('close', () => { if (viewingArt) window.__artworkGoto?.(current); });
 dialog.querySelector('[data-viewer-prev]').addEventListener('click', () => step(-1));
 dialog.querySelector('[data-viewer-next]').addEventListener('click', () => step(1));
 dialog.addEventListener('keydown', (event) => {
@@ -395,8 +400,17 @@ const pager = document.createElement('nav'); pager.className = 'art-pager'; page
 pager.innerHTML = '<button type="button" data-art-page="-1" aria-label="이전 페이지">←</button><span class="mono" data-art-pos>1 / 1</span><button type="button" data-art-page="1" aria-label="다음 페이지">→</button>';
 grid.after(pager);
 pager.addEventListener('click', (e) => { const b = e.target instanceof Element ? e.target.closest('[data-art-page]') : null; if (!b) return;
-const pages = Math.ceil(allFiles.length / PER_PAGE); page = (page + Number(b.dataset.artPage) + pages) % pages; render(allFiles, true);
-const top = grid.getBoundingClientRect().top + scrollY - 120; if (window.__glideTo) window.__glideTo(top); else scrollTo({ top, behavior: 'smooth' }); });
+const dir = Number(b.dataset.artPage), pages = Math.ceil(allFiles.length / PER_PAGE); if (turning || pages < 2) return; turning = true;
+/* 페이지 넘김: 지금 그림들이 넘기는 방향으로 살짝 밀리며 흐려지고, 새 그림들이 반대쪽에서 들어옵니다 (높이는 고정해 아래 내용이 튀지 않게) */
+grid.style.minHeight = `${grid.offsetHeight}px`; grid.dataset.turn = dir > 0 ? 'out-next' : 'out-prev';
+setTimeout(() => { page = (page + dir + pages) % pages; render(allFiles, true); grid.dataset.turn = dir > 0 ? 'in-next' : 'in-prev';
+requestAnimationFrame(() => requestAnimationFrame(() => { grid.dataset.turn = ''; setTimeout(() => { grid.style.minHeight = ''; turning = false; }, 420); }));
+/* 그리드 윗부분이 화면 위로 지나가 있을 때만 그리드 시작점으로 부드럽게 올려 줍니다 */
+const top = grid.getBoundingClientRect().top; if (top < 80) { const y = top + scrollY - 120; if (window.__glideTo) window.__glideTo(y); else scrollTo({ top: y, behavior: 'smooth' }); } }, 220); });
+let turning = false;
+const artHref = (f) => `https://raw.githubusercontent.com/FTVOT-STUDIO/FTVOT-STUDIO.github.io/main/docs/assets/gallery/${encodeURIComponent(f.name)}?v=${encodeURIComponent(f.sha)}`;
+window.__artworkItems = () => allFiles.map((f) => ({ href: artHref(f), alt: f.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ') }));
+window.__artworkGoto = (idx) => { const target = Math.floor(idx / PER_PAGE); if (target !== page && target >= 0) { page = target; render(allFiles, true); } };
 /* 방금 올린 그림: 목록 API가 늦게 갱신돼도 10분 동안은 바로 보이게 합쳐 둡니다 */
 const withExtras = (files) => { let extra = []; try { extra = JSON.parse(sessionStorage.getItem('ftvot-gallery-extra') || '[]').filter((x) => x && typeof x.name === 'string' && Date.now() - (x.time || 0) < 600000); } catch { /* 없음 */ }
 const names = new Set(files.map((f) => f.name)); return [...files, ...extra.filter((x) => !names.has(x.name)).map(({ name, sha }) => ({ name, sha: String(sha) }))].sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true })); };
