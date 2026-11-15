@@ -228,7 +228,9 @@ say('삭제했습니다. (GitHub 커밋 기록에서는 되살릴 수 있습니�
 finally { setBusy(false); }
 };
 
-tokenForm.addEventListener('submit', (e) => { e.preventDefault(); const token = tokenInput.value.trim(); if (!token) return; setToken(token, remember.checked); tokenInput.value = ''; connect(); });
+let pending = null; /* 바로 올리기에서 고른 그림: 토큰이 없으면 연결 후 이어서 올립니다 */
+tokenForm.addEventListener('submit', async (e) => { e.preventDefault(); const token = tokenInput.value.trim(); if (!token) return; setToken(token, remember.checked); tokenInput.value = ''; await connect();
+if (pending && getToken() && !manager.hidden) { const picked = pending; pending = null; upload(picked); } });
 logout.addEventListener('click', () => { setToken('', false); files = []; manager.hidden = true; tokenForm.hidden = false; say('이 브라우저에서 토큰을 지웠습니다.'); });
 fileInput.addEventListener('change', () => upload(fileInput.files));
 ['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('is-over'); }));
@@ -238,6 +240,19 @@ close.addEventListener('click', () => { if (!busy) dialog.close(); });
 dialog.addEventListener('cancel', (e) => { if (busy) e.preventDefault(); });
 dialog.addEventListener('click', (e) => { if (e.target === dialog && !busy) dialog.close(); });
 
+/* 그림 바로 올리기: 버튼을 누르면 곧바로 파일 선택창(탐색기·Finder)을 열고, 고르면 진행률 창을 띄워 바로 올립니다 */
+const quick = document.querySelector('[data-gallery-upload]');
+if (quick) {
+const quickInput = el('input', { type: 'file', accept: '.png,.jpg,.jpeg,.webp,.gif,.avif', multiple: '', class: 'ga-file', 'aria-hidden': 'true', tabindex: '-1' });
+document.body.append(quickInput);
+quick.addEventListener('click', () => { if (!busy) quickInput.click(); });
+quickInput.addEventListener('change', async () => {
+const picked = [...quickInput.files]; quickInput.value = ''; if (!picked.length) return;
+dialog.showModal(); say('');
+if (getToken()) { await connect(); if (!manager.hidden) upload(picked); else pending = picked; }
+else { pending = picked; tokenForm.hidden = false; manager.hidden = true; tokenInput.focus(); say(`그림 ${picked.length}개를 골랐습니다. GitHub 토큰을 연결하면 바로 올립니다.`); }
+});
+}
 trigger.addEventListener('click', (event) => {
 event.preventDefault();
 dialog.showModal();

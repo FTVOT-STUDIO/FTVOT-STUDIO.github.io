@@ -9,7 +9,8 @@ const SOUND_KEY = 'sfx';
 const ACT_MS = 820;
 const SFX_VOLUME = 0.32;   // 세피라 효과음 기본 볼륨
 const SFX_BOOST = { 'ui-click': 2.6 }; // 버튼 클릭음은 짧고 가벼워서 따로 더 키웁니다 (최종 0.83)
-const volumeOf = (sid) => Math.min(1, SFX_VOLUME * (SFX_BOOST[sid] || 1));
+const SEPH_SFX = new Set(['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth']);
+const volumeOf = (sid) => Math.min(1, SFX_VOLUME * (SFX_BOOST[sid] || 1) * (SEPH_SFX.has(sid) ? 0.75 : 1)); /* 세피라 캐릭터 효과음만 25% 낮춤 */
 // 나무가 자라날 때 세피라 하나당 지연(ms). 케테르부터 말쿠트까지 차례로 켜집니다
 const GROW_STEP = 120;
 
