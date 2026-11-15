@@ -369,6 +369,15 @@ const dx = B.x - A.x, dy = B.y - A.y, len2 = dx * dx + dy * dy || 1;
 return { el, A, B, bx, by, t: ((bx - A.x) * dx + (by - A.y) * dy) / len2 };
 });
 let lastMorph = -1;
+// 깨어나기 전 빈 원 안의 수수께끼 문구: 이름은 숨기되 각 세피라의 의미를 짧게 암시합니다 (켜지면 사라지고 이름이 드러남)
+const RIDDLES = { 1: ['있음 이전의', '있음'], 2: ['최초의', '번뜩임'], 3: ['형상을 품는', '바다'], 4: ['넘치도록', '주는 손'], 5: ['베어내는', '칼'], 6: ['모든 길의', '심장'], 7: ['끝나지 않는', '승리'], 8: ['말과 질서의', '광휘'], 9: ['꿈이 고이는', '기초'], 10: ['손에 닿는', '왕국'] };
+for (const info of nodeInfo.values()) {
+const lines = RIDDLES[info.node.dataset.seph]; if (!lines) continue;
+const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+txt.setAttribute('class', 'node-riddle'); txt.setAttribute('aria-hidden', 'true');
+lines.forEach((line, k) => { const span = document.createElementNS('http://www.w3.org/2000/svg', 'tspan'); span.setAttribute('x', String(info.x)); span.setAttribute('y', String(info.y + (k ? 9 : -3))); span.textContent = line; txt.append(span); });
+info.node.append(txt);
+}
 const ain = tree.querySelector('.ain'), veil = tree.querySelector('.veil'), veilText = veil?.querySelector('text');
 // 가로 배치 뒤 배경: 나무 중심을 도는 세 겹 궤도, 눈금, 수평선. svg 맨 뒤에 넣습니다
 (() => {

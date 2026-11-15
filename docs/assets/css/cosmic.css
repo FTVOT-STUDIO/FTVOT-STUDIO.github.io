@@ -216,5 +216,8 @@
 /* 처음 세로 나무에서는 어떤 원이 어떤 세피라인지 알 수 없게 이름·문양·번호와 경로 글자를 숨기고 빈 원만 보입니다.
    켜지는(is-lit) 순간 하나씩 드러납니다 */
 .js .ht-tree .node text, .js .ht-tree .node .node-num-bg { transition: opacity .5s ease-out; }
-.js .ht-tree .node:not(.is-lit) text, .js .ht-tree .node:not(.is-lit) .node-num-bg { opacity: 0; }
+.js .ht-tree .node:not(.is-lit) text:not(.node-riddle), .js .ht-tree .node:not(.is-lit) .node-num-bg { opacity: 0; }
+/* 수수께끼 문구는 반대로: 깨어나기 전에만 보이고 켜지면 사라집니다 */
+.ht-tree .node-riddle { font: 500 9.5px var(--font-sans, Pretendard, sans-serif); letter-spacing: .02em; fill: #cfcfd6; text-anchor: middle; pointer-events: none; transition: opacity .5s ease-out; }
+.ht-tree .node.is-lit .node-riddle, .js:not(.js) .node-riddle { opacity: 0; }
 .js .hero-tree:not(.is-laid) .ht-tree .path-badge { opacity: 0 !important; }
