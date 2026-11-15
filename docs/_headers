@@ -23,3 +23,6 @@
   Cache-Control: no-store
 /game-sw.js
   Cache-Control: no-cache
+  # 서비스 워커의 fetch도 이 파일의 CSP를 따르므로, GitHub Pages(빌드 파일 출처)에 연결할 수 있게 따로 둡니다
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'none'; connect-src 'self' https://ftvot-studio.github.io
