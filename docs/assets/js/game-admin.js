@@ -1,3 +1,4 @@
+import { createProgress, xhrJSON } from './progress-ui.js?v=20261118a';
 // 게임 관리자: Unity WebGL 빌드 폴더를 고르면 사이트에 바로 게임으로 올립니다.
 // 여러 파일을 커밋 하나로 묶기 위해 Git Data API(blob → tree → commit → ref)를 씁니다.
 // 토큰은 갤러리 관리자와 같은 키를 공유해 한 번만 입력하면 됩니다. 요청 대상은 api.github.com 하나뿐입니다.
@@ -51,21 +52,25 @@ return Array.from({ length: parts }, (_, k) => ({ file: e.file.slice(k * CHUNK, 
 return res;
 }
 
-async function commitFiles(token, files, message, onStep) {
+async function commitFiles(token, files, message, onStep, onFrac) {
 const ref = await gh(`/git/ref/heads/${BRANCH}`, token);
 const head = await gh(`/git/commits/${ref.object.sha}`, token);
 const tree = [];
 let i = 0;
+/* 진행률: 올릴 바이트 합계 대비 보낸 양. 마지막 5%는 트리·커밋 만들기 몫 */
+const total = files.reduce((a, f) => a + (f.delete ? 0 : (f.file?.size || (f.base64?.length || 0) * .75)), 0) || 1; let sent = 0;
 for (const f of files) {
 i += 1; onStep?.(`올리는 중 ${i}/${files.length} · ${f.path.split('/').at(-1)}`);
 if (f.delete) { tree.push({ path: f.path, mode: '100644', type: 'blob', sha: null }); continue; }
-const blob = await gh('/git/blobs', token, { method: 'POST', body: JSON.stringify({ content: f.base64 ?? await toBase64(f.file), encoding: 'base64' }) });
-tree.push({ path: f.path, mode: '100644', type: 'blob', sha: blob.sha });
+const size = f.file?.size || (f.base64?.length || 0) * .75;
+const blob = await xhrJSON(`${API}/git/blobs`, { method: 'POST', token, body: JSON.stringify({ content: f.base64 ?? await toBase64(f.file), encoding: 'base64' }), onProgress: (p) => onFrac?.(.95 * (sent + size * p) / total) });
+sent += size; tree.push({ path: f.path, mode: '100644', type: 'blob', sha: blob.sha });
 }
 onStep?.('커밋 만드는 중');
 const newTree = await gh('/git/trees', token, { method: 'POST', body: JSON.stringify({ base_tree: head.tree.sha, tree }) });
 const commit = await gh('/git/commits', token, { method: 'POST', body: JSON.stringify({ message, tree: newTree.sha, parents: [ref.object.sha] }) });
 await gh(`/git/refs/heads/${BRANCH}`, token, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) });
+onFrac?.(1);
 }
 
 async function readManifest(token) {
@@ -98,12 +103,14 @@ dlg.innerHTML = `<div class="ga-head"><h3 id="gm-title">게임 관리</h3><butto
 <label class="gm-field"><span>표지 이미지 (선택)</span><input name="cover" type="file" accept="image/*"></label>
 <p class="gm-scan" data-scan aria-live="polite"></p>
 <button type="submit" class="gm-go">올리기</button>
+<div data-progress-slot></div>
 </form>
 <section class="gm-list"><h4>올라간 게임</h4><ul data-list></ul></section>
 <p class="gm-status" data-status role="status" aria-live="polite"></p>
 </div>`;
 document.body.append(dlg);
 const $ = (s) => dlg.querySelector(s), status = (t) => { $('[data-status]').textContent = t; };
+const progress = createProgress('qliphoth'); $('[data-progress-slot]').replaceWith(progress.el); const frac = (v) => progress.set(v);
 const tokenIn = $('[data-token]'); tokenIn.value = getToken();
 const token = () => { const t = tokenIn.value.trim(); if (!t) throw new Error('GitHub 토큰을 먼저 입력해 주세요.'); setToken(t, $('[data-remember]').checked); return t; };
 let analysis = null;
@@ -122,9 +129,9 @@ if (!Array.isArray(games) || !games.length) { ul.append(h('li', { class: 'gm-emp
 games.forEach((g) => { const del = h('button', { type: 'button', class: 'gm-del', text: '삭제' });
 del.addEventListener('click', async () => {
 if (del.dataset.armed !== '1') { del.dataset.armed = '1'; del.textContent = '한 번 더 눌러 삭제'; setTimeout(() => { del.dataset.armed = ''; del.textContent = '삭제'; }, 3000); return; }
-try { busy(true); const t = token(); status('삭제할 파일 찾는 중');
+try { busy(true); progress.reset(); const t = token(); status('삭제할 파일 찾는 중');
 const paths = await listPaths(t, g.slug), manifest = (await readManifest(t)).filter((x) => x.slug !== g.slug);
-await commitFiles(t, [...paths.map((p) => ({ path: p, delete: true })), { path: `${ROOT}/manifest.json`, base64: utf8Base64(`${JSON.stringify(manifest, null, 2)}\n`) }], `게임 삭제: ${g.title}`, status);
+await commitFiles(t, [...paths.map((p) => ({ path: p, delete: true })), { path: `${ROOT}/manifest.json`, base64: utf8Base64(`${JSON.stringify(manifest, null, 2)}\n`) }], `게임 삭제: ${g.title}`, status, frac); progress.done('삭제 완료');
 status(`삭제했습니다. 1~2분 뒤 사이트에 반영됩니다.`); setTimeout(() => document.dispatchEvent(new Event('games:changed')), 90000);
 } catch (e) { status(e.message); } finally { busy(false); renderList(); } });
 ul.append(h('li', {}, h('a', { href: `./play.html?g=${encodeURIComponent(g.slug)}`, text: g.title }), h('span', { class: 'mono', text: g.slug }), del)); });
@@ -138,7 +145,7 @@ if (!title) throw new Error('게임 이름을 입력해 주세요.');
 if (!SLUG_RE.test(slug)) throw new Error('주소는 영문 소문자, 숫자, -만 쓸 수 있습니다.');
 if (!analysis) analysis = analyzeBuild(form.folder.files);
 if (analysis.errors.length) throw new Error(analysis.errors[0]);
-busy(true);
+busy(true); progress.reset();
 const files = analysis.entries.map((e) => ({ path: `${ROOT}/${slug}/${e.path}`, file: e.file }));
 let cover = '';
 const cf = form.cover.files[0];
@@ -152,7 +159,7 @@ const entry = { slug, title, desc: form.desc.value.trim(), width: Number(form.wi
 chunks: analysis.chunks || {}, build: { loader: analysis.loader, data: analysis.data, framework: analysis.framework, wasm: analysis.wasm, ...(analysis.symbols ? { symbols: analysis.symbols } : {}) } };
 const next = prev ? manifest.map((g) => (g.slug === slug ? entry : g)) : [entry, ...manifest];
 files.push({ path: `${ROOT}/manifest.json`, base64: utf8Base64(`${JSON.stringify(next, null, 2)}\n`) });
-await commitFiles(t, [...files, ...stale.map((p) => ({ path: p, delete: true }))], `${prev ? '게임 업데이트' : '게임 추가'}: ${title}`, status);
+await commitFiles(t, [...files, ...stale.map((p) => ({ path: p, delete: true }))], `${prev ? '게임 업데이트' : '게임 추가'}: ${title}`, (t) => { status(t); progress.set(0, t); }, frac); progress.done('업로드 완료');
 status(`${prev ? '업데이트' : '업로드'} 완료. GitHub Pages 배포까지 1~2분 걸립니다.`);
 form.reset(); delete form.slug.dataset.touched; analysis = null; $('[data-scan]').textContent = '';
 setTimeout(() => document.dispatchEvent(new Event('games:changed')), 90000);

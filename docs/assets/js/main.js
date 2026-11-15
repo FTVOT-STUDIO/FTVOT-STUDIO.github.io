@@ -1,12 +1,12 @@
 // FTVOT_STUDIO — main.js
 // 빌드 없는 ES 모듈입니다. 모든 기능은 JS가 실패해도 기본 HTML이 동작하도록 "덧붙이는" 방식입니다.
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
-import { initIntro, initSky } from './intro.js?v=20261117b';
+import { initIntro, initSky } from './intro.js?v=20261118b';
 import { initCosmos } from './cosmos.js?v=20261117q';
 import { initSephirot } from './sephirot.js?v=20261118i';
-import { initGalleryAdmin } from './gallery-admin.js?v=20261117d';
+import { initGalleryAdmin } from './gallery-admin.js?v=20261118a';
 import { initGames } from './games.js?v=20261118a';
-import { initGameAdmin } from './game-admin.js?v=20261118b';
+import { initGameAdmin } from './game-admin.js?v=20261118d';
 import { initChapterScenes } from './chapter-scenes.js?v=20261117q';
 // 저사양·모바일 기기 감지: 코어 4개 이하, 메모리 4GB 이하, 터치 위주 화면이면 'lite' 모드로 무거운 배경 연출을 줄입니다
 const LITE = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || matchMedia('(pointer: coarse)').matches;
@@ -737,11 +737,14 @@ const sounds = ['./assets/tree-on.mp3?v=2', './assets/tree-off.mp3?v=2', './asse
 const images = ids.flatMap((id) => [`./assets/sephirot/${id}-0.webp`, `./assets/sephirot/${id}-1.webp`]);
 const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
 const saveData = navigator.connection?.saveData;
+/* 미리받기 진행률을 window.__preloadFrac(0~1)로 내보내 인트로의 퍼센트·막대가 실제 준비 상황을 따르게 합니다 */
+const total = sounds.length + (saveData ? 0 : images.length); let done = 0;
+window.__preloadFrac = 0; const tick = () => { done += 1; window.__preloadFrac = done / total; };
 idle(() => {
 // 데이터 절약 모드에서는 소리만 미리 받고 그림은 필요할 때 받습니다
-sounds.forEach((src) => fetch(src, { cache: 'force-cache', credentials: 'same-origin' }).catch(() => {}));
-if (!saveData) images.forEach((src, i) => setTimeout(() => { const img = new Image(); img.decoding = 'async'; img.src = src; }, i * 40));
-});
+sounds.forEach((src) => fetch(src, { cache: 'force-cache', credentials: 'same-origin' }).then((r) => r.arrayBuffer()).catch(() => {}).finally(tick));
+if (!saveData) images.forEach((src, i) => setTimeout(() => { const img = new Image(); img.decoding = 'async'; img.onload = img.onerror = tick; img.src = src; }, i * 40));
+}, { timeout: 300 });
 })();
 
 /* 클리포트 하강 연출: 섹션이 가까워질수록 화면을 붉게 덮고, 충분히 들어오면 균열·나무를 깨웁니다 */

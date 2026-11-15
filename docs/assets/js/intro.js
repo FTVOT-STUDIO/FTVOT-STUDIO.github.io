@@ -26,13 +26,16 @@ onDone();
 // 로딩 로그: 진행 막대 아래에 터미널 로그가 한 줄씩 쌓이고, 마지막 줄에 Hello World! 가 찍힌 뒤 사이트로 들어갑니다
 const pct = intro.querySelector('[data-intro-pct]'), log = intro.querySelector('[data-intro-hello]');
 const LINES = ['boot ftvot_studio.exe', 'load assets/sephirot ........ ok', 'mount worlds[10] ........... ok', 'link paths[22] ............. ok', 'compile tree_of_life ....... ok'];
-const LOAD_MS = 1500, start = performance.now();
+const LOAD_MS = 1500, MAX_MS = 5000, start = performance.now(); /* 최소 1.5초, 실제 소리·그림 준비가 늦어도 5초에서는 들어갑니다 */
+const fill = intro.querySelector('[data-intro-fill]');
 let shown = 0;
 const addLine = (text, cls = '') => { if (!log) return; const row = document.createElement('span'); row.className = `intro-log-line ${cls}`; row.textContent = `> ${text}`; log.append(row); };
 const tick = (now) => {
 if (closed) return;
-const k = Math.min(1, (now - start) / LOAD_MS), eased = 1 - Math.pow(1 - k, 2.2);
-if (pct) pct.textContent = `${Math.round(eased * 100)}%`;
+/* 표시 진행률 = 시간 진행과 실제 미리받기 진행(main.js의 __preloadFrac) 중 느린 쪽. 5초가 지나면 강제로 100% */
+const kt = Math.min(1, (now - start) / LOAD_MS), real = typeof window.__preloadFrac === 'number' ? window.__preloadFrac : kt;
+const k = now - start > MAX_MS ? 1 : Math.min(kt, real), eased = 1 - Math.pow(1 - k, 2.2);
+if (pct) pct.textContent = `${Math.round(eased * 100)}%`; if (fill) fill.style.transform = `scaleX(${eased})`;
 while (shown < Math.ceil(k * LINES.length) && shown < LINES.length) addLine(LINES[shown++]);
 if (state) state.textContent = k < 1 ? 'LOADING' : 'READY';
 if (k < 1) requestAnimationFrame(tick); else { setTimeout(() => { addLine('Hello World!', 'is-hello'); setTimeout(close, 900); }, 200); }

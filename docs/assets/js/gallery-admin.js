@@ -1,3 +1,4 @@
+import { createProgress, xhrJSON } from './progress-ui.js?v=20261118a';
 // 갤러리 관리자: 사이트에서 바로 그림을 올리고, 이름을 바꾸고, 지울 수 있게 합니다.
 // GitHub Pages는 서버가 없어서, 저장소 주인의 GitHub 토큰으로 브라우저에서 직접 GitHub API에 커밋합니다.
 // 토큰은 이 브라우저에만 저장되고 다른 곳으로 보내지지 않습니다 (요청 대상은 api.github.com 하나뿐).
@@ -102,6 +103,7 @@ let files = [];
 let busy = false;
 
 const status = el('p', { class: 'ga-status', role: 'status', 'aria-live': 'polite' });
+const progress = createProgress('tiferet'); /* 업로드 진행률 */
 const tokenInput = el('input', { type: 'password', class: 'ga-input', id: 'ga-token', autocomplete: 'off', spellcheck: 'false', placeholder: 'github_pat_…' });
 const remember = el('input', { type: 'checkbox', id: 'ga-remember' });
 const tokenForm = el('form', { class: 'ga-token' },
@@ -120,7 +122,7 @@ const manager = el('div', { class: 'ga-manager', hidden: '' }, drop, fileInput, 
 const close = el('button', { type: 'button', class: 'ga-close', 'aria-label': '닫기', text: '×' });
 const dialog = el('dialog', { class: 'ga-dialog', 'aria-labelledby': 'ga-title' },
 el('div', { class: 'ga-head' }, el('h3', { id: 'ga-title', text: '갤러리 관리' }), close),
-tokenForm, manager, status);
+tokenForm, manager, progress.el, status);
 document.body.append(dialog);
 
 const say = (text, tone = '') => { status.textContent = text; status.dataset.tone = tone; };
@@ -162,22 +164,28 @@ const items = [...picked].filter((f) => IMAGE_RE.test(f.name));
 if (!items.length) { say('PNG · JPG · WebP · GIF · AVIF 파일만 올릴 수 있습니다.', 'error'); return; }
 setBusy(true);
 let done = 0;
+progress.reset();
+/* 진행률 배분: 파일마다 같은 몫, 그 안에서 압축 10% · 원본 전송 80% · 썸네일 10% */
+const share = 1 / items.length; let idx = 0;
 try {
 for (const file of items) {
+const base = idx * share; progress.set(base, `준비 중 ${idx + 1}/${items.length} · ${file.name}`);
 say(`준비 중 (${done + 1}/${items.length}) ${file.name}`);
 const packed = await shrink(file);
-if (packed.file.size > MAX_BYTES) { say(`${file.name}: 압축해도 95MB를 넘어 건너뜁니다.`, 'error'); continue; }
+if (packed.file.size > MAX_BYTES) { say(`${file.name}: 압축해도 95MB를 넘어 건너뜁니다.`, 'error'); idx += 1; continue; }
 const name = safeName(packed.name, extOf(packed.name));
-if (!name) continue;
+if (!name) { idx += 1; continue; }
 say(`올리는 중 (${done + 1}/${items.length}) ${name}${packed.file !== file ? ` · ${(file.size / 1048576).toFixed(1)}MB → ${(packed.file.size / 1048576).toFixed(1)}MB로 압축` : ''}`);
 const existing = files.find((f) => f.name === name);
 const content = await fileToBase64(packed.file);
-await gh(pathOf(name), getToken(), { method: 'PUT', body: JSON.stringify({ message: `${existing ? 'Replace' : 'Add'} artwork ${name}`, content, branch: BRANCH, ...(existing ? { sha: existing.sha } : {}) }) });
+progress.set(base + share * .1, `올리는 중 ${idx + 1}/${items.length} · ${name}`);
+await xhrJSON(`${API}${pathOf(name)}`, { method: 'PUT', token: getToken(), body: JSON.stringify({ message: `${existing ? 'Replace' : 'Add'} artwork ${name}`, content, branch: BRANCH, ...(existing ? { sha: existing.sha } : {}) }), onProgress: (f) => progress.set(base + share * (.1 + .8 * f)) });
+progress.set(base + share * .9, `썸네일 만드는 중 · ${name}`);
 const thumbBlob = await makeThumb(packed.file);
 if (thumbBlob) { try { const sha = await thumbSha(name, getToken()); await gh(thumbPath(name), getToken(), { method: 'PUT', body: JSON.stringify({ message: `Thumbnail ${name}`, content: await fileToBase64(thumbBlob), branch: BRANCH, ...(sha ? { sha } : {}) }) }); } catch { /* 썸네일이 없어도 갤러리는 원본으로 표시됩니다 */ } }
-done += 1;
+done += 1; idx += 1; progress.set(idx * share);
 }
-await refresh(); changed();
+await refresh(); changed(); progress.done('완료');
 say(`${done}개를 올렸습니다. 배포가 끝나면(약 1분) 갤러리에 표시됩니다.`, 'ok');
 } catch (error) { say(error.message, 'error'); }
 finally { setBusy(false); fileInput.value = ''; }
