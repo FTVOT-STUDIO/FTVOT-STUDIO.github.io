@@ -96,7 +96,7 @@ const audio = new Audio(soundPath(sid)); audio.volume = volumeOf(sid); audio.pla
 function soundPath(sid) {
 if (sid === 'ui-click') return './assets/ui-click.mp3?v=2';
 if (sid === 'node-lit') return './assets/node-lit.mp3'; // 나무에서 세피라가 켜질 때
-if (sid === 'tree-on' || sid === 'tree-off' || sid === 'nav-jump' || sid === 'path-trace') return `./assets/${sid}.mp3`; // 나무 활성/비활성
+if (sid === 'tree-on' || sid === 'tree-off' || sid === 'nav-jump' || sid === 'path-trace') return `./assets/${sid}.mp3?v=2`; /* 파일 교체 시 v 값을 올려 캐시를 새로 받습니다 */ // 나무 활성/비활성
 return `${SFX_PATH}/${sid}.mp3`;
 }
 
