@@ -1,6 +1,6 @@
 # Cloudflare Workers 정적 에셋 전용 응답 헤더입니다. GitHub Pages는 이 파일을 무시합니다.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src https://cdn.jsdelivr.net https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self' https://api.github.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src https://cdn.jsdelivr.net https://fonts.gstatic.com; img-src 'self' data: https://ftvot-studio.github.io https://raw.githubusercontent.com; media-src 'self'; connect-src 'self' https://api.github.com https://ftvot-studio.github.io https://raw.githubusercontent.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()

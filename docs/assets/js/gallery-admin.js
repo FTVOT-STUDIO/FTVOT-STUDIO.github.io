@@ -131,7 +131,7 @@ const changed = () => document.dispatchEvent(new CustomEvent('gallery:changed'))
 /* 100% 이후 자동 새로고침: 배포가 끝나 사이트에서 새 그림 파일이 열릴 때까지 5초마다 확인하고, 열리면 갤러리를 다시 그립니다 (최대 4분) */
 const waitDeploy = async (names) => {
 if (!names.length) return;
-const url = (n) => `./assets/gallery/${encodeURIComponent(n)}?check=${Date.now()}`;
+const url = (n) => `https://raw.githubusercontent.com/FTVOT-STUDIO/FTVOT-STUDIO.github.io/main/docs/assets/gallery/${encodeURIComponent(n)}?check=${Date.now()}`; /* 커밋 즉시 열리는 GitHub 원본 주소로 확인 */
 const ready = async () => { for (const n of names) { try { const r = await fetch(url(n), { method: 'HEAD', cache: 'no-store' }); if (!r.ok) return false; } catch { return false; } } return true; };
 const t0 = Date.now(); try { sessionStorage.setItem('ftvot-deploy-start', String(t0)); } catch { /* 저장소 없음 */ }
 /* 반영 단계도 같은 막대로: 예상 진행률(보통 1~2분)을 그리다가 실제로 열리면 100% */

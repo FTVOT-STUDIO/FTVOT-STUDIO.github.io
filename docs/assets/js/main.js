@@ -4,7 +4,7 @@
 import { initIntro, initSky } from './intro.js?v=20261118b';
 import { initCosmos } from './cosmos.js?v=20261117q';
 import { initSephirot } from './sephirot.js?v=20261118i';
-import { initGalleryAdmin } from './gallery-admin.js?v=20261118c';
+import { initGalleryAdmin } from './gallery-admin.js?v=20261119a';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
 import { initChapterScenes } from './chapter-scenes.js?v=20261117q';
@@ -402,7 +402,7 @@ state.hidden = true;
 const fragment = document.createDocumentFragment();
 files.forEach((file, i) => {
 const title = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
-const url = `./assets/gallery/${encodeURIComponent(file.name)}?v=${encodeURIComponent(file.sha)}`;
+const url = `https://raw.githubusercontent.com/FTVOT-STUDIO/FTVOT-STUDIO.github.io/main/docs/assets/gallery/${encodeURIComponent(file.name)}?v=${encodeURIComponent(file.sha)}`;
 const figure = document.createElement('figure');
 figure.className = 'artwork-card';
 figure.style.setProperty('--art-delay', `${Math.min(i, 6) * 60}ms`);
@@ -413,7 +413,7 @@ link.target = '_blank';
 link.rel = 'noopener noreferrer';
 const image = document.createElement('img');
 // 목록에는 가벼운 썸네일(thumbs/이름.webp)을 쓰고, 없으면 원본으로 대신합니다. 누르면 원본이 열립니다
-const thumb = `./assets/gallery/thumbs/${encodeURIComponent(file.name.replace(/\.[^.]+$/, ''))}.webp?v=${encodeURIComponent(file.sha)}`;
+const thumb = `https://raw.githubusercontent.com/FTVOT-STUDIO/FTVOT-STUDIO.github.io/main/docs/assets/gallery/thumbs/${encodeURIComponent(file.name.replace(/\.[^.]+$/, ''))}.webp?v=${encodeURIComponent(file.sha)}`;
 image.src = thumb;
 image.addEventListener('error', () => { if (image.src.includes('/thumbs/')) image.src = url; }, { once: true });
 image.alt = title;
@@ -747,7 +747,7 @@ once(rings, (el) => el.classList.add('is-shown'));
 (() => {
 const ids = ['kether', 'chokmah', 'binah', 'chesed', 'gevurah', 'tiferet', 'netzach', 'hod', 'yesod', 'malkuth'];
 const sounds = ['./assets/tree-on.mp3?v=2', './assets/tree-off.mp3?v=2', './assets/node-lit.mp3', './assets/path-trace.mp3?v=2', './assets/nav-jump.mp3?v=2', './assets/q-enter.mp3?v=3', './assets/q-exit.mp3', './assets/q-jump.mp3', ...ids.map((id) => `./assets/sfx/${id}.mp3`)];
-const images = ids.flatMap((id) => [`./assets/sephirot/${id}-0.webp`, `./assets/sephirot/${id}-1.webp`]);
+const images = ids.flatMap((id) => [`https://ftvot-studio.github.io/assets/sephirot/${id}-0.webp`, `https://ftvot-studio.github.io/assets/sephirot/${id}-1.webp`]); /* 그림은 GitHub Pages에서: 한국에서 Cloudflare보다 수백 배 빠름 */
 const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
 const saveData = navigator.connection?.saveData;
 /* 미리받기 진행률을 window.__preloadFrac(0~1)로 내보내 인트로의 퍼센트·막대가 실제 준비 상황을 따르게 합니다 */
