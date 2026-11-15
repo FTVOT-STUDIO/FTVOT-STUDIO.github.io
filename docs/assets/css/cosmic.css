@@ -472,3 +472,7 @@
 /* 장막은 배경층으로만: 본문(main)보다 아래에 깔려 글자를 흐리지 않습니다 */
 .q-veil { z-index: 0; }
 main#main { position: relative; z-index: 1; }
+/* 클리포트 경로: 노드가 켜지는 동안 타우미엘에서 아래로 한 줄씩 그어집니다 (선 길이·지연은 main.js가 --plen/--pdl로 지정) */
+.qliphoth .q-paths line:not(.q-signal) { stroke-dasharray: var(--plen, 260); stroke-dashoffset: var(--plen, 260); transition: stroke-dashoffset .9s cubic-bezier(.65, 0, .35, 1) var(--pdl, 0s); }
+.qliphoth.is-awake .q-paths line:not(.q-signal) { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: reduce) { .qliphoth .q-paths line:not(.q-signal) { stroke-dashoffset: 0; transition: none; } }

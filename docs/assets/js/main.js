@@ -775,6 +775,9 @@ new IntersectionObserver(([e]) => { if (e.isIntersecting && !run) { run = true; 
 const svg = sec.querySelector('.q-tree'), paths = sec.querySelector('.q-paths');
 if (svg && paths && !reduce) {
 const NS = 'http://www.w3.org/2000/svg', lines = [...paths.querySelectorAll('line')];
+/* 경로 그리기 준비: 각 선의 실제 길이와, 타우미엘에서 아래로 퍼지는 순서대로 지연을 줍니다 */
+lines.forEach((l) => { const len = Math.hypot(l.getAttribute('x2') - l.getAttribute('x1'), l.getAttribute('y2') - l.getAttribute('y1')); const top = Math.min(Number(l.getAttribute('y1')), Number(l.getAttribute('y2')));
+l.style.setProperty('--plen', len.toFixed(1)); l.style.setProperty('--pdl', `${(top / 636 * 1.4).toFixed(2)}s`); });
 lines.forEach((l, i) => { const s = document.createElementNS(NS, 'line'); for (const k of ['x1', 'y1', 'x2', 'y2']) s.setAttribute(k, l.getAttribute(k));
 const len = Math.hypot(l.getAttribute('x2') - l.getAttribute('x1'), l.getAttribute('y2') - l.getAttribute('y1'));
 s.setAttribute('class', 'q-signal'); s.style.setProperty('--len', len.toFixed(0)); s.style.animationDelay = `${(Number(l.getAttribute('y1')) / 640 * 2.4 + (i % 3) * .2).toFixed(2)}s`; paths.append(s); });
