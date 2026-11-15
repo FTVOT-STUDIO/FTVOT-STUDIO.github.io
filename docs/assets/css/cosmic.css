@@ -602,3 +602,6 @@ html.tree-grown #tree .nodes { animation: hero-fade 1.1s ease .45s both; }
 .q-card .chapter-epithet { margin: 14px 0 0; }
 .q-card .chapter-statement { font-size: clamp(24px, 7vw, 32px); }
 }
+/* 확대 보기 슬라이더: 나가는 그림(유령)을 같은 자리에 겹쳐 두고 옆으로 밀어냅니다 */
+.viewer-stage { position: relative; overflow: hidden; }
+.viewer-ghost { position: absolute; margin: 0; object-fit: contain; pointer-events: none; z-index: 0; }

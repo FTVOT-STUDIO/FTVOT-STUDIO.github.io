@@ -280,9 +280,24 @@ count.textContent = `${String(current + 1).padStart(2, '0')} / ${String(galleryL
 dialog.querySelector('[data-viewer-prev]').disabled = galleryLinks.length < 2;
 dialog.querySelector('[data-viewer-next]').disabled = galleryLinks.length < 2;
 imageAnimation?.cancel();
-if (!reduceMotion.matches) imageAnimation = image.animate([{ opacity: 0, transform: 'scale(0.98)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 260, easing: 'ease-out' });
+if (!reduceMotion.matches && !slideDir) imageAnimation = image.animate([{ opacity: 0, transform: 'scale(0.98)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 260, easing: 'ease-out' });
 };
-const step = (direction) => { if (!galleryLinks.length) return; current = (current + direction + galleryLinks.length) % galleryLinks.length; render(); };
+/* 이전/다음: 지금 그림은 옆으로 밀려 나가고 새 그림이 반대쪽에서 미끄러져 들어오는 슬라이더 */
+let slideDir = 0;
+const SLIDE = { duration: 420, easing: 'cubic-bezier(.22, .8, .2, 1)' };
+const step = (direction) => {
+if (!galleryLinks.length) return;
+current = (current + direction + galleryLinks.length) % galleryLinks.length;
+if (reduceMotion.matches) { render(); return; }
+const stage = image.parentElement, box = image.getBoundingClientRect(), sb = stage.getBoundingClientRect();
+const ghost = image.cloneNode(); ghost.removeAttribute('data-viewer-image'); ghost.className = 'viewer-ghost';
+Object.assign(ghost.style, { left: `${box.left - sb.left}px`, top: `${box.top - sb.top}px`, width: `${box.width}px`, height: `${box.height}px` });
+stage.append(ghost);
+const dist = Math.min(sb.width * .6, 420);
+ghost.animate([{ transform: 'translateX(0)', opacity: 1 }, { transform: `translateX(${-direction * dist}px)`, opacity: 0 }], SLIDE).finished.finally(() => ghost.remove());
+slideDir = direction; render(); slideDir = 0;
+imageAnimation = image.animate([{ transform: `translateX(${direction * dist}px)`, opacity: 0 }, { transform: 'translateX(0)', opacity: 1 }], SLIDE);
+};
 document.addEventListener('click', (event) => {
 const link = event.target instanceof Element ? event.target.closest('.project-gallery figure > a, .artwork-grid .artwork-card > a') : null;
 if (!link || dialog.open) return;
