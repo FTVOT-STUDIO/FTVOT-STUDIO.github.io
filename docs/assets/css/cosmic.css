@@ -272,3 +272,22 @@
 .intro-log-line.is-hello::after { content: ''; display: inline-block; width: .6em; height: 1em; margin-left: 4px; vertical-align: -.15em; background: #b9a3e3; animation: hello-caret .9s steps(1) infinite; }
 @keyframes log-in { from { opacity: 0; translate: 0 3px; } to { opacity: 1; translate: 0 0; } }
 @keyframes hello-caret { 50% { opacity: 0; } }
+
+/* 스크롤 힌트는 배경·선 없이 글자만 희미하게 */
+.tree-hint { padding: 0 !important; background: none !important; border: 0 !important; }
+.tree-hint span { font-weight: 500 !important; font-size: 13px !important; color: rgb(250 250 250 / .45) !important; letter-spacing: .08em !important; }
+.tree-hint-line { display: none !important; }
+.tree-hint.is-shown span { animation: hint-breathe 2.6s ease-in-out infinite; }
+@keyframes hint-breathe { 50% { opacity: .55; } }
+/* 갤러리 바둑판에도 아래 반사: 그림 칸 전체를 아래로 옅게 비춥니다 (box-reflect, 크롬·사파리·엣지) */
+.s-tiferet .artwork-card .image-mirror { display: none !important; }
+.s-tiferet .artwork-frame { -webkit-box-reflect: below 4px linear-gradient(to bottom, transparent 82%, rgb(0 0 0 / .28)); }
+.s-tiferet .artwork-card { padding-bottom: 20%; } /* 아래 반사가 들어갈 자리 */
+.s-tiferet .artwork-card figcaption { position: absolute; inset: 0 0 auto 0; aspect-ratio: 1 / 1; display: flex; align-items: flex-end; margin: 0; padding: 10px 12px !important; border-radius: 14px; background: linear-gradient(to bottom, transparent 68%, rgb(5 4 8 / .72)); color: #fafafa !important; pointer-events: none; } /* 제목은 그림 아래쪽 위에 겹쳐 표시 */
+.lite .s-tiferet .artwork-frame { -webkit-box-reflect: none; }
+.lite .s-tiferet .artwork-card { padding-bottom: 0; }
+/* 말쿠트 연락 카드: 주소 카드와 링크 카드를 각각 완전한 둥근 카드로 (잘려 보이지 않게) */
+.s-malkuth .contact-address { border-radius: 16px !important; border-bottom: 1px solid rgb(255 255 255 / .1) !important; }
+.s-malkuth .contact-links { border-radius: 16px !important; padding: 6px !important; }
+.s-malkuth .contact-links a { border-top: 0 !important; }
+.s-malkuth .contact-links li + li a { box-shadow: 0 -1px 0 rgb(255 255 255 / .06); border-radius: 0 0 10px 10px; }

@@ -648,27 +648,34 @@ requestAnimationFrame(step);
 window.__glideTo = (top) => { if (reduce.matches) { scrollTo(0, top); return; } if (!gliding) glideTo(top); };
 })();
 
-// 펼침 목록(details)을 열면, 펼쳐진 내용이 화면 안에 잘 보이도록 자동으로 스크롤합니다.
-// 내용이 화면보다 길면 제목이 상단바 바로 아래에 오게, 짧으면 끝까지 보이는 만큼만 내립니다.
+// 펼침 목록(details)을 열면, 펼침 애니메이션이 끝난 뒤 부드럽게 미끄러지며 내용을 화면에 맞춰 줍니다.
+// 내용이 화면보다 길면 제목을 상단바 아래에, 짧으면 끝까지 보이는 만큼만 내립니다
 (() => {
-const TOP_GAP = 72, BOTTOM_GAP = 24;
+const TOP_GAP = 76, BOTTOM_GAP = 28;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+let anim = 0;
+const ease = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const glide = (delta) => {
+cancelAnimationFrame(anim);
+if (reduce.matches) { scrollBy(0, delta); return; }
+const from = scrollY, start = performance.now(), dur = Math.min(900, 420 + Math.abs(delta) * .5);
+const step = (now) => { const k = Math.min(1, (now - start) / dur); scrollTo(0, Math.round(from + delta * ease(k))); if (k < 1) anim = requestAnimationFrame(step); };
+anim = requestAnimationFrame(step);
+};
 const reveal = (item) => {
 const rect = item.getBoundingClientRect();
 const room = innerHeight - TOP_GAP - BOTTOM_GAP;
 let delta = 0;
-if (rect.height > room || rect.top < TOP_GAP) delta = rect.top - TOP_GAP;          // 길거나 위로 잘림 → 제목을 위에 맞춤
-else if (rect.bottom > innerHeight - BOTTOM_GAP) delta = rect.bottom - (innerHeight - BOTTOM_GAP); // 아래로 잘림 → 끝이 보이게
-if (Math.abs(delta) < 4) return;
-const top = scrollY + delta;
-if (window.__glideTo) window.__glideTo(top); else scrollTo({ top, behavior: 'smooth' });
+if (rect.height > room || rect.top < TOP_GAP) delta = rect.top - TOP_GAP;
+else if (rect.bottom > innerHeight - BOTTOM_GAP) delta = rect.bottom - (innerHeight - BOTTOM_GAP);
+if (Math.abs(delta) > 4) glide(delta);
 };
 document.addEventListener('toggle', (event) => {
 const item = event.target;
 if (!(item instanceof HTMLDetailsElement) || !item.open) return;
-// 다른 항목이 닫히며 위치가 바뀌거나 펼침 애니메이션이 끝난 뒤 다시 한 번 맞춥니다
-requestAnimationFrame(() => reveal(item));
-setTimeout(() => { if (item.open) reveal(item); }, 480);
-setTimeout(() => { if (item.open) reveal(item); }, 1300); // 지연 로딩 이미지가 늦게 들어와 높이가 바뀌는 경우
+// 펼쳐지는 동작이 끝난 뒤(약 0.45초) 한 번만 맞춥니다. 늦게 뜨는 그림으로 높이가 바뀌면 한 번 더 살짝 맞춥니다
+setTimeout(() => { if (item.open) reveal(item); }, 450);
+setTimeout(() => { if (item.open) reveal(item); }, 1500);
 }, true);
 })();
 
