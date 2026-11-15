@@ -291,3 +291,27 @@
 .s-malkuth .contact-links { border-radius: 16px !important; padding: 6px !important; }
 .s-malkuth .contact-links a { border-top: 0 !important; }
 .s-malkuth .contact-links li + li a { box-shadow: 0 -1px 0 rgb(255 255 255 / .06); border-radius: 0 0 10px 10px; }
+/* ── 말쿠트 개선: 함께할 일 칩 + 지나온 여정(열 세피라) + 처음으로 돌아가기 ── */
+.s-malkuth .contact-topics { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; }
+.s-malkuth .contact-topics li { padding: 7px 14px; border: 1px solid rgb(255 255 255 / .12); border-radius: 999px; color: #d4d4d8; font-size: 13px; background: rgb(255 255 255 / .03); }
+.s-malkuth .contact-send { transition: background .25s, transform .2s; }
+.s-malkuth .contact-send:hover { background: color-mix(in oklab, var(--sc) 26%, transparent); transform: translateY(-2px); }
+.s-malkuth .contact-address button { transition: border-color .2s, color .2s; }
+.s-malkuth .contact-address button:hover { border-color: var(--sc); color: #fafafa; }
+.malkuth-journey { grid-column: 1 / -1; margin-top: clamp(40px, 6vw, 80px); padding-top: 40px; border-top: 1px solid rgb(255 255 255 / .08); display: grid; gap: 28px; justify-items: center; text-align: center; }
+.journey-path { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0; margin: 0; padding: 0; list-style: none; counter-reset: j; }
+.journey-path li { display: flex; align-items: center; }
+.journey-path li + li::before { content: ''; width: clamp(10px, 2vw, 28px); height: 1px; background: rgb(255 255 255 / .18); }
+.journey-path a { position: relative; display: grid; place-items: center; width: 44px; height: 44px; border: 1.5px solid var(--sc); border-radius: 50%; color: transparent; font-size: 0; text-decoration: none; background: color-mix(in oklab, var(--sc) 14%, transparent); transition: transform .25s cubic-bezier(.34,1.56,.64,1), background .25s; }
+.journey-path a::before { counter-increment: j; content: counter(j); color: var(--sc); font: 600 12px var(--font-mono, ui-monospace, monospace); }
+.journey-path a:hover { transform: scale(1.12); background: color-mix(in oklab, var(--sc) 30%, transparent); }
+
+.journey-path li:last-child a { box-shadow: 0 0 0 4px rgb(255 255 255 / .06); }
+.journey-end .mono { margin: 0; color: var(--sc); font-size: 11px; letter-spacing: .24em; }
+.journey-line { margin: 10px 0 0; color: #d4d4d8; font-size: 15px; }
+.journey-return { display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; min-height: 48px; padding: 0 22px; border: 1px solid rgb(255 255 255 / .16); border-radius: 999px; color: #fafafa; text-decoration: none; font-size: 14px; transition: border-color .2s, transform .2s; }
+.journey-return:hover { border-color: var(--sc); transform: translateY(-2px); }
+@media (max-width: 560px) { .journey-path a { width: 34px; height: 34px; } .journey-path li + li::before { width: 6px; } }
+.s-malkuth .contact-links a { display: grid !important; grid-template-columns: 88px minmax(0, 1fr) 20px !important; grid-template-rows: auto !important; grid-auto-flow: column !important; align-items: center !important; }
+.s-malkuth .contact-links a > * { margin: 0 !important; }
+.s-malkuth .contact-links a > span { grid-column: auto !important; grid-row: auto !important; } /* 모바일 2줄 배치 규칙을 무시하고 한 줄로 */
