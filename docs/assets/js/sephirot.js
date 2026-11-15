@@ -415,7 +415,7 @@ const el = document.createElementNS(NS3, 'text'); el.setAttribute('x', String(CX
 svg.append(cap);
 })();
 /* 공전 궤도 계산(한 번만): 처음 나무와 눕힌 나무 각각의 중심을 기준으로 시작·도착 각도와 반지름을 구합니다 */
-let orbitCache = null;
+let orbitCache = null, orbitRings = null;
 const orbitOf = (info) => {
 if (!orbitCache) { const all = [...nodeInfo.values()], n = all.length || 1;
 const c0x = all.reduce((t, v) => t + v.x, 0) / n, c0y = all.reduce((t, v) => t + v.y, 0) / n, c1x = all.reduce((t, v) => t + v.tx, 0) / n, c1y = all.reduce((t, v) => t + v.ty, 0) / n;
@@ -424,6 +424,7 @@ orbitCache = new Map(all.map((v) => { const r0 = Math.hypot(v.x - c0x, v.y - c0y
 let a0 = Math.atan2(v.y - c0y, v.x - c0x), a1 = Math.atan2(v.ty - c1y, v.tx - c1x); if (r0 < 4) a0 = a1; if (r1 < 4) a1 = a0;
 let da = a1 - a0; while (da > 0) da -= Math.PI * 2; while (da <= -Math.PI * 2) da += Math.PI * 2; /* 모두 같은(반시계) 방향으로 공전 */
 if (da < -Math.PI * 1.5) da += Math.PI * 2; /* 너무 먼 길로 돌지 않게 */
+if (r0 / rmax < .6 && r0 >= 4) da -= Math.PI * 2; /* 안쪽 궤도 행성은 한 바퀴 더 돌아 바깥보다 빠르게 공전 (도착 각도는 같음) */
 return [v, { c0x, c0y, c1x, c1y, r0, r1, a0, da, rn: r0 / rmax }]; })); }
 return orbitCache.get(info);
 };
@@ -465,6 +466,12 @@ if (ain && K && !narrow) { const kk = easeInOut(Math.min(1, Math.max(0, e * 1.6)
 if (veil && !narrow) { const va = 90 * easeInOut(e); veil.setAttribute('transform', e ? `rotate(${(-va).toFixed(2)} ${CX} ${CY})` : ''); if (veilText) veilText.setAttribute('transform', e ? `rotate(${va.toFixed(2)} ${veilText.getAttribute('x')} ${veilText.getAttribute('y')})` : ''); }
 // 배경 궤도: 다 바뀐 뒤 나무 뒤를 채우는 고리와 눈금 (진하기만 e로 조절, 회전은 CSS)
 tree.style.setProperty('--laid', easeInOut(e).toFixed(3));
+/* 공전 궤도 고리: 움직이는 동안에만 각 세피라의 궤도가 희미하게 드러났다 사라집니다 */
+if (!narrow) { if (!orbitRings) { const any = orbitOf(nodeInfo.values().next().value); if (any) { orbitRings = document.createElementNS('http://www.w3.org/2000/svg', 'g'); orbitRings.setAttribute('class', 'ht-orbits'); orbitRings.setAttribute('aria-hidden', 'true');
+const radii = [...new Set([...nodeInfo.values()].map((v) => Math.round(orbitOf(v).r0)).filter((r) => r > 6))];
+radii.forEach((r) => { const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', any.c0x.toFixed(1)); c.setAttribute('cy', any.c0y.toFixed(1)); c.setAttribute('r', String(r)); orbitRings.append(c); });
+const svgEl = tree.querySelector('svg'); svgEl?.insertBefore(orbitRings, svgEl.querySelector('.nodes')); } }
+if (orbitRings) orbitRings.style.opacity = (Math.sin(Math.PI * Math.min(1, e)) * (1 - leave)).toFixed(3); }
 for (const { el, a, b } of lines) { const A = nodeInfo.get(a), B = nodeInfo.get(b); if (!A || !B) continue; el.setAttribute('x1', A.cx.toFixed(1)); el.setAttribute('y1', A.cy.toFixed(1)); el.setAttribute('x2', B.cx.toFixed(1)); el.setAttribute('y2', B.cy.toFixed(1)); }
 for (const bd of badges) { const x = bd.A.cx + (bd.B.cx - bd.A.cx) * bd.t, y = bd.A.cy + (bd.B.cy - bd.A.cy) * bd.t; bd.el.setAttribute('transform', `translate(${(x - bd.bx).toFixed(2)} ${(y - bd.by).toFixed(2)})`); }
 };

@@ -614,3 +614,6 @@ html.tree-grown #tree .nodes { animation: hero-fade 1.1s ease .45s both; }
 .is-offscreen .image-mirror, .is-offscreen .project-reflection { visibility: hidden; }
 /* 큰 장식 레이어는 독립 레이어로 분리해 스크롤 중 다시 그리는 범위를 줄입니다 */
 .sky, .q-ash, .pl-sky { contain: strict; }
+/* 나무 활성화 공전 궤도 고리 */
+.ht-orbits { pointer-events: none; opacity: 0; }
+.ht-orbits circle { fill: none; stroke: rgb(200 186 228 / .28); stroke-width: 1; stroke-dasharray: 2 6; }
