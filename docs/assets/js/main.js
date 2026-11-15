@@ -680,3 +680,20 @@ setTimeout(() => { if (item.open) reveal(item); }, 1500);
 }, true);
 })();
 
+
+// 주소창 해시를 현재 위치에 맞춥니다: 첫 화면(나무, 활성·비활성 모두)에서는 #main, 그 아래에서는 보고 있는 세피라 장(#kether 등)
+(() => {
+const hero = document.getElementById('tree');
+const chapters = [...document.querySelectorAll('section.chapter[id]')];
+if (!hero || !chapters.length) return;
+let frame = 0, current = location.hash;
+const sync = () => {
+frame = 0;
+const mid = innerHeight * 0.5;
+let next = '#main';
+if (chapters[0].getBoundingClientRect().top < mid) { for (const ch of chapters) { if (ch.getBoundingClientRect().top < mid) next = `#${ch.id}`; else break; } }
+if (next !== current) { current = next; history.replaceState(history.state, '', `${location.pathname}${location.search}${next}`); }
+};
+addEventListener('scroll', () => { if (!frame) frame = requestAnimationFrame(sync); }, { passive: true });
+sync();
+})();
