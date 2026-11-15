@@ -636,7 +636,7 @@ html.is-returning #intro { display: none; }
 .q-latin { font-size: clamp(2rem, 1rem + 4vw, 4.4rem); }
 .q-title { margin-top: 10px; font-size: clamp(1.3rem, .9rem + 1.4vw, 2rem); }
 .q-sub { margin-top: 8px; font-size: 13px; }
-.q-tree { width: auto; height: calc(100svh - 76px - 212px); margin-top: -6px; max-height: 980px; min-height: 360px; max-width: 100%; }
+.q-tree { width: auto; height: calc(100svh - 76px - 252px); margin-top: -14px; margin-bottom: 40px; max-height: 980px; min-height: 360px; max-width: 100%; }
 @media (max-width: 600px) { .q-tree { height: auto; width: min(100%, calc((100svh - 230px) * .571)); } }
 /* 클리포트 등장 연출: 깨어나면 제목이 위에서 내려앉고, 나무 전체가 흐릿한 어둠 속에서 아래로부터 떠오르며 또렷해집니다.
    (올라가며 다시 잠들 때는 같은 전환이 거꾸로 진행) */
