@@ -741,8 +741,17 @@ if (hero) {
 new IntersectionObserver(([entry]) => {
 const away = !entry.isIntersecting;
 topbar?.classList.toggle('is-shown', away);
-minimap?.classList.toggle('is-shown', away);
+
 }, { threshold: 0.15 }).observe(hero);
+// 우측 미니맵은 케테르 장이 화면 절반 위로 올라왔을 때부터 서서히 나타납니다 (나무 화면에서는 숨김)
+const kether = document.getElementById('kether');
+if (minimap && kether) {
+let mmFrame = 0;
+const syncMinimap = () => { mmFrame = 0; minimap.classList.toggle('is-shown', kether.getBoundingClientRect().top < innerHeight * 0.5); };
+addEventListener('scroll', () => { if (!mmFrame) mmFrame = requestAnimationFrame(syncMinimap); }, { passive: true });
+addEventListener('resize', syncMinimap);
+syncMinimap();
+}
 }
 
 // 노드 클릭: 효과음 + 파동 + 이동 + 캐릭터 동작
