@@ -801,7 +801,6 @@ const release = () => { if (busy && animDone && glided) setTimeout(() => { busy 
 const sfx = (id) => window.__sfx?.(id);
 const clear = () => { timers.forEach(clearTimeout); timers = []; };
 const light = () => { clear(); sec.classList.add('is-awake');
-sfx('q-enter'); /* 진입: 마법 충격음 */
 nodes.forEach((n, i) => timers.push(setTimeout(() => { n.classList.add('is-lit'); sfx('node-lit'); }, 500 + i * 150)));
 timers.push(setTimeout(() => { sec.classList.add('is-traced'); sfx('path-trace'); animDone = true; release(); }, 500 + nodes.length * 150)); };
 const dim = (animated) => { clear(); sec.classList.remove('is-traced');
@@ -818,6 +817,7 @@ if (k < 1) requestAnimationFrame(step); else { document.documentElement.style.sc
 requestAnimationFrame(step); };
 const top = () => sec.getBoundingClientRect().top + scrollY;
 const descend = () => { if (busy) return; busy = true; animDone = false; let lit = false;
+sfx('q-enter'); /* 진입음: 내려가기 시작하는 순간 바로 */
 glide(top(), (k) => { document.documentElement.style.setProperty('--qd', easeOut(k).toFixed(3)); if (k >= .35 && !lit) { lit = true; light(); } }); };
 const ascend = () => { if (busy) return; busy = true; animDone = false; dim(true);
 glide(Math.max(0, top() - innerHeight), (k) => document.documentElement.style.setProperty('--qd', (1 - easeOut(k)).toFixed(3))); };
