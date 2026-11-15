@@ -556,6 +556,9 @@ if (!button) return;
 // 긴 곡을 PCM으로 전부 풀지 않고 브라우저의 미디어 스트림으로 재생합니다.
 const audio = new Audio();
 audio.preload = 'none';
+/* 첫 클릭 직후 바로 들리도록: 화면이 준비된 뒤(유휴 시간) GitHub Pages에서 음원을 미리 받아 둡니다. Cloudflare 경로는 한국에서 매우 느림 */
+const SRC = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? './assets/space-ambient.mp3' : 'https://ftvot-studio.github.io/assets/space-ambient.mp3';
+(window.requestIdleCallback || ((fn) => setTimeout(fn, 1500)))(() => { if (!audio.getAttribute('src')) { audio.preload = 'auto'; audio.src = SRC; audio.load(); } }, { timeout: 2500 });
 audio.loop = true;
 // 배경음은 볼륨 변화 없이 작은 소리로 계속 반복합니다.
 audio.volume = 0.3; // 배경음 (예전 0.08은 거의 안 들려서 올림)
@@ -575,7 +578,7 @@ sync();
 const start = () => {
 if (!enabled || document.hidden || !audio.paused) return;
 // 첫 화면이 먼저 준비되도록 실제 재생 직전까지 음원 요청을 미룹니다.
-if (!audio.getAttribute('src')) audio.src = './assets/space-ambient.mp3';
+if (!audio.getAttribute('src')) audio.src = SRC;
 audio.play().then(() => {
 if (!enabled || document.hidden) { stop(); return; }
 sync();
