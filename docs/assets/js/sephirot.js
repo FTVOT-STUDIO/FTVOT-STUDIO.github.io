@@ -305,7 +305,7 @@ p.after(signal);
 // 회전량은 스크롤 위치로만 계산해서, 위로 되돌아가면 같은 경로로 다시 일어섭니다.
 const ROTATE_RATIO = 0.1;  // 화면 높이의 몇 배를 스크롤하면 다 눕는지 (작을수록 빨리 돕니다)
 const PIN_RATIO = 0.44;     // 가로로 다 바뀔 때까지 나무를 화면에 붙잡아 두는 스크롤 길이 (#tree margin-bottom과 같은 값)
-const MORPH_SECONDS = 3.2; // 가로로 바뀌는 데 걸리는 시간 (행성 공전이 눈으로 따라갈 수 있는 속도)
+const MORPH_SECONDS = 2.2; // 가로로 바뀌는 데 걸리는 시간
 let treeAudible = false, wantDown = false, wantUp = false, lockDir = -1, glideAnim = 0, reversing = false, anim = 0, lastTime = 0, scrollLocked = false, glideFrom = 0, tension = 0, snapping = false;
 
 const LOCK_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar']);
@@ -414,42 +414,22 @@ const el = document.createElementNS(NS3, 'text'); el.setAttribute('x', String(CX
 });
 svg.append(cap);
 })();
-/* 공전 궤도 계산(한 번만): 처음 나무와 눕힌 나무 각각의 중심을 기준으로 시작·도착 각도와 반지름을 구합니다 */
-let orbitCache = null, orbitRings = null;
-const orbitOf = (info) => {
-if (!orbitCache) { const all = [...nodeInfo.values()], n = all.length || 1;
-const c0x = all.reduce((t, v) => t + v.x, 0) / n, c0y = all.reduce((t, v) => t + v.y, 0) / n, c1x = all.reduce((t, v) => t + v.tx, 0) / n, c1y = all.reduce((t, v) => t + v.ty, 0) / n;
-const rmax = Math.max(...all.map((v) => Math.hypot(v.x - c0x, v.y - c0y))) || 1;
-orbitCache = new Map(all.map((v) => { const r0 = Math.hypot(v.x - c0x, v.y - c0y), r1 = Math.hypot(v.tx - c1x, v.ty - c1y);
-let a0 = Math.atan2(v.y - c0y, v.x - c0x), a1 = Math.atan2(v.ty - c1y, v.tx - c1x); if (r0 < 4) a0 = a1; if (r1 < 4) a1 = a0;
-let da = a1 - a0; while (da > 0) da -= Math.PI * 2; while (da <= -Math.PI * 2) da += Math.PI * 2; /* 모두 같은(반시계) 방향으로 공전 */
-if (da < -Math.PI * 1.5) da += Math.PI * 2; /* 너무 먼 길로 돌지 않게 */
-if (r0 / rmax < .6 && r0 >= 4) da -= Math.PI * 2; /* 안쪽 궤도 행성은 한 바퀴 더 돌아 바깥보다 빠르게 공전 (도착 각도는 같음) */
-return [v, { c0x, c0y, c1x, c1y, r0, r1, a0, da, rn: r0 / rmax }]; })); }
-return orbitCache.get(info);
-};
+/* 부드러운 안착 곡선(easeInOutBack, 약하게): 기계적으로 멈추지 않고 살짝 지나쳤다 돌아와 자리 잡습니다 */
+const settle = (x) => { if (x <= 0) return 0; if (x >= 1) return 1; const c1 = .45, c2 = c1 * 1.525;
+return x < .5 ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2 : (Math.pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2; };
 const morph = (e, leave = 0) => {
 const narrow = innerWidth < 700;
 const m = Math.round(e * 1000) / 1000 + Math.round(leave * 1000) * 10; if (m === lastMorph) return; lastMorph = m;
 for (const info of nodeInfo.values()) {
 const i = Number(info.node.dataset.seph) - 1;
-const raw = Math.min(1, Math.max(0, e * 1.3 - i * (.3 / 9)));
-const k = easeInOut(raw);
+const raw = Math.min(1, Math.max(0, e * 1.45 - i * (.45 / 9))); /* 시차를 조금 줄여 세피라가 더 긴 시간 동안 부드럽게 이동 */
+const k = settle(raw); /* 출발할 때 아주 살짝 뒤로 당겼다가, 도착할 때 조금 지나쳤다 제자리에 안착하는 자연스러운 곡선 */
 // 직선이 아니라 바깥쪽으로 부풀었다 들어오는 호
 // 세로 화면(폭 700 미만)에서는 가로로 눕히면 너무 작아지므로 제자리에서 차례로 켜지기만 합니다
-/* 행성 공전: 직선 대신 나무 중심을 축으로 모든 세피라가 같은 방향으로 함께 공전하며 자리를 옮깁니다.
-   각도와 중심 거리를 함께 보간하고, 안쪽 궤도일수록 먼저 도착(케플러처럼)하도록 반지름에 따라 진행을 살짝 당깁니다 */
-if (narrow) { info.cx = info.x; info.cy = info.y; }
-else {
-const o = orbitOf(info);
-const kk = easeInOut(Math.min(1, Math.max(0, raw * (1 + (1 - o.rn) * .25))));
-const a = o.a0 + o.da * kk, r = o.r0 + (o.r1 - o.r0) * kk + Math.sin(Math.PI * kk) * 14; /* 공전 중엔 궤도가 살짝 부풀었다 돌아옴 */
-const ox = o.c0x + (o.c1x - o.c0x) * kk, oy = o.c0y + (o.c1y - o.c0y) * kk;
-info.cx = ox + Math.cos(a) * r; info.cy = oy + Math.sin(a) * r;
-}
-/* 자전: 공전하는 동안 기호가 제자리에서 한 바퀴 돕니다 */
-const sym = info.sym ??= info.node.querySelector('.node-sym');
-if (sym) sym.setAttribute("transform", !narrow && k > 0 && raw < .999 ? `rotate(${(180 * k).toFixed(1)} ${info.x} ${info.y - 11})` : '');
+const mx = narrow ? 0 : info.tx - info.x, my = narrow ? 0 : info.ty - info.y, len = Math.hypot(mx, my) || 1;
+const bulge = Math.sin(Math.PI * Math.min(1, Math.max(0, k))) * Math.min(48, len * .2); /* 호를 조금 완만하게 */
+info.cx = info.x + mx * k + (-my / len) * bulge;
+info.cy = info.y + my * k + (mx / len) * bulge;
 // 떠날 때: 세피라마다 다른 속도로 위로 흩어지는 시차(패럴랙스). 케테르가 가장 느리고 말쿠트가 가장 빠릅니다
 const ls = leave * leave;
 info.cx -= ls * (i - 4.5) * 6;
@@ -461,17 +441,11 @@ if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit
 }
 // 케테르 위의 아인 호(세 겹 반원)는 케테르를 따라가며 바깥쪽(왼쪽)을 향하도록 방향만 바꿉니다
 const K = nodeInfo.get('1');
-if (ain && K && !narrow) { const kk = easeInOut(Math.min(1, Math.max(0, e * 1.3))); ain.setAttribute('transform', e ? `translate(${(K.cx - K.x).toFixed(2)} ${(K.cy - K.y).toFixed(2)}) rotate(${(-90 * kk).toFixed(2)} ${K.x} ${K.y})` : ''); }
+if (ain && K && !narrow) { const kk = settle(Math.min(1, Math.max(0, e * 1.45))); ain.setAttribute('transform', e ? `translate(${(K.cx - K.x).toFixed(2)} ${(K.cy - K.y).toFixed(2)}) rotate(${(-90 * kk).toFixed(2)} ${K.x} ${K.y})` : ''); }
 // 심연의 장막: 위 삼각과 아래를 가르는 가로선이 세로선으로 서서히 바뀝니다
 if (veil && !narrow) { const va = 90 * easeInOut(e); veil.setAttribute('transform', e ? `rotate(${(-va).toFixed(2)} ${CX} ${CY})` : ''); if (veilText) veilText.setAttribute('transform', e ? `rotate(${va.toFixed(2)} ${veilText.getAttribute('x')} ${veilText.getAttribute('y')})` : ''); }
 // 배경 궤도: 다 바뀐 뒤 나무 뒤를 채우는 고리와 눈금 (진하기만 e로 조절, 회전은 CSS)
 tree.style.setProperty('--laid', easeInOut(e).toFixed(3));
-/* 공전 궤도 고리: 움직이는 동안에만 각 세피라의 궤도가 희미하게 드러났다 사라집니다 */
-if (!narrow) { if (!orbitRings) { const any = orbitOf(nodeInfo.values().next().value); if (any) { orbitRings = document.createElementNS('http://www.w3.org/2000/svg', 'g'); orbitRings.setAttribute('class', 'ht-orbits'); orbitRings.setAttribute('aria-hidden', 'true');
-const radii = [...new Set([...nodeInfo.values()].map((v) => Math.round(orbitOf(v).r0)).filter((r) => r > 6))];
-radii.forEach((r) => { const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', any.c0x.toFixed(1)); c.setAttribute('cy', any.c0y.toFixed(1)); c.setAttribute('r', String(r)); orbitRings.append(c); });
-const svgEl = tree.querySelector('svg'); svgEl?.insertBefore(orbitRings, svgEl.querySelector('.nodes')); } }
-if (orbitRings) orbitRings.style.opacity = (Math.sin(Math.PI * Math.min(1, e)) * (1 - leave)).toFixed(3); }
 for (const { el, a, b } of lines) { const A = nodeInfo.get(a), B = nodeInfo.get(b); if (!A || !B) continue; el.setAttribute('x1', A.cx.toFixed(1)); el.setAttribute('y1', A.cy.toFixed(1)); el.setAttribute('x2', B.cx.toFixed(1)); el.setAttribute('y2', B.cy.toFixed(1)); }
 for (const bd of badges) { const x = bd.A.cx + (bd.B.cx - bd.A.cx) * bd.t, y = bd.A.cy + (bd.B.cy - bd.A.cy) * bd.t; bd.el.setAttribute('transform', `translate(${(x - bd.bx).toFixed(2)} ${(y - bd.by).toFixed(2)})`); }
 };
