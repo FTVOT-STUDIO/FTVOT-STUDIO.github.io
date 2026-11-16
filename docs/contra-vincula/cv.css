@@ -69,3 +69,6 @@ section { width: min(1100px, 90vw); margin: 0 auto; }
   .ly, .logo, .release, .reveal { transition: opacity .15s linear; clip-path: none; transform: none; }
 }
 .ly.body { transform-origin: 40% 82%; }
+/* 레이어가 받아지는 동안 전체 그림을 먼저 보여 줘서 첫 화면이 어둡지 않게 합니다 */
+.stage { background: url('https://ftvot-studio.github.io/contra-vincula/assets/poster.webp') 38% 50% / cover no-repeat; }
+@media (max-width: 700px) { .stage { background-position: 30% 50%; } }
