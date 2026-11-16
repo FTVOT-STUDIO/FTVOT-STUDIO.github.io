@@ -4,7 +4,7 @@
 import { initIntro, initSky } from './intro.js?v=20261120a';
 import { initCosmos } from './cosmos.js?v=20261117q';
 import { initSephirot } from './sephirot.js?v=20261120i';
-import { initGalleryAdmin } from './gallery-admin.js?v=20261119d';
+import { initGalleryAdmin } from './gallery-admin.js?v=20261117a';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
 import { initChapterScenes } from './chapter-scenes.js?v=20261117q';
@@ -445,6 +445,8 @@ window.__artworkItems = () => allFiles.map((f) => ({ href: artHref(f), alt: f.na
 window.__artworkGoto = (idx) => { const target = Math.floor(idx / PER_PAGE); if (target !== page && target >= 0) { page = target; render(allFiles, true); } };
 /* 방금 올린 그림: 목록 API가 늦게 갱신돼도 10분 동안은 바로 보이게 합쳐 둡니다 */
 const withExtras = (files) => { let extra = []; try { extra = JSON.parse(sessionStorage.getItem('ftvot-gallery-extra') || '[]').filter((x) => x && typeof x.name === 'string' && Date.now() - (x.time || 0) < 600000); } catch { /* 없음 */ }
+let gone = new Set(); try { gone = new Set(JSON.parse(sessionStorage.getItem('ftvot-gallery-removed') || '[]').filter((x) => Date.now() - x.time < 600000).map((x) => x.name)); } catch { /* 없음 */ }
+files = files.filter((f) => !gone.has(f.name)); /* 방금 지운 그림은 목록 API가 늦어도 바로 숨김 */
 const names = new Set(files.map((f) => f.name)); return [...files, ...extra.filter((x) => !names.has(x.name)).map(({ name, sha }) => ({ name, sha: String(sha) }))].sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true })); };
 const render = (files, keepPage = false) => {
 files = withExtras(files.filter(validFile)).filter(validFile);
@@ -561,7 +563,7 @@ refresh.disabled = false;
 };
 refresh.hidden = false;
 refresh.addEventListener('click', () => load(true));
-document.addEventListener('gallery:changed', () => load(true)); // 관리 창에서 바꾸면 목록을 바로 다시 불러옵니다
+document.addEventListener('gallery:changed', () => { render(allFiles, true); load(true); }); // 관리 창에서 바꾸면 지금 목록에서 바로 반영하고, 서버 목록은 뒤에서 다시 확인 // 관리 창에서 바꾸면 목록을 바로 다시 불러옵니다
 // 갤러리를 열 때만 요청해 불필요한 네트워크 호출을 줄입니다.
 if ('IntersectionObserver' in window) {
 const observer = new IntersectionObserver((entries) => {

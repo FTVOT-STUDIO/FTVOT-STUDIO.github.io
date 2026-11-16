@@ -190,6 +190,7 @@ done += 1; idx += 1; uploaded.push({ name, sha: putRes?.content?.sha || String(D
 await refresh(); out.progress.done('업로드 완료');
 /* 방금 올린 그림을 기억해 두고(목록 API가 1분가량 늦게 갱신될 때 대비) 갤러리 목록만 다시 불러옵니다. 페이지 전체 새로고침은 하지 않습니다 */
 try { const prev = JSON.parse(sessionStorage.getItem('ftvot-gallery-extra') || '[]'); sessionStorage.setItem('ftvot-gallery-extra', JSON.stringify([...prev.filter((x) => !uploaded.some((u) => u.name === x.name)), ...uploaded.map((u) => ({ ...u, time: Date.now() }))]));
+sessionStorage.setItem('ftvot-gallery-removed', JSON.stringify(JSON.parse(sessionStorage.getItem('ftvot-gallery-removed') || '[]').filter((x) => !uploaded.some((u) => u.name === x.name))));
 Object.keys(sessionStorage).filter((k) => k.startsWith('ftvot-artwork-gallery')).forEach((k) => sessionStorage.removeItem(k)); } catch { /* 저장소 없음 */ }
 changed();
 out.say(`${done}개를 올렸습니다. 갤러리 목록을 새로 고쳤습니다.`, 'ok');
@@ -220,9 +221,14 @@ if (button.dataset.confirm !== '1') { button.dataset.confirm = '1'; button.textC
 setBusy(true); say(`${file.name}을(를) 지우고 있습니다…`);
 try {
 await gh(pathOf(file.name), getToken(), { method: 'DELETE', body: JSON.stringify({ message: `Delete artwork ${file.name}`, sha: file.sha, branch: BRANCH }) });
-try { const sha = await thumbSha(file.name, getToken()); if (sha) await gh(thumbPath(file.name), getToken(), { method: 'DELETE', body: JSON.stringify({ message: `Remove thumbnail ${file.name}`, sha, branch: BRANCH }) }); } catch { /* 썸네일 정리는 실패해도 괜찮습니다 */ }
-await refresh(); changed();
+/* 바로 반영: 목록 API가 늦게 갱신돼도 10분 동안은 지운 그림을 숨기고, 관리 목록에서도 즉시 뺍니다 */
+try { const gone = JSON.parse(sessionStorage.getItem('ftvot-gallery-removed') || '[]').filter((x) => Date.now() - x.time < 600000); gone.push({ name: file.name, time: Date.now() }); sessionStorage.setItem('ftvot-gallery-removed', JSON.stringify(gone));
+const extra = JSON.parse(sessionStorage.getItem('ftvot-gallery-extra') || '[]').filter((x) => x.name !== file.name); sessionStorage.setItem('ftvot-gallery-extra', JSON.stringify(extra));
+Object.keys(sessionStorage).filter((k) => k.startsWith('ftvot-artwork-gallery')).forEach((k) => sessionStorage.removeItem(k)); } catch { /* 저장소 없음 */ }
+button.closest('li')?.remove(); changed();
 say('삭제했습니다. (GitHub 커밋 기록에서는 되살릴 수 있습니다)', 'ok');
+/* 썸네일 정리와 목록 재확인은 뒤에서 조용히 */
+(async () => { try { const sha = await thumbSha(file.name, getToken()); if (sha) await gh(thumbPath(file.name), getToken(), { method: 'DELETE', body: JSON.stringify({ message: `Remove thumbnail ${file.name}`, sha, branch: BRANCH }) }); } catch { /* 썸네일 정리는 실패해도 괜찮습니다 */ } refresh().catch(() => {}); })();
 } catch (error) { say(error.message, 'error'); }
 finally { setBusy(false); }
 };
