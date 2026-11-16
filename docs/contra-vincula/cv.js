@@ -1,14 +1,34 @@
 // Contra Vincula 소개 페이지: 레이어 시차, 출시 카운트다운, 스크롤 등장
+// 새로고침하면 항상 맨 위에서 시작합니다(브라우저의 스크롤 위치 복원 끔, 주소의 #위치도 지움)
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+scrollTo(0, 0);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const layers = [...document.querySelectorAll('[data-stage] .ly')];
 
-// 레이어가 모두 받아지면 함께 켜서 한 장씩 따로 뜨는 어색함을 막습니다
-let loaded = 0;
+// 초기 로딩: 첫 화면 레이어·파편·로고·인물 그림을 미리 받으며 진행률을 보여 주고, 다 받으면 사슬이 끊기듯 화면이 갈라지며 열립니다
+const loader = document.querySelector('[data-loader]'), ldFill = document.querySelector('[data-ld-fill]'), ldPct = document.querySelector('[data-ld-pct]');
 const imgs = layers.map((l) => (l.tagName === 'IMG' ? l : l.querySelector('img')));
-const ready = () => { layers.forEach((l) => l.classList.add('is-in')); document.body.classList.add('is-ready'); };
-imgs.forEach((l) => { if (l.complete) loaded++; else l.addEventListener('load', () => { if (++loaded === imgs.length) ready(); }, { once: true }); l.addEventListener('error', () => { if (++loaded === imgs.length) ready(); }, { once: true }); });
-if (loaded === imgs.length) ready();
-setTimeout(ready, 6000); // 느린 연결에서도 6초 뒤에는 보여 줍니다
+const extra = ['./assets/shard.png', document.querySelector('.logo')?.src, ...[...document.querySelectorAll('.portrait')].map((i) => i.src)].filter(Boolean);
+const total = imgs.length + extra.length; let loaded = 0, shown = 0, opened = false;
+const reveal = () => { layers.forEach((l) => l.classList.add('is-in')); document.body.classList.add('is-ready'); };
+const open = () => {
+  if (opened) return; opened = true; scrollTo(0, 0);
+  if (!loader) { reveal(); return; }
+  loader.classList.add('is-done'); document.body.classList.remove('is-loading');
+  setTimeout(reveal, 350); setTimeout(() => loader.remove(), 1600);
+};
+const bump = () => { loaded = Math.min(total, loaded + 1); };
+imgs.forEach((l) => { if (l.complete) bump(); else { l.addEventListener('load', bump, { once: true }); l.addEventListener('error', bump, { once: true }); } });
+extra.forEach((src) => { const i = new Image(); i.onload = i.onerror = bump; i.src = src; });
+// 숫자가 튀지 않게 표시값이 실제 진행률을 부드럽게 따라갑니다
+const tickLoad = () => {
+  const target = loaded / total * 100; shown = Math.min(target, shown + Math.max(.8, (target - shown) * .15));
+  if (ldFill) ldFill.style.clipPath = `inset(0 ${100 - shown}% 0 0)`; if (ldPct) ldPct.textContent = Math.floor(shown);
+  if (shown >= 100) setTimeout(open, 250); else setTimeout(tickLoad, 16);
+};
+requestAnimationFrame(tickLoad);
+setTimeout(() => { loaded = total; }, 12000); // 아주 느린 연결이면 12초 뒤에는 열어 줍니다
 
 // 시차: 마우스(데스크톱)와 스크롤 양쪽을 부드럽게 따라갑니다
 if (!reduce) {
