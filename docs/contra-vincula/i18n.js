@@ -16,7 +16,17 @@ const T = [
   ]],
   ['#about dt', ['Genre', 'World', 'Themes'], ['ジャンル', '世界観', 'テーマ']],
   ['#about dd', ['Narrative RPG · Dark Fantasy', 'ARCA', 'Freedom · Bondage · Salvation · Faith · Choice · Defiance'], ['ナラティブRPG · ダークファンタジー', 'ARCA（アルカ）', '自由 · 束縛 · 救済 · 信仰 · 選択 · 抵抗']],
-  ['#world .lead', ['ARCA, where transcendent beings clash over their own ideals. Here, divinity does not mean goodness, and salvation can be the gentlest of shackles.'], ['超越者たちがそれぞれの理想を抱いてぶつかり合う世界、アルカ。ここでは神性は善を意味せず、救いは時に最も柔らかな枷となります。']],
+  ['#world .lead', [
+    'ARCA, where transcendent beings clash over their own ideals. Here, divinity does not mean goodness, and salvation can be the gentlest of shackles.',
+    'The Sephirot who govern the order and principles of the world, the transcendents who oppose them or chase other ideals, and countless lives in their shadow. What is order to one becomes oppression to another, and a decision made to protect can steal the very freedom of the one it protects.',
+    'No conflict in this world wears the label of good or evil. Everyone carries their own past, convictions, and desires, and even the same event is seen and judged through different eyes.',
+    'And at its heart stands the <b>Faust Church</b>, which worships beauty and salvation. Followers of Tiphareth, the Sephira of beauty, entrust their lives to faith in hope of escaping pain, and the deeper their belief, the more quietly their will sinks beneath the order of that faith.'
+  ], [
+    '超越者たちがそれぞれの理想を抱いてぶつかり合う世界、アルカ。ここでは神性は善を意味せず、救いは時に最も柔らかな枷となります。',
+    '世界の秩序と原理を司るセフィラ、彼らに抗い、あるいは異なる理想を追う超越者たち、そしてその影の下で生きる無数の命。ある者にとっての秩序は別の者にとっての抑圧となり、守るための決断が、時にその者の自由を奪います。',
+    'この世界の争いに、善と悪という名札は付いていません。誰もがそれぞれの過去と信念、欲望を抱き、同じ出来事でさえ異なる目で見て、解釈します。',
+    'そしてその中心に、美と救いを崇める<b>ファウスト教</b>があります。美の権能を持つセフィラ、ティフェレトに従う信徒たちは苦しみから逃れることを願って人生を信仰に委ね、信仰が深まるほど、その意志は静かに信仰の秩序の下へと沈んでいきます。'
+  ]],
   ['#story h2', ['Seven Days, and No More'], ['許された時間は、ただ七日']],
   ['#story .lead', [
     'Cast down from heaven for defying its order, Lilith found no sanctuary in the Faust Church, only another altar to kneel before in the name of salvation. Imprisoned in place of the one she meant to protect, she is stripped even of her voice.',

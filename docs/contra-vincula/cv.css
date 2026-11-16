@@ -352,3 +352,16 @@ section.block:last-of-type::before, section.block:last-of-type::after { display:
 @media (prefers-reduced-motion: reduce) { .cd b.flip, .scroll-cue i::after { animation: none; } }
 .hero-copy { width: min(680px, 88vw); margin-bottom: max(13vh, 112px); }
 @media (max-width: 700px) { .hero-copy { margin-bottom: 104px; } }
+
+/* ── 글꼴: 고딕 판타지 톤 ── 라틴 제목 Cinzel, 본문 Cormorant Garamond, 한글 본문 고운바탕, 한글 제목 송명, 일본어 시포리 명조 */
+:root { --serif: 'Cinzel', 'Song Myung', 'Shippori Mincho', serif; --sans: 'Cormorant Garamond', 'Gowun Batang', 'Shippori Mincho', serif; --title: 'Song Myung', 'Cinzel', 'Shippori Mincho', serif; }
+html:lang(ja) { --sans: 'Cormorant Garamond', 'Shippori Mincho', serif; --title: 'Shippori Mincho', 'Cinzel', serif; }
+html { font-family: var(--sans); }
+.block h2, .main-tag, .cast h3, .gp h3, .gp-node h3 { font-family: var(--title); font-weight: 400; letter-spacing: 0; }
+html:lang(en) .block h2, html:lang(en) .main-tag, html:lang(en) .cast h3, html:lang(en) .gp h3 { font-family: 'Cinzel', serif; font-weight: 500; letter-spacing: .02em; }
+html:lang(ja) .block h2, html:lang(ja) .main-tag, html:lang(ja) .cast h3, html:lang(ja) .gp h3 { font-weight: 700; }
+.lead, .cast p, .gp p, .quote, .sub-tag, .facts dd { font-size: 1.06em; }
+html:lang(en) .lead, html:lang(en) .cast p, html:lang(en) .quote { font-size: 1.14em; line-height: 1.7; }
+.main-tag { font-size: clamp(28px, 4.4vw, 50px); line-height: 1.4; }
+.back, .rel-label, .day-cap, .gp-core span, .facts dt, .cast .role { font-family: var(--sans); }
+#world .lead + .lead { margin-top: 0; }
