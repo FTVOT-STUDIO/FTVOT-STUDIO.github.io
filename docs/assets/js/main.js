@@ -753,8 +753,10 @@ const from = scrollY, start = performance.now(), dur = Math.min(900, 420 + Math.
 const step = (now) => { const k = Math.min(1, (now - start) / dur); scrollTo(0, Math.round(from + delta * ease(k))); if (k < 1) anim = requestAnimationFrame(step); };
 anim = requestAnimationFrame(step);
 };
-const reveal = (item) => {
-const rect = item.getBoundingClientRect();
+const reveal = (item, predict) => {
+const r = item.getBoundingClientRect();
+// predict: 펼침 애니메이션이 끝났을 때의 높이(scrollHeight)로 미리 계산해, 펼쳐지는 것과 동시에 스크롤을 시작합니다
+const rect = predict ? { top: r.top, height: item.scrollHeight, bottom: r.top + item.scrollHeight } : r;
 const room = innerHeight - TOP_GAP - BOTTOM_GAP;
 let delta = 0;
 if (rect.height > room || rect.top < TOP_GAP) delta = rect.top - TOP_GAP;
@@ -764,8 +766,8 @@ if (Math.abs(delta) > 4) glide(delta);
 document.addEventListener('toggle', (event) => {
 const item = event.target;
 if (!(item instanceof HTMLDetailsElement) || !item.open) return;
-// 펼쳐지는 동작이 끝난 뒤(약 0.45초) 한 번만 맞춥니다. 늦게 뜨는 그림으로 높이가 바뀌면 한 번 더 살짝 맞춥니다
-setTimeout(() => { if (item.open) reveal(item); }, 450);
+// 펼침과 동시에 최종 높이 기준으로 바로 미끄러지고, 늦게 뜨는 그림으로 높이가 바뀐 경우만 나중에 살짝 보정합니다
+requestAnimationFrame(() => { if (item.open) reveal(item, true); });
 setTimeout(() => { if (item.open) reveal(item); }, 1500);
 }, true);
 })();
