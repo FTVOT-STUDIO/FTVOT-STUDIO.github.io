@@ -3,9 +3,14 @@
 {
   "name": "ftvot-site",
   "compatibility_date": "2026-11-01",
+  // 호스트별 분기(게임 소개 사이트)를 위한 작은 Worker
+  "main": "./worker.js",
   "assets": {
     // GitHub Pages와 같은 폴더를 그대로 씁니다. 저장소 하나로 두 곳에 배포됩니다
     "directory": "./docs",
+    "binding": "ASSETS",
+    // 모든 요청을 Worker가 먼저 받아 호스트를 보고 나눕니다
+    "run_worker_first": true,
     // 없는 경로는 docs/404.html을 404 상태로 응답합니다
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
