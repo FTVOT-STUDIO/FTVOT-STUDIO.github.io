@@ -436,20 +436,21 @@ const raw = Math.min(1, Math.max(0, e * 1.25 - i * (.25 / 9))); /* 세피라 순
 const seg = (a, b) => Math.min(1, Math.max(0, (raw - a) / (b - a)));
 const shrinkT = seg(0, .38), moveT = seg(.12, .88), bloomT = seg(.62, 1);
 const k = narrow ? 0 : easeInOut(moveT);
-if (narrow) { info.cx = info.x; info.cy = info.y; }
-else {
+/* 모바일(세로 나무)도 같은 별자리 연출: 화면 가운데로 모였다가 제자리로 다시 퍼지며 피어납니다 */
+const TX = narrow ? info.x : info.tx, TY = narrow ? info.y : info.ty;
+{
 /* 2차 베지어: 출발점 → (출발·도착의 가운데를 나무 중심 쪽으로 60% 당긴 점) → 도착점 */
 /* 중앙 집결: 빛점들이 모두 나무 한가운데로 모여 작은 원을 이뤘다가, 그 자리에서 가로 배치로 다시 퍼져 나갑니다.
    어느 한쪽으로 치우치지 않고 화면 중앙에서 접혔다 펼쳐지는 느낌 */
 const ang = (i / 10) * Math.PI * 2 - Math.PI / 2, qx = gather.x + Math.cos(ang) * 26, qy = gather.y + Math.sin(ang) * 26;
 if (moveT < .5) { const h = easeInOut(moveT * 2); info.cx = info.x + (qx - info.x) * h; info.cy = info.y + (qy - info.y) * h; }
-else { const h = easeInOut((moveT - .5) * 2); info.cx = qx + (info.tx - qx) * h; info.cy = qy + (info.ty - qy) * h; }
+else { const h = easeInOut((moveT - .5) * 2); info.cx = qx + (TX - qx) * h; info.cy = qy + (TY - qy) * h; }
 }
 /* 크기: 1 → 0.32(빛점) → 1. 줄어들 때와 피어날 때 모두 부드러운 곡선, 두 구간이 겹치며 이어집니다 */
 const smooth = (t) => t * t * (3 - 2 * t);
-const sc = narrow ? 1 : (raw <= .001 || raw >= .999) ? 1 : Math.min(1 - .68 * smooth(shrinkT) + .68 * smooth(bloomT), 1);
+const sc = (raw <= .001 || raw >= .999) ? 1 : Math.min(1 - .68 * smooth(shrinkT) + .68 * smooth(bloomT), 1);
 /* 빛점에 가까울수록 글자·번호가 서서히 사라졌다 돌아옵니다 (전환 중에만 직접 지정, 평소엔 원래 스타일 그대로) */
-const mote = narrow || raw <= .001 || raw >= .999 ? 0 : Math.max(0, 1 - Math.abs(sc - .32) / .68);
+const mote = raw <= .001 || raw >= .999 ? 0 : Math.max(0, 1 - Math.abs(sc - .32) / .68);
 const labels = info.labels ??= [...info.node.querySelectorAll('text, .node-num-bg')];
 for (const t of labels) t.style.filter = mote > 0 ? `opacity(${(1 - mote).toFixed(3)})` : ''; /* opacity 대신 filter: 원래 숨겨진 글자(수수께끼/이름)는 그대로 숨긴 채 곱해서 흐리게 → 글자 겹침 방지 */
 // 떠날 때: 세피라마다 다른 속도로 위로 흩어지는 시차(패럴랙스). 케테르가 가장 느리고 말쿠트가 가장 빠릅니다
@@ -464,12 +465,12 @@ if (lit !== info.lit) { info.lit = lit; info.node.classList.toggle('is-lit', lit
 }
 // 케테르 위의 아인 호(세 겹 반원)는 케테르를 따라가며 바깥쪽(왼쪽)을 향하도록 방향만 바꿉니다
 const K = nodeInfo.get('1');
-if (ain && K && !narrow) { const kk = easeInOut(Math.min(1, Math.max(0, e))); ain.setAttribute('transform', e ? `translate(${(K.cx - K.x).toFixed(2)} ${(K.cy - K.y).toFixed(2)}) rotate(${(-90 * kk).toFixed(2)} ${K.x} ${K.y})` : ''); }
+if (ain && K) { const kk = narrow ? 0 : easeInOut(Math.min(1, Math.max(0, e))); /* 모바일은 회전 없이 케테르만 따라감 */ ain.setAttribute('transform', e ? `translate(${(K.cx - K.x).toFixed(2)} ${(K.cy - K.y).toFixed(2)}) rotate(${(-90 * kk).toFixed(2)} ${K.x} ${K.y})` : ''); }
 // 심연의 장막: 위 삼각과 아래를 가르는 가로선이 세로선으로 서서히 바뀝니다
 if (veil && !narrow) { const va = 90 * easeInOut(e); veil.setAttribute('transform', e ? `rotate(${(-va).toFixed(2)} ${CX} ${CY})` : ''); if (veilText) veilText.setAttribute('transform', e ? `rotate(${va.toFixed(2)} ${veilText.getAttribute('x')} ${veilText.getAttribute('y')})` : ''); }
 // 배경 궤도: 다 바뀐 뒤 나무 뒤를 채우는 고리와 눈금 (진하기만 e로 조절, 회전은 CSS)
 tree.style.setProperty('--laid', easeInOut(e).toFixed(3));
-if (!narrow) tree.style.setProperty('--relink', (e <= 0 || e >= 1) ? '1' : (1 - .85 * Math.pow(Math.sin(Math.PI * e), 1.5)).toFixed(3)); /* 재배치 중 경로가 부드럽게 흐려졌다 돌아옴 */
+tree.style.setProperty('--relink', (e <= 0 || e >= 1) ? '1' : (1 - .85 * Math.pow(Math.sin(Math.PI * e), 1.5)).toFixed(3)); /* 재배치 중 경로가 부드럽게 흐려졌다 돌아옴 */
 for (const { el, a, b } of lines) { const A = nodeInfo.get(a), B = nodeInfo.get(b); if (!A || !B) continue; el.setAttribute('x1', A.cx.toFixed(1)); el.setAttribute('y1', A.cy.toFixed(1)); el.setAttribute('x2', B.cx.toFixed(1)); el.setAttribute('y2', B.cy.toFixed(1)); }
 for (const bd of badges) { const x = bd.A.cx + (bd.B.cx - bd.A.cx) * bd.t, y = bd.A.cy + (bd.B.cy - bd.A.cy) * bd.t; bd.el.setAttribute('transform', `translate(${(x - bd.bx).toFixed(2)} ${(y - bd.by).toFixed(2)})`); }
 };
