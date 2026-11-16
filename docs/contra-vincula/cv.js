@@ -121,7 +121,7 @@ if (wind && !reduce) {
 
 // 7일: 고른 날까지 사슬이 차오르고 남은 날을 알려 줍니다
 (() => {
-  const btns = [...document.querySelectorAll('[data-day]')], fill = document.querySelector('[data-day-fill]'), cap = document.querySelector('[data-day-cap]');
+  const btns = [...document.querySelectorAll('[data-day]')], fill = document.querySelector('[data-tl-fill]'), cap = document.querySelector('[data-day-cap]');
   if (!btns.length) return;
   const TXT = { ko: (n) => `<b>DIES ${['I','II','III','IV','V','VI','VII'][n - 1]}</b> · 안개가 걷히기까지 ${7 - n}일`, en: (n) => `<b>DIES ${['I','II','III','IV','V','VI','VII'][n - 1]}</b> · ${7 - n} day${7 - n === 1 ? '' : 's'} until the mist lifts`, ja: (n) => `<b>DIES ${['I','II','III','IV','V','VI','VII'][n - 1]}</b> · 霧が晴れるまで${7 - n}日` };
   let cur = 1;
@@ -138,7 +138,7 @@ if (wind && !reduce) {
     if (Math.abs(targetK - shownK) < .0005) shownK = targetK;
     const v = shownK * 7;
     btns.forEach((b, i) => b.style.setProperty('--p', Math.max(0, Math.min(1, v - i)).toFixed(3)));
-    if (fill) fill.style.transform = `scaleX(${shownK})`;
+    if (fill) fill.style.strokeDashoffset = String(1 - Math.max(0, Math.min(1, (shownK * 7 - 1) / 6)));
     const n = Math.max(1, Math.min(7, Math.ceil(v || 1)));
     if (!hovering && n !== cur) set(n);
     raf = Math.abs(targetK - shownK) > .0005 ? requestAnimationFrame(paint) : 0;
@@ -166,4 +166,27 @@ if (wind && !reduce) {
     if (bgm && !bgm.paused) { const v0 = bgm.volume; const t0 = performance.now(); const f = (t) => { const k = Math.min((t - t0) / 600, 1); bgm.volume = v0 * (1 - k); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
     setTimeout(() => { location.href = a.href; }, 700);
   }));
+})();
+
+// 목차: 지금 보고 있는 장을 밑줄이 미끄러지며 따라갑니다
+(() => {
+  const toc = document.querySelector('.toc'); if (!toc) return;
+  const links = [...toc.querySelectorAll('a')], bar = document.createElement('span'); bar.className = 'toc-bar'; toc.append(bar);
+  const secs = links.map((a) => document.querySelector(a.getAttribute('href')));
+  let cur = -1;
+  const move = (i) => { if (i === cur) return; cur = i; links.forEach((a, j) => a.classList.toggle('is-on', j === i));
+    if (i < 0) { bar.style.opacity = '0'; return; } const a = links[i], r = a.getBoundingClientRect(), t = toc.getBoundingClientRect();
+    bar.style.opacity = '1'; bar.style.transform = `translateX(${r.left - t.left + toc.scrollLeft}px)`; bar.style.width = `${r.width}px`; };
+  const sync = () => { let i = -1; secs.forEach((s, j) => { if (s && s.getBoundingClientRect().top < innerHeight * .4) i = j; }); move(i); };
+  addEventListener('scroll', sync, { passive: true }); addEventListener('resize', () => { cur = -2; sync(); }); sync();
+})();
+
+// 본문 안의 요소들이 차례로 떠오르고, 기록화는 스크롤에 따라 천천히 확대됩니다
+(() => {
+  if (reduce) return;
+  document.querySelectorAll('main section').forEach((sec) => [...sec.querySelectorAll('.lead, .facts > div, .cast article, .gp-step, .gp-box, .quote, .timeline')].forEach((el, i) => { el.classList.add('rise'); el.style.transitionDelay = `${Math.min(i, 8) * 70}ms`; }));
+  const io2 = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-up'); io2.unobserve(e.target); } }), { threshold: .2 });
+  document.querySelectorAll('.rise').forEach((el) => io2.observe(el));
+  const art = document.querySelector('.keyart img');
+  if (art) addEventListener('scroll', () => { const r = art.parentElement.getBoundingClientRect(); const k = Math.max(-1, Math.min(1, (r.top + r.height / 2 - innerHeight / 2) / innerHeight)); art.style.transform = `scale(${1.08 - Math.abs(k) * .05}) translateY(${k * 24}px)`; }, { passive: true });
 })();

@@ -28,8 +28,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="./cv.css?v=16">
-<script src="./cv.js?v=13" defer></script>
+<link rel="stylesheet" href="./cv.css?v=19">
+<script src="./cv.js?v=15" defer></script>
 <script src="./i18n.js?v=3" defer></script>
 <!--
   Credits
@@ -109,10 +109,15 @@
     <h2>허락된 시간은, 단 이레</h2>
     <p class="lead">질서를 거역한 대가로 천계에서 내던져진 릴리트. 그녀가 닿은 파우스트교는 안식처가 아니라, 구원이라는 이름으로 또 한 번 무릎을 꿇리는 곳이었습니다. 지키려던 이를 대신해 갇힌 그녀에게서, 교단은 목소리마저 거두어 갑니다.</p>
     <p class="lead">뜻밖의 손길이 감옥 문을 연 날, 티페레트를 제외한 모든 신도의 기억이 안개처럼 흐려집니다. 그 안개가 걷히기까지 남은 시간은 이레. 그 안에 티페레트에게 맞설 <b>일곱 개의 진실</b>을 손에 넣어야 합니다.</p>
-    <div class="days" role="group" aria-label="7일">
-      <button type="button" data-day="1">1</button><button type="button" data-day="2">2</button><button type="button" data-day="3">3</button><button type="button" data-day="4">4</button><button type="button" data-day="5">5</button><button type="button" data-day="6">6</button><button type="button" data-day="7">7</button>
+    <div class="timeline" data-timeline>
+      <svg class="tl-svg" viewBox="0 0 700 80" preserveAspectRatio="none" aria-hidden="true">
+        <line class="tl-base" x1="50" y1="40" x2="650" y2="40"/>
+        <line class="tl-fill" data-tl-fill x1="50" y1="40" x2="650" y2="40" pathLength="1"/>
+      </svg>
+      <div class="tl-nodes" role="group" aria-label="7일">
+        <button type="button" data-day="1"><i></i><span>I</span></button><button type="button" data-day="2"><i></i><span>II</span></button><button type="button" data-day="3"><i></i><span>III</span></button><button type="button" data-day="4"><i></i><span>IV</span></button><button type="button" data-day="5"><i></i><span>V</span></button><button type="button" data-day="6"><i></i><span>VI</span></button><button type="button" data-day="7"><i></i><span>VII</span></button>
+      </div>
     </div>
-    <div class="day-track" aria-hidden="true"><i data-day-fill></i></div>
     <p class="day-cap" data-day-cap aria-live="polite"></p>
     <p class="quote">그녀가 바라는 것은 복수가 아닙니다. 누구의 명령에도 묶이지 않고, 자신의 삶을 스스로 결정할 자유입니다.</p>
   </section>
