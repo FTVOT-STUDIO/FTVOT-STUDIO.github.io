@@ -648,3 +648,9 @@ html.is-returning #intro { display: none; }
 .q-tree { opacity: 0; transform: translateY(40px) scale(.94); filter: blur(8px); transform-origin: 50% 30%; transition: opacity 1.2s ease .15s, transform 1.6s cubic-bezier(.16, 1, .3, 1) .15s, filter 1.2s ease .15s; }
 .qliphoth.is-awake .q-tree { opacity: 1; transform: none; filter: none; }
 @media (prefers-reduced-motion: reduce) { .q-latin, .q-title, .q-tree { opacity: 1; transform: none; filter: none; transition: none; } }
+/* 모바일 첫 화면: 나무가 제목·힌트·소리 버튼과 겹치지 않도록 화면 높이에 맞춰 줄입니다 */
+@media (max-width: 700px) {
+.hero-tree .ht-tree { height: min(560px, calc(100svh - 340px)); min-height: 330px; }
+.tree-hint { bottom: max(14px, env(safe-area-inset-bottom)); white-space: nowrap; }
+html.in-hero .audio-controls { translate: 0 calc(100% + 24px); opacity: 0; pointer-events: none; }
+}

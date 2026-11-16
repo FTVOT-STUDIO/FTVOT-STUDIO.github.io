@@ -323,7 +323,8 @@ const holdFor = (ms) => { window.__scrollHold.until = Math.max(window.__scrollHo
 const holding = () => performance.now() < window.__scrollHold.until;
 const blockScroll = (event) => { if (event.cancelable) event.preventDefault(); };
 const blockKeys = (event) => { if (LOCK_KEYS.has(event.key)) event.preventDefault(); };
-window.addEventListener('wheel', (e) => { if (holding() && e.cancelable) e.preventDefault(); }, { passive: false, capture: true });
+/* 관성 흡수: 잠금이 풀린 직후 트랙패드·휠 관성이 계속 들어오면, 관성이 멎을 때까지(마지막 입력 후 0.2초, 최대 1.6초) 대기를 늘려 연출 직후 화면이 휙 날아가지 않게 */
+window.addEventListener('wheel', (e) => { if (holding() && e.cancelable) { e.preventDefault(); const cap = window.__holdCap || 0; window.__scrollHold.until = Math.min(Math.max(window.__scrollHold.until, performance.now() + 200), cap || performance.now() + 200); } }, { passive: false, capture: true });
 window.addEventListener('touchmove', (e) => { if (holding() && e.cancelable) e.preventDefault(); }, { passive: false, capture: true });
 function setScrollLock(on) {
 scrollLocked = on;
@@ -544,7 +545,7 @@ if (!inHero && target === 1) anim = 1; // 링크로 멀리 점프한 경우: 잠
 if (window.__navGliding && target === 1) anim = 1; /* 바로가기 이동 중에는 나무 잠금·글라이드가 끼어들지 않고 즉시 완료 */
 const shouldLock = inHero && anim !== target && !reduceMotion.matches && !window.__navGliding;
 if (shouldLock && (!scrollLocked || lockDir !== target)) { glideFrom = scrollY; glideAnim = anim; lockDir = target; if (target === 1 && anim < .05) { setTimeout(() => playLayer('tree-on'), 500); /* 0.5초 뒤 재생 */ prepareSfx('node-lit'); } }
-if (shouldLock !== scrollLocked) { if (!shouldLock) holdFor(500); setScrollLock(shouldLock); }
+if (shouldLock !== scrollLocked) { if (!shouldLock) { holdFor(500); window.__holdCap = performance.now() + 1600; } setScrollLock(shouldLock); }
 if (scrollLocked) {
 const to = target ? heroTop + pin : heroTop;
 const span = Math.abs(target - glideAnim) || 1, k = Math.min(1, Math.abs(anim - glideAnim) / span);
@@ -641,6 +642,11 @@ const pull = () => { if (!snapping) snapToKether(); };
 // 가로 나무 구간에서 위로 스크롤하면 바로 세로로 돌아가는 연출을 시작합니다 (네이티브 스크롤과 섞이며 떨리는 것 방지)
 const upIntent = (event) => { if (!laid || scrollLocked || holding() || reduceMotion.matches) return; if (scrollY - heroTop > heroHeight * PIN_RATIO + 2) return; if (event.cancelable) event.preventDefault(); wantUp = true; schedule(); };
 window.addEventListener('wheel', (event) => { if (event.deltaY < 0) upIntent(event); }, { passive: false });
+/* 세게 스크롤해도 연출이 씹히지 않게: 전환 직후 대기(0.5초) 동안 나무 구간에서는 관성 스크롤을 흘려보내지 않습니다.
+   (예전엔 이 틈에 관성이 나무 구간을 통째로 지나가 활성/비활성 연출이 건너뛰어졌음) */
+const holdBlock = (event) => { if (!event.cancelable || reduceMotion.matches) return; if ((holding() || scrollLocked) && scrollY - heroTop <= heroHeight * PIN_RATIO + 2) event.preventDefault(); };
+window.addEventListener('wheel', holdBlock, { passive: false });
+window.addEventListener('touchmove', holdBlock, { passive: false });
 // 맨 위 세로 나무에서 첫 아래 스크롤은 네이티브로 흘려보내지 않고 바로 연출로 넘깁니다 (첫 프레임 튐 방지)
 const downIntent = (event) => { if (laid || anim > 0 || scrollLocked || holding() || reduceMotion.matches) return; if (scrollY - heroTop > 8) return; if (event.cancelable) event.preventDefault(); wantDown = true; schedule(); };
 window.addEventListener('wheel', (event) => { if (event.deltaY > 0) downIntent(event); }, { passive: false });

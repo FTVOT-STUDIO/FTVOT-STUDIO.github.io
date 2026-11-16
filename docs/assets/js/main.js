@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261120a';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261120b';
+import { initSephirot } from './sephirot.js?v=20261120d';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261119d';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
@@ -891,7 +891,7 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, DUR = 150
 const nodes = [...sec.querySelectorAll('.q-node')];
 const easeOut = (t) => 1 - Math.pow(1 - t, 3); /* 출발 속도가 가장 빠르고 끝에서 부드럽게 멈춤 = 손의 스크롤을 이어받는 느낌 */
 let busy = false, timers = [], animDone = false, glided = false, touchY = null;
-const release = () => { if (busy && animDone && glided) setTimeout(() => { busy = false; }, 500); };
+const release = () => { if (busy && animDone && glided) setTimeout(() => { busy = false; /* 풀린 뒤에도 관성이 남아 있으면 멎을 때까지 흡수 */ if (window.__scrollHold) { window.__scrollHold.until = performance.now() + 300; window.__holdCap = performance.now() + 1600; } }, 500); };
 const sfx = (id) => { if (!window.__qQuiet) window.__sfx?.(id); }; /* 게임에서 돌아오는 중에는 클리포트 소리를 내지 않음 */
 const clear = () => { timers.forEach(clearTimeout); timers = []; };
 const light = () => { clear(); sec.classList.add('is-awake');
@@ -916,14 +916,14 @@ glide(top(), (k) => { document.documentElement.style.setProperty('--qd', easeOut
 const ascend = () => { if (busy) return; busy = true; animDone = false; dim(true);
 glide(Math.max(0, top() - innerHeight), (k) => document.documentElement.style.setProperty('--qd', (1 - easeOut(k)).toFixed(3))); };
 /* 의도 판단: 클리포트가 화면 아래쪽에 보이기 시작했는데 내려가려 하면 하강, 클리포트 맨 위에서 올라가려 하면 상승 */
-const intent = (dir) => { if (window.__navGliding) return false; const r = sec.getBoundingClientRect();
-if (dir > 0 && !isDown() && r.top < innerHeight && r.top > 0) { descend(); return true; }
+const intent = (dir, mag = 0) => { if (window.__navGliding) return false; const r = sec.getBoundingClientRect();
+if (dir > 0 && !isDown() && r.top > 0 && r.top - Math.abs(mag) < innerHeight) { descend(); return true; } /* 한 번에 크게 굴려 클리포트를 건너뛰려 해도 미리 잡아 하강 연출로 */
 if (dir < 0 && isDown() && r.top > -60 && r.top < innerHeight * .5) { ascend(); return true; }
 return false; };
-addEventListener('wheel', (e) => { if (busy) { e.preventDefault(); return; } if (Math.abs(e.deltaY) > 2 && intent(Math.sign(e.deltaY))) e.preventDefault(); }, { passive: false });
+addEventListener('wheel', (e) => { if (busy) { e.preventDefault(); return; } if (Math.abs(e.deltaY) > 2 && intent(Math.sign(e.deltaY), e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY)) e.preventDefault(); }, { passive: false });
 addEventListener('touchstart', (e) => { touchY = e.touches[0]?.clientY ?? null; }, { passive: true });
 addEventListener('touchmove', (e) => { if (busy) { e.preventDefault(); return; } if (touchY == null) return; const dy = touchY - (e.touches[0]?.clientY ?? touchY);
-if (Math.abs(dy) > 12 && intent(Math.sign(dy))) { e.preventDefault(); touchY = null; } }, { passive: false });
+if (Math.abs(dy) > 12 && intent(Math.sign(dy), dy * 3)) { e.preventDefault(); touchY = null; } }, { passive: false });
 addEventListener('keydown', (e) => { const keys = { ArrowDown: 1, PageDown: 1, Space: 1, ArrowUp: -1, PageUp: -1 };
 if (!(e.code in keys)) return; if (busy) { e.preventDefault(); return; } if (e.target instanceof HTMLElement && e.target.closest('input, textarea, select, [contenteditable]')) return;
 if (intent(e.shiftKey && e.code === 'Space' ? -1 : keys[e.code])) e.preventDefault(); });
@@ -1033,3 +1033,10 @@ const a = e.target instanceof Element ? e.target.closest('a.game-card') : null;
 if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || !window.__portalGo) return;
 e.preventDefault(); window.__portalGo(a.href, e.clientX, e.clientY);
 });
+
+/* 모바일: 첫 화면(나무 구간)에서는 소리 버튼을 숨겨 나무·힌트와 겹치지 않게 합니다 */
+(() => {
+const hero = document.getElementById('tree'); if (!hero) return;
+const sync = () => document.documentElement.classList.toggle('in-hero', hero.getBoundingClientRect().bottom > innerHeight * .2);
+addEventListener('scroll', sync, { passive: true }); addEventListener('resize', sync); sync();
+})();
