@@ -643,7 +643,7 @@ requestAnimationFrame(step);
 // 활성 상태에서 아래로 스크롤하면 당김 없이 바로 자동 스크롤을 시작합니다 (입력 크기와 무관)
 const pull = () => { if (!snapping) snapToKether(); };
 // 가로 나무 구간에서 위로 스크롤하면 바로 세로로 돌아가는 연출을 시작합니다 (네이티브 스크롤과 섞이며 떨리는 것 방지)
-const upIntent = (event) => { if (!laid || scrollLocked || holding() || reduceMotion.matches) return; if (scrollY - heroTop > heroHeight * PIN_RATIO + 2) return; if (event.cancelable) event.preventDefault(); wantUp = true; schedule(); };
+const upIntent = (event) => { if (!laid || scrollLocked || holding() || reduceMotion.matches) return; if (scrollY - heroTop > heroHeight * PIN_RATIO + 2) return; if (event.cancelable) event.preventDefault(); wantUp = true; setScrollLock(true); /* 같은 프레임에 이어 들어오는 센 휠도 즉시 막음 */ schedule(); };
 window.addEventListener('wheel', (event) => { if (event.deltaY < 0) upIntent(event); }, { passive: false });
 /* 세게 스크롤해도 연출이 씹히지 않게: 전환 직후 대기(0.5초) 동안 나무 구간에서는 관성 스크롤을 흘려보내지 않습니다.
    (예전엔 이 틈에 관성이 나무 구간을 통째로 지나가 활성/비활성 연출이 건너뛰어졌음) */
@@ -651,7 +651,7 @@ const holdBlock = (event) => { if (!event.cancelable || reduceMotion.matches) re
 window.addEventListener('wheel', holdBlock, { passive: false });
 window.addEventListener('touchmove', holdBlock, { passive: false });
 // 맨 위 세로 나무에서 첫 아래 스크롤은 네이티브로 흘려보내지 않고 바로 연출로 넘깁니다 (첫 프레임 튐 방지)
-const downIntent = (event) => { if (laid || anim > 0 || scrollLocked || holding() || reduceMotion.matches) return; if (scrollY - heroTop > 8) return; if (event.cancelable) event.preventDefault(); wantDown = true; schedule(); };
+const downIntent = (event) => { if (laid || anim > 0 || scrollLocked || holding() || reduceMotion.matches) return; if (scrollY - heroTop > 8) return; if (event.cancelable) event.preventDefault(); wantDown = true; setScrollLock(true); /* 연출 시작 전 프레임에 들어오는 관성까지 막음 */ schedule(); };
 window.addEventListener('wheel', (event) => { if (event.deltaY > 0) downIntent(event); }, { passive: false });
 window.addEventListener('keydown', (event) => { if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(event.key)) downIntent(event); });
 let upTouchY = 0;

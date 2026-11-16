@@ -385,3 +385,16 @@ html:lang(ko) .acta-facts dt, html:lang(ja) .acta-facts dt { letter-spacing: .1e
 @media (max-width: 800px) { .acta-grid { grid-template-columns: 1fr; gap: 32px; } .acta-seal { width: min(260px, 70vw); justify-self: center; } }
 @media (prefers-reduced-motion: reduce) { .seal-ring, .seal-core { animation: none; } }
 @media (max-width: 800px) { .acta-facts > div { grid-template-columns: 76px 1fr; } }
+/* 숨쉬기: 몸·얼굴·눈을 한 묶음으로 같이 움직여 눈동자가 따로 떨리지 않게 */
+.ly.body { overflow: visible; }
+.ly.body .bl { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 38% 50%; }
+@media (max-width: 700px) { .ly.body .bl { object-position: 30% 50%; } }
+.ly.body .eyes .pupil { will-change: auto; }
+@media (max-width: 700px) {
+  .cast article { grid-template-columns: 84px 1fr; padding: 24px 20px; }
+  .cast article > .portrait { grid-row: 1 / 3; width: 84px; height: 120px; }
+  .cast article > p:not(.role) { grid-column: 1 / -1; margin-top: 14px; }
+  .cast .role { margin-top: 18px; }
+  section.block { padding: 64px 0; }
+  .main-tag { font-size: 26px; }
+}

@@ -8,7 +8,7 @@ const layers = [...document.querySelectorAll('[data-stage] .ly')];
 
 // 초기 로딩: 첫 화면 레이어·파편·로고·인물 그림을 미리 받으며 진행률을 보여 주고, 다 받으면 사슬이 끊기듯 화면이 갈라지며 열립니다
 const loader = document.querySelector('[data-loader]'), ldFill = document.querySelector('[data-ld-fill]'), ldPct = document.querySelector('[data-ld-pct]');
-const imgs = layers.map((l) => (l.tagName === 'IMG' ? l : l.querySelector('img')));
+const imgs = [...document.querySelectorAll('[data-stage] img')]; // 몸 묶음 안의 그림까지 모두
 const extra = ['./assets/shard.png', document.querySelector('.logo')?.src, ...[...document.querySelectorAll('.portrait')].map((i) => i.src)].filter(Boolean);
 const total = imgs.length + extra.length; let loaded = 0, shown = 0, opened = false;
 const reveal = () => { layers.forEach((l) => l.classList.add('is-in')); document.body.classList.add('is-ready'); };
