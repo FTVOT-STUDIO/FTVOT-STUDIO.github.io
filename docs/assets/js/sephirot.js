@@ -328,6 +328,7 @@ window.addEventListener('wheel', (e) => { if (holding() && e.cancelable) { e.pre
 window.addEventListener('touchmove', (e) => { if (holding() && e.cancelable) e.preventDefault(); }, { passive: false, capture: true });
 function setScrollLock(on) {
 scrollLocked = on;
+window.__freeze?.('tree', on); /* 터치 기기: 관성 스크롤을 즉시 끊어 연출 도중 화면이 날아가지 않게 */
 const method = on ? 'addEventListener' : 'removeEventListener';
 window[method]('wheel', blockScroll, { passive: false });
 window[method]('touchmove', blockScroll, { passive: false });
