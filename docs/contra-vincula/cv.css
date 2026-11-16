@@ -272,3 +272,59 @@ section.block:last-of-type::before, section.block:last-of-type::after { display:
 .cast article:hover::after { height: 100%; }
 @media (max-width: 700px) { .tl-nodes span { font-size: 11px; } .tl-nodes i { width: 18px; height: 18px; } .sub-tag::before, .sub-tag::after { width: 20px; } }
 @media (prefers-reduced-motion: reduce) { .rise { opacity: 1; transform: none; } .tl-nodes button.is-now i { animation: none; } }
+.gate-sigil { aspect-ratio: 1; filter: drop-shadow(0 0 6px rgb(255 40 60 / .45)); }
+.gate-sigil img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.gate-sigil .ps-o { animation: psSpin 26s linear infinite; }
+.gate-sigil .ps-m { animation: psSpin 17s linear infinite reverse; }
+.gate-sigil .ps-c { animation: psSpin 9s linear infinite; }
+.gate-sigil .ps-echo { inset: -40%; width: 180%; height: 180%; max-width: none; opacity: .16; animation: psSpin 60s linear infinite reverse; }
+@keyframes psSpin { to { rotate: 360deg; } }
+
+/* ── Ludus: 카드 대신 순환 도식 + 선으로 나눈 목록 ── */
+.gp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+.gp-step, .gp-box, .gp-loop, .gp-row { all: unset; }
+.gp-cycle { position: relative; aspect-ratio: 1; max-width: 440px; width: 100%; justify-self: center; }
+.gp-ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.gp-orbit { fill: none; stroke: rgb(255 120 180 / .12); stroke-width: 1; stroke-dasharray: 2 6; }
+.gp-arc { fill: none; stroke: rgb(255 79 139 / .55); stroke-width: 1.5; }
+#gpArrow path { fill: #ff4f8b; }
+.gp-dot { fill: #0d0512; stroke: #ff4f8b; stroke-width: 2; }
+.gp-runner { fill: #ffd3e4; }
+.gp-core { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 6px; pointer-events: none; }
+.gp-core b { font: 500 38px var(--serif); color: #ffd3e4; letter-spacing: .06em; }
+.gp-core span { font-size: 13px; color: var(--ink-2); }
+.gp-node { position: absolute; width: 46%; text-align: center; }
+.gp-node h3 { font-size: 16px; margin: 0 0 4px; }
+.gp-node p { font-size: 12.5px; line-height: 1.5; color: var(--ink-2); margin: 0; }
+.gp-node.n1 { left: 50%; top: 17%; transform: translate(-50%, -100%); }
+.gp-node.n2 { left: 76%; top: 84%; transform: translateX(-50%); }
+.gp-node.n3 { left: 24%; top: 84%; transform: translateX(-50%); }
+.gp-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+.gp-list > li { display: grid; grid-template-columns: 1fr 150px; gap: 20px; align-items: center; padding: 22px 0; border-bottom: 1px solid var(--line); transition: background .3s; }
+.gp-list > li:hover { background: linear-gradient(90deg, transparent, rgb(255 79 139 / .05), transparent); }
+.gp-list h3 { font-size: 16px; margin: 0 0 4px; }
+.gp-list p { font-size: 13.5px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+.gp-viz { width: 150px; }
+.gp-pips { margin: 0; }
+.gp-meters { margin: 0; gap: 6px; }
+.gp-meters li { grid-template-columns: 42px 1fr; font-size: 11px; }
+.gp-web path { stroke: rgb(255 120 180 / .35); stroke-width: 1; fill: none; stroke-dasharray: 3 3; animation: webFlow 3s linear infinite; }
+.gp-web circle { fill: #0d0512; stroke: #c78bff; stroke-width: 1.5; }
+.gp-web circle.me { stroke: #ff4f8b; fill: #ff4f8b; }
+@keyframes webFlow { to { stroke-dashoffset: -12; } }
+.gp-tree { overflow: visible; }
+.gp-tree .t-all path { fill: none; stroke: rgb(255 120 180 / .22); stroke-width: 1.2; }
+.gp-tree .t-hot { fill: none; stroke: #ff4f8b; stroke-width: 1.8; stroke-dasharray: 1; stroke-dashoffset: 1; animation: treeRun 7.5s ease-in-out infinite; }
+.gp-tree .h2 { animation-delay: 2.5s; } .gp-tree .h3 { animation-delay: 5s; }
+.gp-tree circle { fill: #ff4f8b; }
+@keyframes treeRun { 0% { stroke-dashoffset: 1; opacity: 1; } 22% { stroke-dashoffset: 0; opacity: 1; } 30% { opacity: 0; stroke-dashoffset: 0; } 100% { opacity: 0; stroke-dashoffset: 0; } }
+@media (max-width: 900px) {
+  .gp { grid-template-columns: 1fr; gap: 72px; }
+  .gp-cycle { max-width: 340px; }
+  .gp-node { width: 50%; }
+  .gp-node p { display: none; }
+  .gp-list > li { grid-template-columns: 1fr 120px; } .gp-viz { width: 120px; }
+}
+@media (prefers-reduced-motion: reduce) { .gp-web path, .gp-tree .t-hot { animation: none; } .gp-tree .h1 { stroke-dashoffset: 0; } }
+.gp-cycle { margin-bottom: 40px; }
+@media (max-width: 700px) { .toc { display: none; } }

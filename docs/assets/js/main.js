@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261120a';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261120d';
+import { initSephirot } from './sephirot.js?v=20261120f';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261119d';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
@@ -932,7 +932,10 @@ if (intent(e.shiftKey && e.code === 'Space' ? -1 : keys[e.code])) e.preventDefau
 /* 스크롤바·앵커 이동처럼 의도 신호 없이 넘어온 경우: 상태만 맞춰 둡니다 */
 addEventListener('scroll', () => { if (busy) return; const r = sec.getBoundingClientRect();
 if (r.top > innerHeight && isDown()) { dim(false); document.documentElement.style.setProperty('--qd', '0'); }
-else if (r.top <= innerHeight * .2 && !isDown()) { if (window.__navGliding) { light(); animDone = true; } else { busy = true; animDone = false; glided = true; light(); } } }, { passive: true });
+else if (r.top < innerHeight * .92 && !isDown()) {
+/* 휠·터치 신호 없이 관성만으로 클리포트에 들어온 경우(모바일 플링, 아주 센 트랙패드)에도 하강 연출을 거치게 합니다. 바로가기·깊은 점프만 즉시 점등 */
+if (window.__navGliding || r.top < -innerHeight * .5) { light(); animDone = true; } else descend(); }
+else if (isDown() && r.top > innerHeight * .5 && r.top < innerHeight && !window.__navGliding) ascend(); /* 관성으로 위로 빠져나가는 경우도 상승 연출로 */ }, { passive: true });
 })();
 
 /* 클리포트 미니맵: 클리포트가 깨어나면 오른쪽 세피로트 미니맵이 물러나고, 같은 모양의 핏빛 클리포트 미니맵이 그 자리에 들어옵니다.

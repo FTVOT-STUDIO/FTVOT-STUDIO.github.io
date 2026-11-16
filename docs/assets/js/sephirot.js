@@ -339,7 +339,7 @@ const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) 
 
 function initTreeScroll(hero, tree) {
 if (!hero || !tree) return;
-let pending = 0, previous = 0, traceTimer = 0, laid = false;
+let pending = 0, previous = 0, traceTimer = 0, laid = false, prevRaw = null;
 let heroTop = 0, heroHeight = 1, treeW = 1, treeH = 1;
 const copy = hero.querySelector('.ht-copy, .hero-copy');
 // 반대 회전 대상: 각 세피라의 문양·이름·번호, 경로 배지의 히브리 글자, 장막 글자. 기준점은 자기 원의 중심입니다
@@ -526,7 +526,10 @@ traceTimer = setTimeout(() => hero.classList.remove('is-tracing'), 2400);
 const update = () => {
 pending = 0;
 const pin = heroHeight * PIN_RATIO;
-const raw0 = Math.max(0, scrollY - heroTop);
+let raw0 = Math.max(0, scrollY - heroTop);
+/* 관성만으로 나무 구간을 한 번에 지나쳐 버린 경우(모바일 플링·센 트랙패드): 구간 안으로 되돌려 깨어나는 연출을 거치게 합니다. 바로가기·첫 로드 점프는 제외 */
+if (prevRaw !== null && prevRaw <= pin + 2 && raw0 > pin + 2 && raw0 < pin + innerHeight && anim < 1 && !wantUp && !window.__navGliding && !reduceMotion.matches) { scrollTo(0, heroTop + 9); raw0 = 9; wantDown = true; }
+prevRaw = raw0;
 treeAudible = raw0 <= pin + 2; // 나무 구간 안에서만 점등·경로 소리를 냅니다
 // 방향 결정: 위로 스크롤 의사(wantUp)가 있으면 세로로, 조금이라도 내려와 있으면 가로로
 const target = wantUp ? 0 : (wantDown || raw0 > 8) ? 1 : 0;

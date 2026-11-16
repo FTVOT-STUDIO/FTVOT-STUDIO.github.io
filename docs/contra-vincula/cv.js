@@ -150,7 +150,7 @@ if (wind && !reduce) {
 
 // 사이트 간 균열 전환: 메인 사이트에서 들어올 때는 마법진이 오므라들며 로딩 화면으로 이어지고, 돌아갈 때는 누른 자리에서 균열이 열립니다
 (() => {
-  const build = () => { const el = document.createElement('div'); el.className = 'gate'; el.setAttribute('aria-hidden', 'true'); el.innerHTML = '<div class="gate-bg"></div><img class="gate-sigil" src="./assets/portal-sigil.svg" alt="" decoding="sync">'; document.body.append(el); return el; };
+  const build = () => { const el = document.createElement('div'); el.className = 'gate'; el.setAttribute('aria-hidden', 'true'); el.innerHTML = '<div class="gate-bg"></div><div class="gate-sigil"><img class="ps-echo" src="./assets/sigil-outer.svg" alt=""><img class="ps-o" src="./assets/sigil-outer.svg" alt=""><img class="ps-m" src="./assets/sigil-mid.svg" alt=""><img class="ps-c" src="./assets/sigil-core.svg" alt=""></div>'; document.body.append(el); return el; };
   const q = new URLSearchParams(location.search);
   if (q.get('portal') === '1') {
     history.replaceState(null, '', location.pathname);
@@ -184,7 +184,7 @@ if (wind && !reduce) {
 // 본문 안의 요소들이 차례로 떠오르고, 기록화는 스크롤에 따라 천천히 확대됩니다
 (() => {
   if (reduce) return;
-  document.querySelectorAll('main section').forEach((sec) => [...sec.querySelectorAll('.lead, .facts > div, .cast article, .gp-step, .gp-box, .quote, .timeline')].forEach((el, i) => { el.classList.add('rise'); el.style.transitionDelay = `${Math.min(i, 8) * 70}ms`; }));
+  document.querySelectorAll('main section').forEach((sec) => [...sec.querySelectorAll('.lead, .facts > div, .cast article, .gp-cycle, .gp-list > li, .quote, .timeline')].forEach((el, i) => { el.classList.add('rise'); el.style.transitionDelay = `${Math.min(i, 8) * 70}ms`; }));
   const io2 = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-up'); io2.unobserve(e.target); } }), { threshold: .2 });
   document.querySelectorAll('.rise').forEach((el) => io2.observe(el));
   const art = document.querySelector('.keyart img');

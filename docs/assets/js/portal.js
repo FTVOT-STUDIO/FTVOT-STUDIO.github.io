@@ -5,7 +5,7 @@ const KEY = 'ftvot-portal';
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const build = () => {
 const el = document.createElement('div'); el.className = 'portal'; el.setAttribute('aria-hidden', 'true');
-el.innerHTML = '<div class="portal-bg"></div><img class="portal-sigil" src="./assets/portal-sigil.svg" alt="" decoding="sync">'; /* 첫 프레임 덮개와 같은 그림이라 페이지가 바뀌어도 이어 보입니다 */
+el.innerHTML = '<div class="portal-bg"></div><div class="portal-sigil"><img class="ps-echo" src="./assets/sigil-outer.svg" alt="" decoding="sync"><img class="ps-o" src="./assets/sigil-outer.svg" alt="" decoding="sync"><img class="ps-m" src="./assets/sigil-mid.svg" alt="" decoding="sync"><img class="ps-c" src="./assets/sigil-core.svg" alt="" decoding="sync"></div>'; /* 고리 세 겹이 서로 다른 방향·속도로 돌고, 뒤에서 큰 고대 문자 고리가 천천히 돕니다 */ /* 첫 프레임 덮개와 같은 그림이라 페이지가 바뀌어도 이어 보입니다 */
 document.body.append(el); return el;
 };
 /* 나가기: (x, y)에서 균열이 열려 화면을 덮은 뒤 이동 */

@@ -28,9 +28,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="./cv.css?v=19">
-<script src="./cv.js?v=15" defer></script>
-<script src="./i18n.js?v=3" defer></script>
+<link rel="stylesheet" href="./cv.css?v=21">
+<script src="./cv.js?v=16" defer></script>
+<script src="./i18n.js?v=4" defer></script>
 <!--
   Credits
   - 일러스트·로고: © 세구 스튜디오 (FTVOT STUDIO)
@@ -135,23 +135,37 @@
   <section class="block" id="gameplay">
     <p class="latin"><span>V</span>Ludus — 체계</p>
     <div class="gp">
-      <div class="gp-loop" aria-label="핵심 순환">
-        <div class="gp-step"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><h3>조사 및 탐색</h3><p>장소와 인물에서 단서·기록·증거 수집</p></div>
-        <span class="gp-arrow" aria-hidden="true"></span>
-        <div class="gp-step"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg><h3>대화 및 선택지</h3><p>발언과 행동을 읽고 흐름을 바꾸는 선택</p></div>
-        <span class="gp-arrow" aria-hidden="true"></span>
-        <div class="gp-step"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M7 7l-3 7a3 3 0 0 0 6 0zM17 7l-3 7a3 3 0 0 0 6 0z"/></svg><h3>추리 및 심리전</h3><p>진술의 모순을 증거로 꿰뚫기</p></div>
+      <div class="gp-cycle" aria-label="핵심 순환">
+        <svg class="gp-ring" viewBox="0 0 400 400" aria-hidden="true">
+          <defs><marker id="gpArrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>
+          <circle class="gp-orbit" cx="200" cy="200" r="120"/>
+          <path class="gp-arc" d="M227.0 83.1 A120 120 0 0 1 314.8 235.1" marker-end="url(#gpArrow)"/>
+          <path class="gp-arc" d="M287.8 281.8 A120 120 0 0 1 112.2 281.8" marker-end="url(#gpArrow)"/>
+          <path class="gp-arc" d="M85.2 235.1 A120 120 0 0 1 173.0 83.1" marker-end="url(#gpArrow)"/>
+          <circle class="gp-runner" r="4.5"><animateMotion dur="9s" repeatCount="indefinite" path="M200 80 A120 120 0 1 1 199.9 80"/></circle>
+          <circle class="gp-dot" cx="200.0" cy="80.0" r="8"/><circle class="gp-dot" cx="303.9" cy="260.0" r="8"/><circle class="gp-dot" cx="96.1" cy="260.0" r="8"/>
+        </svg>
+        <div class="gp-core"><b>VII</b><span class="gp-center">이레 안에 일곱 개의 진실</span></div>
+        <div class="gp-node n1"><h3>조사 및 탐색</h3><p>장소와 인물에서 단서·기록·증거 수집</p></div>
+        <div class="gp-node n2"><h3>대화 및 선택지</h3><p>발언과 행동을 읽고 흐름을 바꾸는 선택</p></div>
+        <div class="gp-node n3"><h3>추리 및 심리전</h3><p>진술의 모순을 증거로 꿰뚫기</p></div>
       </div>
-      <div class="gp-row">
-        <div class="gp-box"><h3>시간 관리</h3><p>7일 안에 어디를 조사하고 누구를 만날지</p><div class="gp-pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-        <div class="gp-box"><h3>RPG 요소</h3><p>매 행동마다 상태를 저울질</p>
-          <ul class="gp-meters"><li><span>체력</span><b class="m1"></b></li><li><span>행동력</span><b class="m2"></b></li><li><span>의심도</span><b class="m3"></b></li></ul></div>
-      </div>
-      <div class="gp-row">
-        <div class="gp-box"><h3>인물 관계</h3><p>호감도와 감정, 이전 행동이 반응과 정보를 바꿈</p></div>
-        <div class="gp-box gp-branch"><h3>분기형 스토리</h3><p>선택과 조사 결과가 전개를 바꿈</p>
-          <svg viewBox="0 0 120 40" aria-hidden="true"><path d="M4 20h36M40 20c14 0 18-14 34-14h42M40 20h76M40 20c14 0 18 14 34 14h42"/><circle cx="40" cy="20" r="3"/></svg></div>
-      </div>
+      <ul class="gp-list">
+        <li><div><h3>시간 관리</h3><p>7일 안에 어디를 조사하고 누구를 만날지</p></div>
+          <div class="gp-viz gp-pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></li>
+        <li><div><h3>RPG 요소</h3><p>매 행동마다 상태를 저울질</p></div>
+          <ul class="gp-viz gp-meters"><li><span>체력</span><b class="m1"></b></li><li><span>행동력</span><b class="m2"></b></li><li><span>의심도</span><b class="m3"></b></li></ul></li>
+        <li><div><h3>인물 관계</h3><p>호감도와 감정, 이전 행동이 반응과 정보를 바꿈</p></div>
+          <svg class="gp-viz gp-web" viewBox="0 0 160 70" aria-hidden="true"><path d="M80 35L22 14M80 35L26 58M80 35L136 12M80 35L140 56M22 14L26 58M136 12L140 56"/><circle cx="80" cy="35" r="7" class="me"/><circle cx="22" cy="14" r="5"/><circle cx="26" cy="58" r="5"/><circle cx="136" cy="12" r="5"/><circle cx="140" cy="56" r="5"/></svg></li>
+        <li><div><h3>분기형 스토리</h3><p>선택과 조사 결과가 전개를 바꿈</p></div>
+          <svg class="gp-viz gp-tree" viewBox="0 0 160 80" aria-hidden="true">
+            <g class="t-all"><path d="M8 40H40M40 40C56 40 56 20 72 20H96M40 40C56 40 56 60 72 60H96M96 20C110 20 112 9 126 9H152M96 20C110 20 112 31 126 31H152M96 60C110 60 112 49 126 49H152M96 60C110 60 112 71 126 71H152"/></g>
+            <path class="t-hot h1" d="M8 40H40C56 40 56 20 72 20H96C110 20 112 9 126 9H152" pathLength="1"/>
+            <path class="t-hot h2" d="M8 40H40C56 40 56 60 72 60H96C110 60 112 49 126 49H152" pathLength="1"/>
+            <path class="t-hot h3" d="M8 40H40C56 40 56 20 72 20H96C110 20 112 31 126 31H152" pathLength="1"/>
+            <circle cx="8" cy="40" r="3.5"/><circle cx="40" cy="40" r="3"/><circle cx="96" cy="20" r="3"/><circle cx="96" cy="60" r="3"/>
+          </svg></li>
+      </ul>
     </div>
   </section>
 

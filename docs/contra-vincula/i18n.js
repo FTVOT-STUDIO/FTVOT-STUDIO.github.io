@@ -41,6 +41,7 @@ const T = [
   ]],
   ['.gp h3', ['Investigation', 'Dialogue & Choices', 'Deduction & Mind Games', 'Time Management', 'RPG Elements', 'Relationships', 'Branching Story'], ['調査・探索', '会話・選択肢', '推理・心理戦', '時間管理', 'RPG要素', '人物関係', '分岐するストーリー']],
   ['.gp p', ['Gather clues, records, and evidence from places and people', 'Read words and actions, and choose to turn the flow', 'Pierce contradictions in testimony with evidence', 'Where to search and whom to meet within seven days', 'Weigh your condition with every action', 'Affection, emotion, and past actions change reactions and information', 'Your choices and findings change the story'], ['場所や人物から手がかり・記録・証拠を集める', '発言と行動を読み、流れを変える選択', '証言の矛盾を証拠で突く', '7日の中で、どこを調べ誰に会うか', '行動のたびに状態を見極める', '好感度や感情、過去の行動が反応と情報を変える', '選択と調査の結果が展開を変える']],
+  ['.gp-center', ['Seven truths in seven days'], ['七日のうちに七つの真実']],
   ['.gp-meters span', ['Health', 'Action', 'Suspicion'], ['体力', '行動力', '疑念度']],
   ['#news dt', ['Developer', 'Release', 'Engine', 'Platforms'], ['開発', '発売', 'エンジン', 'プラットフォーム']],
   ['#news dd', ['FTVOT Studio', 'December 2029', 'Unity', 'TBA'], ['FTVOT STUDIO（セグスタジオ）', '2029年12月予定', 'Unity', '後日発表']],
