@@ -43,3 +43,17 @@ if (dday) {
 // 본문 등장
 const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }), { threshold: .15 });
 document.querySelectorAll('main section').forEach((s) => { s.classList.add('reveal'); io.observe(s); });
+
+// 배경음: 브라우저 정책상 자동 재생이 막혀 있어 첫 클릭·터치·키 입력 때 켭니다. 끈 상태는 기억합니다
+const bgmBtn = document.querySelector('[data-bgm]'), bgm = document.querySelector('[data-bgm-audio]'), bgmLabel = document.querySelector('[data-bgm-label]');
+if (bgmBtn && bgm) {
+  const TARGET = .45; let fade = 0;
+  const set = (on) => { bgmBtn.setAttribute('aria-pressed', String(on)); const t = on ? '배경음 끄기' : '배경음 켜기'; bgmBtn.title = t; bgmLabel.textContent = t; };
+  const ramp = (to, done) => { cancelAnimationFrame(fade); const from = bgm.volume, t0 = performance.now(); const step = (t) => { const k = Math.min((t - t0) / 900, 1); bgm.volume = from + (to - from) * k; if (k < 1) fade = requestAnimationFrame(step); else done?.(); }; fade = requestAnimationFrame(step); };
+  const play = () => { bgm.volume = 0; bgm.play().then(() => { set(true); ramp(TARGET); }).catch(() => set(false)); };
+  const stop = () => { set(false); ramp(0, () => bgm.pause()); };
+  let off = false; try { off = localStorage.getItem('cv-bgm') === 'off'; } catch {}
+  bgmBtn.addEventListener('click', (e) => { e.stopPropagation(); if (bgm.paused) { play(); try { localStorage.removeItem('cv-bgm'); } catch {} } else { stop(); try { localStorage.setItem('cv-bgm', 'off'); } catch {} } });
+  const first = () => { ['pointerdown', 'keydown'].forEach((t) => removeEventListener(t, first)); if (!off && bgm.paused) play(); };
+  ['pointerdown', 'keydown'].forEach((t) => addEventListener(t, first, { once: true }));
+}
