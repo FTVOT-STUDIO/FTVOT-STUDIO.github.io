@@ -175,3 +175,48 @@ body.is-loading { overflow: hidden; }
 @keyframes ldSpin { 0% { transform: rotate(0) scaleX(1); } 50% { transform: rotate(180deg) scaleX(-1); } 100% { transform: rotate(360deg) scaleX(1); } }
 @keyframes ldBreath { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ld-shard, .ld-word { animation: none; } .ld-half { transition: opacity .2s; } .loader.is-done .ld-half { transform: none; opacity: 0; } }
+
+/* 7일: 누르거나 올리면 그날까지 사슬이 차오르고, 남은 날이 표시됩니다 */
+.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 40px 0 0; }
+.days button { font: 500 22px var(--serif); color: #ffd3e4; background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 18px 0; cursor: pointer; transition: background .35s, border-color .35s, color .35s, transform .35s cubic-bezier(.34,1.56,.64,1); }
+.days button:hover { transform: translateY(-3px); border-color: rgb(255 120 180 / .5); }
+.days button.is-past { background: rgb(255 79 139 / .14); border-color: rgb(255 79 139 / .4); }
+.days button.is-now { background: #ff4f8b; color: #1a0712; border-color: #ff4f8b; transform: translateY(-3px); }
+.days button:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+.day-track { height: 4px; margin: 14px 0 0; border-radius: 999px; background: rgb(255 120 180 / .14); overflow: hidden; }
+.day-track i { display: block; height: 100%; background: linear-gradient(90deg, #8c1d4f, #ff4f8b); transform-origin: left; transform: scaleX(0); transition: transform .6s cubic-bezier(.16,1,.3,1); }
+.day-cap { min-height: 1.6em; margin: 12px 0 40px; font: 500 14px var(--serif); letter-spacing: .06em; color: var(--ink-2); }
+.day-cap b { color: #ffd3e4; font-weight: 500; }
+@media (max-width: 700px) { .days { gap: 4px; } .days button { font-size: 16px; padding: 12px 0; } }
+
+/* 게임플레이: 핵심 순환 → 제약 → 결과를 한눈에 */
+.gp { display: grid; gap: 14px; }
+.gp-loop { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr; align-items: stretch; gap: 8px; }
+.gp-step, .gp-box { border: 1px solid var(--line); border-radius: 14px; padding: 22px 20px; background: #110618; transition: border-color .3s, transform .35s cubic-bezier(.34,1.56,.64,1); }
+.gp-step:hover, .gp-box:hover { border-color: rgb(255 120 180 / .45); transform: translateY(-3px); }
+.gp-step svg { width: 26px; height: 26px; fill: none; stroke: var(--rose); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 12px; }
+.gp h3 { font-size: 17px; margin: 0 0 6px; }
+.gp p { font-size: 14px; line-height: 1.6; color: var(--ink-2); margin: 0; }
+.gp-arrow { align-self: center; height: 2px; background: linear-gradient(90deg, transparent, var(--rose)); position: relative; }
+.gp-arrow::after { content: ''; position: absolute; right: -1px; top: -4px; border: 5px solid transparent; border-left: 7px solid var(--rose); border-right: 0; }
+.gp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.gp-pips { display: flex; gap: 6px; margin-top: 14px; }
+.gp-pips i { flex: 1; height: 6px; border-radius: 2px; background: rgb(255 120 180 / .18); animation: pip 7s steps(1) infinite; }
+.gp-pips i:nth-child(1) { animation-delay: 0s; } .gp-pips i:nth-child(2) { animation-delay: 1s; } .gp-pips i:nth-child(3) { animation-delay: 2s; } .gp-pips i:nth-child(4) { animation-delay: 3s; } .gp-pips i:nth-child(5) { animation-delay: 4s; } .gp-pips i:nth-child(6) { animation-delay: 5s; } .gp-pips i:nth-child(7) { animation-delay: 6s; }
+@keyframes pip { 0% { background: #ff4f8b; } 14% { background: rgb(255 120 180 / .18); } }
+.gp-meters { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
+.gp-meters li { display: grid; grid-template-columns: 56px 1fr; align-items: center; gap: 10px; font-size: 12px; color: var(--ink-2); }
+.gp-meters b { height: 6px; border-radius: 999px; background: rgb(255 120 180 / .14); position: relative; overflow: hidden; }
+.gp-meters b::after { content: ''; position: absolute; inset: 0; border-radius: inherit; transform-origin: left; animation: meter 5s ease-in-out infinite alternate; }
+.gp-meters .m1::after { background: #ff4f8b; --a: .85; --b: .55; }
+.gp-meters .m2::after { background: #c78bff; --a: .7; --b: .3; animation-delay: -1.5s; }
+.gp-meters .m3::after { background: #ffb347; --a: .2; --b: .65; animation-delay: -3s; }
+@keyframes meter { from { transform: scaleX(var(--a)); } to { transform: scaleX(var(--b)); } }
+.gp-branch svg { width: 100%; max-width: 200px; margin-top: 12px; fill: none; stroke: var(--rose); stroke-width: 1.5; stroke-linecap: round; }
+.gp-branch svg circle { fill: var(--rose); }
+@media (max-width: 700px) { .gp-loop { grid-template-columns: 1fr; } .gp-arrow { width: 2px; height: 22px; justify-self: center; background: linear-gradient(180deg, transparent, var(--rose)); } .gp-arrow::after { right: -4px; top: auto; bottom: -1px; border: 5px solid transparent; border-top: 7px solid var(--rose); border-bottom: 0; } .gp-row { grid-template-columns: 1fr; } }
+
+/* 사이트 간 균열 전환: 메인 사이트와 같은 핏빛 배경 + 마법진을 이어 받습니다 */
+.gate { position: fixed; inset: 0; z-index: 200; pointer-events: none; }
+.gate-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, #3a0608 0, #120203 45%, #050102 80%); }
+.gate-sigil { position: absolute; left: 50%; top: 50%; width: min(70vmin, 520px); transform: translate(-50%, -50%); }

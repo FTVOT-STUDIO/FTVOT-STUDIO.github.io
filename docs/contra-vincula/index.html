@@ -28,9 +28,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="./cv.css?v=13">
-<script src="./cv.js?v=10" defer></script>
-<script src="./i18n.js?v=1" defer></script>
+<link rel="stylesheet" href="./cv.css?v=14">
+<script src="./cv.js?v=11" defer></script>
+<script src="./i18n.js?v=2" defer></script>
 <!--
   Credits
   - 일러스트·로고: © 세구 스튜디오 (FTVOT STUDIO)
@@ -48,7 +48,7 @@
   </div>
   <div class="ld-half ld-top" aria-hidden="true"></div><div class="ld-half ld-bot" aria-hidden="true"></div>
 </div>
-<a class="back" href="https://ftvot.studio/">세구 스튜디오</a>
+<a class="back" data-gate href="https://ftvot.studio/?from=cv">세구 스튜디오</a>
 <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="ko" aria-pressed="true">KO</button><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="ja" aria-pressed="false">JA</button></div>
 <button class="bgm" type="button" data-bgm aria-pressed="false" title="배경음 켜기"><span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="sr-only" data-bgm-label>배경음 켜기</span></button>
 <audio data-bgm-audio src="https://ftvot-studio.github.io/contra-vincula/assets/bgm.mp3" loop preload="none"></audio>
@@ -101,11 +101,7 @@
 
   <section class="block" id="world">
     <p class="latin">World — ARCA</p>
-    <p class="lead">아르카는 신성과 권능을 지닌 초월적 존재들이 저마다의 이상을 좇으며 충돌하는 세계입니다. 이곳에서 구원은 언제나 자비가 아니고, 누군가를 지키려는 결정이 그 존재의 자유를 빼앗기도 합니다.</p>
-    <div class="pair">
-      <article><h3>세피라</h3><p>세계의 질서와 원리를 관장하는 존재들. 그들과 대립하거나 다른 이상을 품은 초월자들, 그리고 그 영향 아래 살아가는 생명들이 복잡하게 얽혀 있습니다.</p></article>
-      <article><h3>파우스트교</h3><p>아름다움의 권능을 지닌 세피라 티페레트를 중심으로 한 교단. 믿음이 깊어질수록 개인의 의지는 신앙의 질서에 종속됩니다. 화려하고 신성한 외관 아래 무엇이 숨어 있는지는 플레이어가 밝혀내야 합니다.</p></article>
-    </div>
+    <p class="lead">신성과 권능을 지닌 초월자들이 저마다의 이상을 좇아 충돌하는 세계. 이곳에서 구원은 언제나 자비가 아닙니다.</p>
   </section>
 
   <section class="block story" id="story">
@@ -113,9 +109,11 @@
     <h2>주어진 시간은 단 7일</h2>
     <p class="lead">질서에 저항한 대가로 날개와 지위를 빼앗긴 릴리트. 그녀가 닿은 파우스트교는 새로운 삶이 아니라, 구원을 명분으로 또다시 복종을 강요하는 곳이었습니다. 지키고자 했던 존재를 대신해 감금된 그녀는 목소리마저 빼앗깁니다.</p>
     <p class="lead">예기치 못한 도움으로 감옥을 벗어난 날, 티페레트를 제외한 교단 사람들의 기억이 일시적으로 흐려집니다. 이 상태가 이어지는 일주일 동안, 릴리트는 티페레트에게 맞설 <b>일곱 개의 유효 정보</b>를 찾아야 합니다.</p>
-    <ol class="days" aria-label="7일">
-      <li>1</li><li>2</li><li>3</li><li>4</li><li>5</li><li>6</li><li>7</li>
-    </ol>
+    <div class="days" role="group" aria-label="7일">
+      <button type="button" data-day="1">1</button><button type="button" data-day="2">2</button><button type="button" data-day="3">3</button><button type="button" data-day="4">4</button><button type="button" data-day="5">5</button><button type="button" data-day="6">6</button><button type="button" data-day="7">7</button>
+    </div>
+    <div class="day-track" aria-hidden="true"><i data-day-fill></i></div>
+    <p class="day-cap" data-day-cap aria-live="polite"></p>
     <p class="quote">그녀가 원하는 것은 복수가 아니라, 누구의 명령에도 속박되지 않고 자신의 삶을 스스로 결정할 자유입니다.</p>
   </section>
 
@@ -124,22 +122,32 @@
     <div class="cast">
       <article class="is-lead"><img class="portrait" src="https://ftvot-studio.github.io/contra-vincula/assets/cast_lilith.webp" alt="세라피나 릴리트" loading="lazy"><p class="role">저항하는 추방자</p><h3>세라피나 릴리트</h3><p>천계의 질서에 저항해 날개를 잃은 전직 천사. 정의로운 영웅도 완전무결한 구원자도 아닙니다. 자유를 되찾기 위해서라면 잔혹한 선택도 마다하지 않습니다.</p></article>
       <article><img class="portrait" src="https://ftvot-studio.github.io/contra-vincula/assets/cast_tiphareth.webp" alt="티페레트" loading="lazy"><p class="role">세상을 매혹하는 아름다움</p><h3>티페레트</h3><p>아름다움의 권능을 지닌 세피라이자 파우스트교의 교주. 구원으로 갈라진 세상을 이으려 하지만, 그 구원은 누군가에게는 신앙이고 누군가에게는 자유를 빼앗는 사슬입니다.</p></article>
-      <article><img class="portrait" src="https://ftvot-studio.github.io/contra-vincula/assets/cast_pore.webp" alt="줄로스 드 포어" loading="lazy"><p class="role">티페레트가 가장 아끼는 성녀</p><h3>줄로스 드 포어</h3><p>티페레트가 누구보다 총애하는 파우스트교의 성녀.</p></article>
-      <article><img class="portrait" src="https://ftvot-studio.github.io/contra-vincula/assets/cast_andromalius.webp" alt="안드로말리우스" loading="lazy"><p class="role">티페레트의 충실한 신도</p><h3>안드로말리우스</h3><p>티페레트를 향한 절대적인 믿음을 품은 인물. 그의 판단 한가운데에는 언제나 티페레트가 있으며, 그 신앙은 그가 세상과 타인을 보는 방식, 그리고 릴리트와의 갈등에도 깊이 얽혀 있습니다.</p></article>
+      <article><img class="portrait" src="https://ftvot-studio.github.io/contra-vincula/assets/cast_pore.webp" alt="줄로스 드 포어" loading="lazy"><p class="role">아름다움이 택한 단 하나의 성녀</p><h3>줄로스 드 포어</h3><p>티페레트를 향한 절대적인 믿음을 품은 인물. 그의 행동과 판단에는 언제나 티페레트가 깊이 자리하고 있으며, 그 신앙은 세상을 바라보는 방식과 타인에게 내리는 판단에도 영향을 미칩니다. 릴리트와의 관계 역시 이 신앙과 복잡하게 얽혀 있습니다.</p></article>
+      <article><img class="portrait" src="https://ftvot-studio.github.io/contra-vincula/assets/cast_andromalius.webp" alt="안드로말리우스" loading="lazy"><p class="role">티페레트의 충실한 신도</p><h3>안드로말리우스</h3><p>티페레트를 섬기며 그녀의 뜻을 수행하는 인물. 교단의 질서와 자신의 신념을 무엇보다 중요하게 여기며, 릴리트와의 갈등에서 중요한 역할을 맡습니다.</p></article>
     </div>
   </section>
 
   <section class="block" id="gameplay">
     <p class="latin">Gameplay</p>
-    <ol class="systems">
-      <li><span>01</span><div><h3>조사 및 탐색</h3><p>장소와 인물을 조사해 단서, 기록, 증거를 모읍니다.</p></div></li>
-      <li><span>02</span><div><h3>대화 및 선택지</h3><p>상대의 발언과 행동을 분석하고, 선택으로 대화의 흐름을 바꿉니다.</p></div></li>
-      <li><span>03</span><div><h3>추리 및 심리전</h3><p>진술의 모순을 찾아 증거로 숨겨진 정보를 밝혀냅니다.</p></div></li>
-      <li><span>04</span><div><h3>시간 관리</h3><p>7일 안에 어디를 조사하고 누구를 만날지 계획합니다.</p></div></li>
-      <li><span>05</span><div><h3>RPG 요소</h3><p>체력, 행동력, 의심도를 따지며 행동을 결정합니다.</p></div></li>
-      <li><span>06</span><div><h3>인물 관계</h3><p>호감도와 감정, 이전 행동에 따라 반응과 정보를 얻을 기회가 달라집니다.</p></div></li>
-      <li><span>07</span><div><h3>분기형 스토리</h3><p>선택과 조사 결과가 사건의 전개를 바꿉니다.</p></div></li>
-    </ol>
+    <div class="gp">
+      <div class="gp-loop" aria-label="핵심 순환">
+        <div class="gp-step"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><h3>조사 및 탐색</h3><p>장소와 인물에서 단서·기록·증거 수집</p></div>
+        <span class="gp-arrow" aria-hidden="true"></span>
+        <div class="gp-step"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg><h3>대화 및 선택지</h3><p>발언과 행동을 읽고 흐름을 바꾸는 선택</p></div>
+        <span class="gp-arrow" aria-hidden="true"></span>
+        <div class="gp-step"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M7 7l-3 7a3 3 0 0 0 6 0zM17 7l-3 7a3 3 0 0 0 6 0z"/></svg><h3>추리 및 심리전</h3><p>진술의 모순을 증거로 꿰뚫기</p></div>
+      </div>
+      <div class="gp-row">
+        <div class="gp-box"><h3>시간 관리</h3><p>7일 안에 어디를 조사하고 누구를 만날지</p><div class="gp-pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="gp-box"><h3>RPG 요소</h3><p>매 행동마다 상태를 저울질</p>
+          <ul class="gp-meters"><li><span>체력</span><b class="m1"></b></li><li><span>행동력</span><b class="m2"></b></li><li><span>의심도</span><b class="m3"></b></li></ul></div>
+      </div>
+      <div class="gp-row">
+        <div class="gp-box"><h3>인물 관계</h3><p>호감도와 감정, 이전 행동이 반응과 정보를 바꿈</p></div>
+        <div class="gp-box gp-branch"><h3>분기형 스토리</h3><p>선택과 조사 결과가 전개를 바꿈</p>
+          <svg viewBox="0 0 120 40" aria-hidden="true"><path d="M4 20h36M40 20c14 0 18-14 34-14h42M40 20h76M40 20c14 0 18 14 34 14h42"/><circle cx="40" cy="20" r="3"/></svg></div>
+      </div>
+    </div>
   </section>
 
   <section class="block" id="gallery" aria-label="갤러리">
@@ -159,7 +167,7 @@
 </main>
 
 <footer class="foot">
-  <a href="https://ftvot.studio/">세구 스튜디오로 돌아가기</a>
+  <a data-gate href="https://ftvot.studio/?from=cv">세구 스튜디오로 돌아가기</a>
   <small>© 2026 세구 스튜디오 · Fonts: Cinzel, Pretendard (OFL)</small>
 </footer>
 </body>

@@ -118,3 +118,36 @@ if (wind && !reduce) {
   };
   init(); requestAnimationFrame(frame);
 }
+
+// 7일: 고른 날까지 사슬이 차오르고 남은 날을 알려 줍니다
+(() => {
+  const btns = [...document.querySelectorAll('[data-day]')], fill = document.querySelector('[data-day-fill]'), cap = document.querySelector('[data-day-cap]');
+  if (!btns.length) return;
+  const TXT = { ko: (n) => `<b>DAY ${n}</b> · 남은 시간 ${7 - n}일 · 확보해야 할 유효 정보 7개`, en: (n) => `<b>DAY ${n}</b> · ${7 - n} day${7 - n === 1 ? '' : 's'} left · 7 pieces of evidence to secure`, ja: (n) => `<b>DAY ${n}</b> · 残り${7 - n}日 · 集めるべき有効な情報は7つ` };
+  let cur = 1;
+  const set = (n) => { cur = n; btns.forEach((b, i) => { b.classList.toggle('is-past', i + 1 < n); b.classList.toggle('is-now', i + 1 === n); b.setAttribute('aria-pressed', String(i + 1 === n)); });
+    if (fill) fill.style.transform = `scaleX(${n / 7})`; const f = TXT[document.documentElement.lang] || TXT.ko; if (cap) cap.innerHTML = f(n); };
+  btns.forEach((b) => { const n = Number(b.dataset.day); b.addEventListener('mouseenter', () => set(n)); b.addEventListener('focus', () => set(n)); b.addEventListener('click', () => set(n)); });
+  new MutationObserver(() => set(cur)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+  set(1);
+})();
+
+// 사이트 간 균열 전환: 메인 사이트에서 들어올 때는 마법진이 오므라들며 로딩 화면으로 이어지고, 돌아갈 때는 누른 자리에서 균열이 열립니다
+(() => {
+  const build = () => { const el = document.createElement('div'); el.className = 'gate'; el.setAttribute('aria-hidden', 'true'); el.innerHTML = '<div class="gate-bg"></div><img class="gate-sigil" src="./assets/portal-sigil.svg" alt="" decoding="sync">'; document.body.append(el); return el; };
+  const q = new URLSearchParams(location.search);
+  if (q.get('portal') === '1') {
+    history.replaceState(null, '', location.pathname);
+    if (!reduce) { const el = build(); const r = Math.hypot(innerWidth, innerHeight) / 2 + 40;
+      el.animate([{ clipPath: `circle(${r}px at 50% 50%)` }, { clipPath: 'circle(0px at 50% 50%)' }], { duration: 900, delay: 200, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' }).finished.then(() => el.remove(), () => el.remove());
+      el.querySelector('.gate-sigil').animate([{ transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(.15) rotate(120deg)', opacity: 0 }], { duration: 900, delay: 200, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' }); }
+  }
+  document.querySelectorAll('[data-gate]').forEach((a) => a.addEventListener('click', (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || reduce) return;
+    e.preventDefault(); const x = e.clientX, y = e.clientY, el = build(), r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    el.animate([{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${r}px at ${x}px ${y}px)` }], { duration: 650, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' });
+    el.querySelector('.gate-sigil').animate([{ transform: 'translate(-50%,-50%) scale(.2) rotate(-90deg)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity: 1 }], { duration: 650, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'forwards' });
+    if (bgm && !bgm.paused) { const v0 = bgm.volume; const t0 = performance.now(); const f = (t) => { const k = Math.min((t - t0) / 600, 1); bgm.volume = v0 * (1 - k); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
+    setTimeout(() => { location.href = a.href; }, 700);
+  }));
+})();

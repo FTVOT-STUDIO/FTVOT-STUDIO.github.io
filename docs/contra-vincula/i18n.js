@@ -15,15 +15,7 @@ const T = [
   ]],
   ['#about dt', ['Genre', 'World', 'Themes'], ['ジャンル', '世界観', 'テーマ']],
   ['#about dd', ['Narrative RPG · Dark Fantasy', 'ARCA', 'Freedom · Bondage · Salvation · Faith · Choice · Defiance'], ['ナラティブRPG · ダークファンタジー', 'ARCA（アルカ）', '自由 · 束縛 · 救済 · 信仰 · 選択 · 抵抗']],
-  ['#world .lead', ['ARCA is a world where transcendent beings of divinity and power clash, each pursuing their own ideals. Here, salvation is not always mercy, and a decision made to protect someone can rob them of their freedom.'], ['アルカは、神性と権能を持つ超越的な存在たちがそれぞれの理想を追い求めて衝突する世界です。ここでの救いは必ずしも慈悲ではなく、誰かを守るための決断がその者の自由を奪うこともあります。']],
-  ['#world h3', ['The Sephirot', 'The Faust Church'], ['セフィラ', 'ファウスト教']],
-  ['#world article p', [
-    'Beings who govern the order and principles of the world. Transcendents who oppose them or hold other ideals, and the lives under their influence, are bound together in a tangled web.',
-    'A church centered on Tiphareth, the Sephira who wields the power of beauty. The deeper the faith, the more each will is subjected to its order. What lies beneath its splendid, sacred surface is for you to uncover.'
-  ], [
-    '世界の秩序と原理を司る存在。彼らと対立し、あるいは異なる理想を抱く超越者たち、そしてその影響下で生きる命が複雑に絡み合っています。',
-    '美の権能を持つセフィラ、ティフェレトを中心とした教団。信仰が深まるほど、個人の意志は信仰の秩序に従属していきます。華やかで神聖な外見の下に何が隠されているのかは、プレイヤー自身が暴かなければなりません。'
-  ]],
+  ['#world .lead', ['A world where transcendent beings of divinity and power clash over their own ideals. Here, salvation is not always mercy.'], ['神性と権能を持つ超越者たちが、それぞれの理想を追って衝突する世界。ここでの救いは、必ずしも慈悲ではありません。']],
   ['#story h2', ['Only Seven Days'], ['与えられた時間は、わずか7日']],
   ['#story .lead', [
     'Lilith lost her wings and her station as the price of defying the order. The Faust Church she reached offered no new life, only another demand for obedience in the name of salvation. Imprisoned in place of the one she sought to protect, she is robbed even of her voice.',
@@ -33,37 +25,22 @@ const T = [
     '思いがけない助けで牢を抜け出した日、ティフェレトを除く教団の人々の記憶が一時的に曇ります。その状態が続く一週間のうちに、リリスはティフェレトに立ち向かうための<b>七つの有効な情報</b>を見つけなければなりません。'
   ]],
   ['#story .quote', ['What she seeks is not revenge, but the freedom to decide her own life, bound by no one\'s command.'], ['彼女が望むのは復讐ではなく、誰の命令にも縛られず、自らの生き方を自分で決める自由です。']],
-  ['.cast .role', ['The Defiant Exile', 'The Beauty That Enthralls the World', 'Tiphareth\'s Most Beloved Saint', 'Tiphareth\'s Devoted Believer'], ['抗う追放者', '世界を魅了する美', 'ティフェレトが最も慈しむ聖女', 'ティフェレトの忠実な信徒']],
+  ['.cast .role', ['The Defiant Exile', 'The Beauty That Enthralls the World', 'The One Saint Chosen by Beauty', 'Tiphareth\'s Devoted Believer'], ['抗う追放者', '世界を魅了する美', '美が選んだ唯一の聖女', 'ティフェレトの忠実な信徒']],
   ['.cast h3', ['Seraphina Lilith', 'Tiphareth', 'Julos de Pore', 'Andromalius'], ['セラフィナ・リリス', 'ティフェレト', 'ジュロス・ド・ポア', 'アンドロマリウス']],
   ['.cast article > p:not(.role)', [
     'A former angel who lost her wings for defying the order of heaven. She is neither a righteous hero nor a flawless savior, and will not shy from cruel choices to win back her freedom.',
     'The Sephira of beauty and head of the Faust Church. She seeks to mend a divided world through salvation, yet that salvation is faith to some and a chain upon freedom to others.',
-    'The saint of the Faust Church whom Tiphareth cherishes above all.',
-    'A man of absolute faith in Tiphareth. She lies at the heart of every judgment he makes, and that faith shapes how he sees the world and others, as well as his conflict with Lilith.'
+    'A figure of absolute faith in Tiphareth. Tiphareth lies at the heart of her every action and judgment, and that faith shapes how she sees the world and judges others. Her relationship with Lilith is tangled up in that same faith.',
+    'One who serves Tiphareth and carries out her will. He values the church\'s order and his own convictions above all, and plays a key role in the conflict with Lilith.'
   ], [
     '天界の秩序に抗い翼を失った元天使。正義の英雄でも完全無欠の救世主でもなく、自由を取り戻すためなら残酷な選択もためらいません。',
     '美の権能を持つセフィラにしてファウスト教の教主。救いによって分かたれた世界をつなごうとしますが、その救いはある者には信仰であり、ある者には自由を奪う鎖です。',
-    'ティフェレトが誰よりも寵愛するファウスト教の聖女。',
-    'ティフェレトへの絶対的な信仰を抱く人物。彼の判断の中心には常にティフェレトがあり、その信仰は世界と他者を見る目、そしてリリスとの対立にも深く絡み合っています。'
+    'ティフェレトへの絶対的な信仰を抱く人物。その行動と判断の奥には常にティフェレトがあり、その信仰は世界の見方や他者への判断にも影響を与えます。リリスとの関係もまた、この信仰と複雑に絡み合っています。',
+    'ティフェレトに仕え、その意志を遂行する人物。教団の秩序と自らの信念を何よりも重んじ、リリスとの対立において重要な役割を担います。'
   ]],
-  ['.systems h3', ['Investigation', 'Dialogue & Choices', 'Deduction & Mind Games', 'Time Management', 'RPG Elements', 'Relationships', 'Branching Story'], ['調査・探索', '会話・選択肢', '推理・心理戦', '時間管理', 'RPG要素', '人物関係', '分岐するストーリー']],
-  ['.systems p', [
-    'Search places and people to gather clues, records, and evidence.',
-    'Read what others say and do, and steer conversations with your choices.',
-    'Find contradictions in testimony and use evidence to expose hidden truths.',
-    'Plan where to search and whom to meet within seven days.',
-    'Weigh health, action points, and suspicion before every move.',
-    'Affection, emotion, and past actions change how people react and what they reveal.',
-    'Your choices and findings change how events unfold.'
-  ], [
-    '場所や人物を調べ、手がかり・記録・証拠を集めます。',
-    '相手の発言と行動を分析し、選択によって会話の流れを変えます。',
-    '証言の矛盾を見つけ、証拠で隠された情報を暴きます。',
-    '7日の中で、どこを調べ誰に会うかを計画します。',
-    '体力・行動力・疑念度を考えながら行動を決めます。',
-    '好感度や感情、これまでの行動によって反応や得られる情報が変わります。',
-    '選択と調査の結果が物語の展開を変えます。'
-  ]],
+  ['.gp h3', ['Investigation', 'Dialogue & Choices', 'Deduction & Mind Games', 'Time Management', 'RPG Elements', 'Relationships', 'Branching Story'], ['調査・探索', '会話・選択肢', '推理・心理戦', '時間管理', 'RPG要素', '人物関係', '分岐するストーリー']],
+  ['.gp p', ['Gather clues, records, and evidence from places and people', 'Read words and actions, and choose to turn the flow', 'Pierce contradictions in testimony with evidence', 'Where to search and whom to meet within seven days', 'Weigh your condition with every action', 'Affection, emotion, and past actions change reactions and information', 'Your choices and findings change the story'], ['場所や人物から手がかり・記録・証拠を集める', '発言と行動を読み、流れを変える選択', '証言の矛盾を証拠で突く', '7日の中で、どこを調べ誰に会うか', '行動のたびに状態を見極める', '好感度や感情、過去の行動が反応と情報を変える', '選択と調査の結果が展開を変える']],
+  ['.gp-meters span', ['Health', 'Action', 'Suspicion'], ['体力', '行動力', '疑念度']],
   ['#news dt', ['Developer', 'Release', 'Engine', 'Platforms'], ['開発', '発売', 'エンジン', 'プラットフォーム']],
   ['#news dd', ['FTVOT Studio', 'December 2029', 'Unity', 'TBA'], ['FTVOT STUDIO（セグスタジオ）', '2029年12月予定', 'Unity', '後日発表']],
   ['.foot a', ['Back to FTVOT Studio'], ['FTVOT Studioへ戻る']],

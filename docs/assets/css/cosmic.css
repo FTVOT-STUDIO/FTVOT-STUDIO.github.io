@@ -654,3 +654,8 @@ html.is-returning #intro { display: none; }
 .tree-hint { bottom: max(14px, env(safe-area-inset-bottom)); white-space: nowrap; }
 html.in-hero .audio-controls { translate: 0 calc(100% + 24px); opacity: 0; pointer-events: none; }
 }
+/* 사타리엘: Contra Vincula 사이트로 가는 문 */
+.cv-gate { display: inline-flex; align-items: center; gap: 10px; margin-top: 22px; padding: 12px 20px; border-radius: 999px; border: 1px solid rgb(255 80 140 / .45); color: #ffd3e4; text-decoration: none; font-size: 14px; background: rgb(60 8 30 / .35); transition: background .3s, border-color .3s, transform .3s cubic-bezier(.34,1.56,.64,1); }
+.cv-gate svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s; }
+.cv-gate:hover { background: rgb(110 14 50 / .5); border-color: rgb(255 80 140 / .8); transform: translateY(-2px); }
+.cv-gate:hover svg { transform: translateX(3px); }

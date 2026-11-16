@@ -939,7 +939,7 @@ else if (r.top <= innerHeight * .2 && !isDown()) { if (window.__navGliding) { li
    열린 껍질(타우미엘·가말리엘)만 누를 수 있고, 잠긴 껍질은 흐린 고리로만 보입니다 */
 (() => {
 const src = document.querySelector('[data-minimap]'), sec = document.getElementById('qliphoth'); if (!src || !sec) return;
-const OPEN = { 1: ['q-thaumiel', '타우미엘'], 9: ['q-gamaliel', '가말리엘'] };
+const OPEN = { 1: ['q-thaumiel', '타우미엘'], 3: ['q-sathariel', '사타리엘'], 9: ['q-gamaliel', '가말리엘'] };
 const qm = src.cloneNode(true);
 qm.removeAttribute('data-minimap'); qm.classList.add('q-minimap'); qm.setAttribute('aria-label', '클리포트의 나무 미니맵');
 qm.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
@@ -952,13 +952,13 @@ else { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); a.set
 src.after(qm);
 const sync = () => { const on = sec.classList.contains('is-awake') || sec.getBoundingClientRect().top < innerHeight * .5; /* 깨어나기를 기다리지 않고 클리포트가 화면 절반을 넘는 순간 교대 */ src.classList.toggle('is-yielded', on); qm.classList.toggle('is-shown', on);
 /* 지금 보고 있는 열린 껍질을 강조 */
-let cur = ''; for (const id of ['q-gamaliel', 'q-thaumiel']) { const r = document.getElementById(id)?.getBoundingClientRect(); if (r && r.top < innerHeight * .55) { cur = id; break; } }
+let cur = ''; for (const id of ['q-gamaliel', 'q-sathariel', 'q-thaumiel']) { const r = document.getElementById(id)?.getBoundingClientRect(); if (r && r.top < innerHeight * .55) { cur = id; break; } }
 qm.querySelectorAll('.qm-node.is-open').forEach((a) => a.classList.toggle('is-current', a.getAttribute('href') === `#${cur}`));
 /* 상단 바: 클리포트 안에서는 말쿠트 대신 지금 껍질 이름으로 바꾸고, 나가면 원래대로 되돌립니다 */
 const tb = document.querySelector('[data-topbar]'), num = tb?.querySelector('[data-tb-num]'), name = tb?.querySelector('[data-tb-name]'), link = tb?.querySelector('[data-tb-now]');
 if (tb && num && name && link) {
 if (on) { if (!saved) saved = { num: num.textContent, name: name.textContent, href: link.getAttribute('href'), seph: tb.dataset.seph };
-const label = cur === 'q-gamaliel' ? ['9', '클리포트 · 가말리엘'] : cur === 'q-thaumiel' ? ['1', '클리포트 · 타우미엘'] : ['Q', '클리포트 · 껍질의 나무'];
+const label = cur === 'q-gamaliel' ? ['9', '클리포트 · 가말리엘'] : cur === 'q-sathariel' ? ['3', '클리포트 · 사타리엘'] : cur === 'q-thaumiel' ? ['1', '클리포트 · 타우미엘'] : ['Q', '클리포트 · 껍질의 나무'];
 num.textContent = label[0]; name.textContent = label[1]; link.setAttribute('href', `#${cur || 'qliphoth'}`); tb.classList.add('is-qliphoth'); }
 else if (saved) { num.textContent = saved.num; name.textContent = saved.name; link.setAttribute('href', saved.href); tb.classList.remove('is-qliphoth'); saved = null; } } };
 let saved = null;
@@ -1022,7 +1022,7 @@ document.addEventListener('visibilitychange', () => document.documentElement.cla
 const html = document.documentElement; if (!html.classList.contains('is-returning')) return;
 window.__qQuiet = true; setTimeout(() => { window.__qQuiet = false; }, 4000); /* 돌아올 때 점등음·경로음이 울리지 않게 */
 try { sessionStorage.removeItem('ftvot-return'); } catch { /* 저장소 없음 */ }
-const target = document.getElementById('q-gamaliel'), sec = document.getElementById('qliphoth');
+const target = document.getElementById(html.dataset.returnTo || 'q-gamaliel'), sec = document.getElementById('qliphoth');
 const place = () => { if (target) { html.style.scrollBehavior = 'auto'; scrollTo(0, target.getBoundingClientRect().top + scrollY - 110); html.style.scrollBehavior = ''; } };
 place(); requestAnimationFrame(place);
 setTimeout(() => { place(); sec?.classList.add('is-awake', 'is-traced'); sec?.querySelectorAll('.q-node').forEach((n) => n.classList.add('is-lit'));
@@ -1031,7 +1031,7 @@ html.classList.add('is-returned'); window.__portalOpen?.(); setTimeout(() => htm
 
 /* 게임 카드를 누르면 그 자리에서 차원 균열이 열리며 플레이 화면으로 넘어갑니다 */
 document.addEventListener('click', (e) => {
-const a = e.target instanceof Element ? e.target.closest('a.game-card') : null;
+const a = e.target instanceof Element ? e.target.closest('a.game-card, a.cv-gate') : null;
 if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || !window.__portalGo) return;
 e.preventDefault(); window.__portalGo(a.href, e.clientX, e.clientY);
 });
