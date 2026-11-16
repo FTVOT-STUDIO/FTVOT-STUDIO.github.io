@@ -12,7 +12,7 @@ setTimeout(ready, 6000); // 느린 연결에서도 6초 뒤에는 보여 줍니�
 
 // 시차: 마우스(데스크톱)와 스크롤 양쪽을 부드럽게 따라갑니다
 if (!reduce) {
-  let mx = 0, my = 0, cx = 0, cy = 0, sy = 0, px = 0, py = 0, hasMouse = false;
+  let mx = 0, my = 0, cx = 0, cy = 0, sy = 0, px = 0, py = 0, lastPX = 0, lastPY = 0, hasMouse = false;
   const pupil = document.querySelector('[data-pupil]');
   addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; hasMouse = true; mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; }, { passive: true });
   const depth = layers.map((l) => Number(l.dataset.depth) || 0);
@@ -24,8 +24,10 @@ if (!reduce) {
     // 눈동자: 마우스를 따라 눈 안에서만 움직입니다(눈 모양 마스크로 잘라 눈꺼풀 밖으로 나가지 않음). 마우스가 없으면 천천히 두리번거립니다
     const now = performance.now() / 1000;
     const lookX = hasMouse ? mx : Math.sin(now * .35) * .35, lookY = hasMouse ? my : Math.sin(now * .23) * .2;
-    px += (lookX - px) * .08; py += (lookY - py) * .08;
-    if (pupil) pupil.style.transform = `translate(${px * .8}%, ${py * .5}%)`;
+    px += (lookX - px) * .05; py += (lookY - py) * .05;
+    // 떨림 방지: 0.05px 미만 변화는 건너뛰고, 값은 0.01% 단위로 고정해 매 프레임 미세하게 흔들리지 않게
+    const ppx = Math.round(px * 80) / 100, ppy = Math.round(py * 50) / 100;
+    if (pupil && (ppx !== lastPX || ppy !== lastPY)) { pupil.style.transform = `translate3d(${ppx}%, ${ppy}%, 0)`; lastPX = ppx; lastPY = ppy; }
     layers.forEach((l, i) => { const d = depth[i]; const b = isBody[i] ? breath : 0; l.style.transform = `translate3d(${-cx * d * 260}px, ${-cy * d * 160 + sy * d * 1.4 - b * 3}px, 0) scale(${1 + d * .2}, ${1 + d * .2 + b * .008})`; });
     requestAnimationFrame(tick);
   };
@@ -63,4 +65,36 @@ if (bgmBtn && bgm) {
   bgmBtn.addEventListener('click', (e) => { e.stopPropagation(); if (bgm.paused) { play(); try { localStorage.removeItem('cv-bgm'); } catch {} } else { stop(); try { localStorage.setItem('cv-bgm', 'off'); } catch {} } });
   const first = () => { ['pointerdown', 'keydown'].forEach((t) => removeEventListener(t, first)); if (!off && bgm.paused) play(); };
   ['pointerdown', 'keydown'].forEach((t) => addEventListener(t, first, { once: true }));
+}
+
+// 바람 이펙트: 붉은 테두리 파편이 오른쪽에서 왼쪽으로 바람에 휘날립니다
+const wind = document.querySelector('[data-wind]');
+if (wind && !reduce) {
+  const ctx = wind.getContext('2d'), shard = new Image(); shard.src = './assets/shard.png';
+  let W = 0, H = 0, dpr = 1, parts = [], last = performance.now(), gust = 0, visible = true;
+  const fit = () => { dpr = Math.min(devicePixelRatio || 1, 2); W = wind.clientWidth; H = wind.clientHeight; wind.width = W * dpr; wind.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  const COUNT = () => Math.round(Math.min(34, Math.max(14, W / 50)));
+  const spawn = (anywhere) => { const z = Math.random(); return { x: anywhere ? Math.random() * W : W + 40 + Math.random() * 200, y: Math.random() * H * 1.1 - H * .05, z, size: 8 + z * 30, vx: -(70 + z * 260), phase: Math.random() * 6.28, spin: (Math.random() - .5) * 3, rot: Math.random() * 6.28, flip: Math.random() * 6.28, flipV: 1.5 + Math.random() * 3 }; };
+  const init = () => { fit(); parts = Array.from({ length: COUNT() }, () => spawn(true)).sort((a, b) => a.z - b.z); };
+  addEventListener('resize', init);
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(wind);
+  const frame = (t) => {
+    const dt = Math.min((t - last) / 1000, .05); last = t;
+    if (visible && shard.complete && shard.naturalWidth) {
+      gust = Math.sin(t / 2300) * .5 + Math.sin(t / 900) * .2; // 바람 세기가 주기적으로 오르내림
+      ctx.clearRect(0, 0, W, H);
+      for (const p of parts) {
+        const speed = 1 + Math.max(0, gust) * .9;
+        p.x += p.vx * speed * dt; p.phase += dt * (1.2 + p.z);
+        p.y += (Math.sin(p.phase) * 40 * (1 - p.z * .4) - gust * 30) * dt;
+        p.rot += p.spin * speed * dt; p.flip += p.flipV * speed * dt;
+        if (p.x < -60 || p.y < -80 || p.y > H + 80) Object.assign(p, spawn(false));
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.scale(Math.cos(p.flip), 1); // 뒤집히며 펄럭이는 느낌
+        ctx.globalAlpha = .45 + p.z * .55; ctx.filter = p.z < .35 ? 'blur(1.5px)' : 'none'; // 먼 파편은 흐리게
+        ctx.drawImage(shard, -p.size / 2, -p.size / 2, p.size, p.size); ctx.restore();
+      }
+    }
+    requestAnimationFrame(frame);
+  };
+  init(); requestAnimationFrame(frame);
 }
