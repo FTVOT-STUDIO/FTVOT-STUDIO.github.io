@@ -53,8 +53,9 @@ const T = [
   ['.gp p', ['Gather clues, records, and evidence from places and people', 'Read words and actions, and choose to turn the flow', 'Pierce contradictions in testimony with evidence', 'Where to search and whom to meet within seven days', 'Weigh your condition with every action', 'Affection, emotion, and past actions change reactions and information', 'Your choices and findings change the story'], ['場所や人物から手がかり・記録・証拠を集める', '発言と行動を読み、流れを変える選択', '証言の矛盾を証拠で突く', '7日の中で、どこを調べ誰に会うか', '行動のたびに状態を見極める', '好感度や感情、過去の行動が反応と情報を変える', '選択と調査の結果が展開を変える']],
   ['.gp-center', ['Seven truths in seven days'], ['七日のうちに七つの真実']],
   ['.gp-meters span', ['Health', 'Action', 'Suspicion'], ['体力', '行動力', '疑念度']],
-  ['#news dt', ['Developer', 'Release', 'Engine', 'Platforms'], ['開発', '発売', 'エンジン', 'プラットフォーム']],
-  ['#news dd', ['FTVOT Studio', 'December 2029', 'Unity', 'TBA'], ['FTVOT STUDIO（セグスタジオ）', '2029年12月予定', 'Unity', '後日発表']],
+  ['#news dt', ['Title', 'Genre', 'Developer', 'Release', 'Engine', 'Platforms'], ['タイトル', 'ジャンル', '開発', '発売', 'エンジン', 'プラットフォーム']],
+  ['#news dd', ['Contra Vincula: The Defiant Exile', 'Narrative RPG · Dark Fantasy', 'FTVOT Studio', 'December 2029', 'Unity', 'TBA'], ['Contra Vincula: The Defiant Exile', 'ナラティブRPG · ダークファンタジー', 'FTVOT STUDIO（セグスタジオ）', '2029年12月予定', 'Unity', '後日発表']],
+  ['.seal-cap', ['Coming'], ['発売予定']],
   ['.foot a', ['Back to FTVOT Studio'], ['FTVOT Studioへ戻る']],
 ];
 

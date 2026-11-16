@@ -365,3 +365,23 @@ html:lang(en) .lead, html:lang(en) .cast p, html:lang(en) .quote { font-size: 1.
 .main-tag { font-size: clamp(28px, 4.4vw, 50px); line-height: 1.4; }
 .back, .rel-label, .day-cap, .gp-core span, .facts dt, .cast .role { font-family: var(--sans); }
 #world .lead + .lead { margin-top: 0; }
+
+/* ── Acta: 봉인 인장 + 사양서 ── */
+.acta-grid { display: grid; grid-template-columns: 300px 1fr; gap: 64px; align-items: center; margin-top: 24px; }
+.acta-seal { position: relative; aspect-ratio: 1; width: 100%; display: grid; place-items: center; }
+.acta-seal img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; filter: hue-rotate(-12deg) saturate(.9); }
+.seal-ring { opacity: .55; animation: psSpin 60s linear infinite; }
+.seal-core { inset: 22% !important; width: 56% !important; height: 56% !important; opacity: .35; animation: psSpin 40s linear infinite reverse; }
+.seal-text { position: relative; display: grid; justify-items: center; gap: 4px; padding: 18px 22px; background: radial-gradient(circle, rgb(13 5 18 / .92) 55%, transparent 75%); }
+.seal-roman { font: 500 11px var(--serif); letter-spacing: .32em; padding-left: .32em; color: var(--rose); }
+.seal-date { font: 500 46px/1 var(--serif); color: #fff; letter-spacing: .02em; text-shadow: 0 2px 18px rgb(255 79 139 / .35); }
+.seal-cap { font-size: 13px; letter-spacing: .2em; color: #ffd3e4; }
+.acta-facts { margin: 0; border-top: 1px solid rgb(255 120 180 / .3); }
+.acta-facts > div { grid-template-columns: 110px 1fr; padding: 18px 4px; transition: background .3s, padding-left .4s cubic-bezier(.16,1,.3,1); }
+.acta-facts > div:hover { background: linear-gradient(90deg, rgb(255 79 139 / .07), transparent 70%); padding-left: 12px; }
+.acta-facts dt { font: 500 12px var(--serif); letter-spacing: .18em; color: var(--rose); align-self: center; }
+.acta-facts dd { font-size: 17px; }
+html:lang(ko) .acta-facts dt, html:lang(ja) .acta-facts dt { letter-spacing: .1em; }
+@media (max-width: 800px) { .acta-grid { grid-template-columns: 1fr; gap: 32px; } .acta-seal { width: min(260px, 70vw); justify-self: center; } }
+@media (prefers-reduced-motion: reduce) { .seal-ring, .seal-core { animation: none; } }
+@media (max-width: 800px) { .acta-facts > div { grid-template-columns: 76px 1fr; } }
