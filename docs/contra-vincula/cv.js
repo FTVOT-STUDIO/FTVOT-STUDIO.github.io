@@ -14,9 +14,12 @@ if (!reduce) {
   let mx = 0, my = 0, cx = 0, cy = 0, sy = 0;
   addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; }, { passive: true });
   const depth = layers.map((l) => Number(l.dataset.depth) || 0);
+  const isBody = layers.map((l) => l.classList.contains('body'));
   const tick = () => {
     cx += (mx - cx) * .06; cy += (my - cy) * .06; sy = Math.min(scrollY, innerHeight);
-    layers.forEach((l, i) => { const d = depth[i]; l.style.transform = `translate3d(${-cx * d * 260}px, ${-cy * d * 160 + sy * d * 1.4}px, 0) scale(${1 + d * .2})`; });
+    // 숨쉬기: 몸 레이어만 약 4.2초 주기로 아주 살짝 위아래로 늘었다 줄어듭니다 (엉덩이 쪽을 기준점으로)
+    const breath = (Math.sin(performance.now() / 4200 * Math.PI * 2) + 1) / 2;
+    layers.forEach((l, i) => { const d = depth[i]; const b = isBody[i] ? breath : 0; l.style.transform = `translate3d(${-cx * d * 260}px, ${-cy * d * 160 + sy * d * 1.4 - b * 3}px, 0) scale(${1 + d * .2}, ${1 + d * .2 + b * .008})`; });
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
