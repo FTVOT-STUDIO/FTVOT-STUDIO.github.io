@@ -54,7 +54,7 @@ const T = [
   ['.gp-center', ['Seven truths in seven days'], ['七日のうちに七つの真実']],
   ['.gp-meters span', ['Health', 'Action', 'Suspicion'], ['体力', '行動力', '疑念度']],
   ['#news dt', ['Title', 'Genre', 'Developer', 'Release', 'Engine', 'Platforms'], ['タイトル', 'ジャンル', '開発', '発売', 'エンジン', 'プラットフォーム']],
-  ['#news dd', ['Contra Vincula: The Defiant Exile', 'Narrative RPG · Dark Fantasy', 'FTVOT Studio', 'December 2029', 'Unity', 'TBA'], ['Contra Vincula: The Defiant Exile', 'ナラティブRPG · ダークファンタジー', 'FTVOT STUDIO（セグスタジオ）', '2029年12月予定', 'Unity', '後日発表']],
+  ['#news dd', ['Contra Vincula: The Defiant Exile', 'Narrative RPG · Dark Fantasy', 'FTVOT Studio', 'December 2029', 'Unity', 'Steam · Google Play'], ['Contra Vincula: The Defiant Exile', 'ナラティブRPG · ダークファンタジー', 'FTVOT STUDIO（セグスタジオ）', '2029年12月予定', 'Unity', 'Steam · Google Play']],
   ['.seal-cap', ['Coming'], ['発売予定']],
   ['.foot a', ['Back to FTVOT Studio'], ['FTVOT Studioへ戻る']],
 ];

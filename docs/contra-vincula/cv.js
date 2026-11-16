@@ -76,15 +76,17 @@ document.querySelectorAll('main section').forEach((s) => { s.classList.add('reve
 // 배경음: 브라우저 정책상 자동 재생이 막혀 있어 첫 클릭·터치·키 입력 때 켭니다. 끈 상태는 기억합니다
 const bgmBtn = document.querySelector('[data-bgm]'), bgm = document.querySelector('[data-bgm-audio]'), bgmLabel = document.querySelector('[data-bgm-label]');
 if (bgmBtn && bgm) {
-  const TARGET = .45; let fade = 0;
+  const TARGET = .45, WIND = .22; let fade = 0; const wind = document.querySelector('[data-wind-audio]'); // 바람 소리: 배경음과 함께 켜지고 꺼지는 환경음
   const set = (on) => { bgmBtn.setAttribute('aria-pressed', String(on)); const t = on ? '배경음 끄기' : '배경음 켜기'; bgmBtn.title = t; bgmLabel.textContent = t; };
-  const ramp = (to, done) => { cancelAnimationFrame(fade); const from = bgm.volume, t0 = performance.now(); const step = (t) => { const k = Math.min((t - t0) / 900, 1); bgm.volume = from + (to - from) * k; if (k < 1) fade = requestAnimationFrame(step); else done?.(); }; fade = requestAnimationFrame(step); };
-  const play = () => { bgm.volume = 0; bgm.play().then(() => { set(true); ramp(TARGET); }).catch(() => set(false)); };
-  const stop = () => { set(false); ramp(0, () => bgm.pause()); };
+  const ramp = (to, done) => { cancelAnimationFrame(fade); const from = bgm.volume, wFrom = wind ? wind.volume : 0, wTo = to ? WIND : 0, t0 = performance.now(); const step = (t) => { const k = Math.min((t - t0) / 900, 1); bgm.volume = from + (to - from) * k; if (wind) wind.volume = wFrom + (wTo - wFrom) * k; if (k < 1) fade = requestAnimationFrame(step); else done?.(); }; fade = requestAnimationFrame(step); };
+  const play = () => { bgm.volume = 0; if (wind) { wind.volume = 0; wind.play().catch(() => {}); } bgm.play().then(() => { set(true); ramp(TARGET); }).catch((err) => { set(false); console.warn('[cv] bgm', err); }); };
+  const stop = () => { set(false); ramp(0, () => { bgm.pause(); wind?.pause(); }); };
   let off = false; try { off = localStorage.getItem('cv-bgm') === 'off'; } catch {}
   bgmBtn.addEventListener('click', (e) => { e.stopPropagation(); if (bgm.paused) { play(); try { localStorage.removeItem('cv-bgm'); } catch {} } else { stop(); try { localStorage.setItem('cv-bgm', 'off'); } catch {} } });
-  const first = () => { ['pointerdown', 'keydown'].forEach((t) => removeEventListener(t, first)); if (!off && bgm.paused) play(); };
-  ['pointerdown', 'keydown'].forEach((t) => addEventListener(t, first, { once: true }));
+  // 브라우저가 '사용자 동작'으로 인정하는 click·touchend·keydown에서 켭니다(pointerdown은 Safari 등에서 소리 허용으로 안 쳐 줌). 소리 버튼을 누른 경우는 버튼이 직접 처리
+  const EV = ['click', 'touchend', 'keydown'];
+  const first = (e) => { if (e.target instanceof Element && e.target.closest('[data-bgm]')) return; EV.forEach((t) => removeEventListener(t, first, true)); if (!off && bgm.paused) play(); };
+  EV.forEach((t) => addEventListener(t, first, true));
 }
 
 // 바람 이펙트: 붉은 테두리 파편이 오른쪽에서 왼쪽으로 바람에 휘날립니다
@@ -163,7 +165,7 @@ if (wind && !reduce) {
     e.preventDefault(); const x = e.clientX, y = e.clientY, el = build(), r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
     el.animate([{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${r}px at ${x}px ${y}px)` }], { duration: 650, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' });
     el.querySelector('.gate-sigil').animate([{ transform: 'translate(-50%,-50%) scale(.2) rotate(-90deg)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity: 1 }], { duration: 650, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'forwards' });
-    if (bgm && !bgm.paused) { const v0 = bgm.volume; const t0 = performance.now(); const f = (t) => { const k = Math.min((t - t0) / 600, 1); bgm.volume = v0 * (1 - k); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
+    if (bgm && !bgm.paused) { const w = document.querySelector('[data-wind-audio]'), w0 = w ? w.volume : 0; const v0 = bgm.volume; const t0 = performance.now(); const f = (t) => { const k = Math.min((t - t0) / 600, 1); bgm.volume = v0 * (1 - k); if (w) w.volume = w0 * (1 - k); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
     setTimeout(() => { location.href = a.href; }, 700);
   }));
 })();
