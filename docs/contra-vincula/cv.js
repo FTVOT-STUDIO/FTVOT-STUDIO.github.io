@@ -123,13 +123,17 @@ if (wind && !reduce) {
 (() => {
   const btns = [...document.querySelectorAll('[data-day]')], fill = document.querySelector('[data-day-fill]'), cap = document.querySelector('[data-day-cap]');
   if (!btns.length) return;
-  const TXT = { ko: (n) => `<b>DAY ${n}</b> · 남은 시간 ${7 - n}일 · 확보해야 할 유효 정보 7개`, en: (n) => `<b>DAY ${n}</b> · ${7 - n} day${7 - n === 1 ? '' : 's'} left · 7 pieces of evidence to secure`, ja: (n) => `<b>DAY ${n}</b> · 残り${7 - n}日 · 集めるべき有効な情報は7つ` };
+  const TXT = { ko: (n) => `<b>DIES ${['I','II','III','IV','V','VI','VII'][n - 1]}</b> · 안개가 걷히기까지 ${7 - n}일`, en: (n) => `<b>DIES ${['I','II','III','IV','V','VI','VII'][n - 1]}</b> · ${7 - n} day${7 - n === 1 ? '' : 's'} until the mist lifts`, ja: (n) => `<b>DIES ${['I','II','III','IV','V','VI','VII'][n - 1]}</b> · 霧が晴れるまで${7 - n}日` };
   let cur = 1;
   const set = (n) => { cur = n; btns.forEach((b, i) => { b.classList.toggle('is-past', i + 1 < n); b.classList.toggle('is-now', i + 1 === n); b.setAttribute('aria-pressed', String(i + 1 === n)); });
     if (fill) fill.style.transform = `scaleX(${n / 7})`; const f = TXT[document.documentElement.lang] || TXT.ko; if (cap) cap.innerHTML = f(n); };
   btns.forEach((b) => { const n = Number(b.dataset.day); b.addEventListener('mouseenter', () => set(n)); b.addEventListener('focus', () => set(n)); b.addEventListener('click', () => set(n)); });
   new MutationObserver(() => set(cur)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
   set(1);
+  // 스크롤로 이야기 구간을 지나가는 만큼 하루씩 넘어갑니다
+  const story = document.getElementById('story'); let raf = 0;
+  const onScroll = () => { raf = 0; const r = story.getBoundingClientRect(); const k = (innerHeight * .7 - r.top) / Math.max(1, r.height - innerHeight * .3); const n = Math.max(1, Math.min(7, Math.ceil(k * 7))); if (n !== cur) set(n); };
+  addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(onScroll); }, { passive: true });
 })();
 
 // 사이트 간 균열 전환: 메인 사이트에서 들어올 때는 마법진이 오므라들며 로딩 화면으로 이어지고, 돌아갈 때는 누른 자리에서 균열이 열립니다

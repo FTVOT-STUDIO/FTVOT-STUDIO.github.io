@@ -220,3 +220,4 @@ body.is-loading { overflow: hidden; }
 .gate { position: fixed; inset: 0; z-index: 200; pointer-events: none; }
 .gate-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, #3a0608 0, #120203 45%, #050102 80%); }
 .gate-sigil { position: absolute; left: 50%; top: 50%; width: min(70vmin, 520px); transform: translate(-50%, -50%); }
+.latin span { display: inline-block; min-width: 2.2em; margin-right: 10px; padding-right: 10px; border-right: 1px solid rgb(255 120 180 / .35); color: #ffd3e4; }

@@ -3,28 +3,29 @@
 const T = [
   ['.back', ['FTVOT Studio'], ['FTVOT Studio']],
   ['.release > span:first-child', ['Coming December 2029'], ['2029年12月 発売予定']],
-  ['.scroll-cue', ['Learn more'], ['もっと見る']],
+  ['.scroll-cue', ['Beyond the veil'], ['帳の向こうへ']],
+  ['.latin', ['<span>I</span>Exilium — Exile', '<span>II</span>Arca — World', '<span>III</span>Septem Dies — Seven Days', '<span>IV</span>Personae — Characters', '<span>V</span>Ludus — Systems', '<span>VI</span>Imago — Artwork', '<span>VII</span>Acta — Details'], ['<span>I</span>Exilium — 追放', '<span>II</span>Arca — 世界', '<span>III</span>Septem Dies — 七日', '<span>IV</span>Personae — 人物', '<span>V</span>Ludus — システム', '<span>VI</span>Imago — 絵画', '<span>VII</span>Acta — 情報']],
   ['.main-tag', ['If refusing salvation is a sin,<br>then gladly I shall be a sinner.'], ['救いを拒むことが罪ならば、<br>喜んで罪人となろう。']],
   ['.sub-tag', ['Not even salvation granted by a god can take the place of my freedom.'], ['神が与えた救いでさえ、私の自由の代わりにはならない。']],
   ['#about .lead', [
-    '<i>Contra Vincula: The Defiant Exile</i> is a narrative RPG set in the dark fantasy world of <b>ARCA</b>, about the oppression carried out in the name of divinity and those who rise against that order.',
-    'You play as Seraphina Lilith, a former angel cast out of heaven, uncovering the truth hidden within the Faust Church.'
+    'Chains forged in the name of divinity, and the one who would break them. <i>Contra Vincula: The Defiant Exile</i> is a narrative RPG set in the dark fantasy world of <b>ARCA</b>.',
+    'You are Seraphina Lilith, an exile stripped of her wings. Tear down the veil of the Faust Church, the cult that worships beauty, and dig up the truth buried beneath it.'
   ], [
-    '『コントラ・ヴィンクラ：ザ・ディファイアント・エグザイル』は、ダークファンタジー世界<b>アルカ（ARCA）</b>を舞台に、神性の名のもとに行われる抑圧と、その秩序に抗う者たちを描くナラティブRPGです。',
-    'プレイヤーは天界を追放された元天使セラフィナ・リリスとなり、ファウスト教に隠された真実を調べます。'
+    '神性の名で満たされた鎖、そしてその鎖を断とうとする者。『コントラ・ヴィンクラ：ザ・ディファイアント・エグザイル』は、ダークファンタジー世界<b>アルカ</b>で繰り広げられるナラティブRPGです。',
+    'あなたは翼を奪われた追放者、セラフィナ・リリス。美を崇めるファウスト教の帳を剥ぎ、その下に埋もれた真実を自らの手で暴きます。'
   ]],
   ['#about dt', ['Genre', 'World', 'Themes'], ['ジャンル', '世界観', 'テーマ']],
   ['#about dd', ['Narrative RPG · Dark Fantasy', 'ARCA', 'Freedom · Bondage · Salvation · Faith · Choice · Defiance'], ['ナラティブRPG · ダークファンタジー', 'ARCA（アルカ）', '自由 · 束縛 · 救済 · 信仰 · 選択 · 抵抗']],
-  ['#world .lead', ['A world where transcendent beings of divinity and power clash over their own ideals. Here, salvation is not always mercy.'], ['神性と権能を持つ超越者たちが、それぞれの理想を追って衝突する世界。ここでの救いは、必ずしも慈悲ではありません。']],
-  ['#story h2', ['Only Seven Days'], ['与えられた時間は、わずか7日']],
+  ['#world .lead', ['ARCA, where transcendent beings clash over their own ideals. Here, divinity does not mean goodness, and salvation can be the gentlest of shackles.'], ['超越者たちがそれぞれの理想を抱いてぶつかり合う世界、アルカ。ここでは神性は善を意味せず、救いは時に最も柔らかな枷となります。']],
+  ['#story h2', ['Seven Days, and No More'], ['許された時間は、ただ七日']],
   ['#story .lead', [
-    'Lilith lost her wings and her station as the price of defying the order. The Faust Church she reached offered no new life, only another demand for obedience in the name of salvation. Imprisoned in place of the one she sought to protect, she is robbed even of her voice.',
-    'On the day an unexpected hand frees her from her cell, the memories of everyone in the church but Tiphareth grow briefly clouded. For the one week this lasts, Lilith must find <b>seven pieces of valid evidence</b> to stand against Tiphareth.'
+    'Cast down from heaven for defying its order, Lilith found no sanctuary in the Faust Church, only another altar to kneel before in the name of salvation. Imprisoned in place of the one she meant to protect, she is stripped even of her voice.',
+    'On the day an unexpected hand opens her cell, the memories of every believer but Tiphareth cloud over like mist. Seven days remain before it lifts. Within them, she must seize <b>seven truths</b> to stand against Tiphareth.'
   ], [
-    '秩序に抗った代償として翼と地位を奪われたリリス。たどり着いたファウスト教は新たな人生ではなく、救いを名目に再び服従を強いる場所でした。守ろうとした者の身代わりに幽閉された彼女は、声さえも奪われます。',
-    '思いがけない助けで牢を抜け出した日、ティフェレトを除く教団の人々の記憶が一時的に曇ります。その状態が続く一週間のうちに、リリスはティフェレトに立ち向かうための<b>七つの有効な情報</b>を見つけなければなりません。'
+    '秩序に背いた代償として天界から投げ出されたリリス。たどり着いたファウスト教は安息の地ではなく、救いの名のもとに再び膝を折らせる場所でした。守ろうとした者の身代わりに囚われた彼女から、教団は声さえも奪っていきます。',
+    '思いがけない手が牢の扉を開けた日、ティフェレトを除くすべての信徒の記憶が霧のように曇ります。その霧が晴れるまで残された時間は七日。その間に、ティフェレトに立ち向かうための<b>七つの真実</b>を手に入れなければなりません。'
   ]],
-  ['#story .quote', ['What she seeks is not revenge, but the freedom to decide her own life, bound by no one\'s command.'], ['彼女が望むのは復讐ではなく、誰の命令にも縛られず、自らの生き方を自分で決める自由です。']],
+  ['#story .quote', ['What she seeks is not revenge. It is the freedom to decide her own life, bound by no one\'s command.'], ['彼女が望むのは復讐ではありません。誰の命令にも縛られず、自らの生き方を自分で決める自由です。']],
   ['.cast .role', ['The Defiant Exile', 'The Beauty That Enthralls the World', 'The One Saint Chosen by Beauty', 'Tiphareth\'s Devoted Believer'], ['抗う追放者', '世界を魅了する美', '美が選んだ唯一の聖女', 'ティフェレトの忠実な信徒']],
   ['.cast h3', ['Seraphina Lilith', 'Tiphareth', 'Julos de Pore', 'Andromalius'], ['セラフィナ・リリス', 'ティフェレト', 'ジュロス・ド・ポア', 'アンドロマリウス']],
   ['.cast article > p:not(.role)', [
