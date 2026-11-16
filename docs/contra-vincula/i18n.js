@@ -2,8 +2,8 @@
 // 각 항목은 [선택자, 영어 배열, 일본어 배열]. 같은 선택자에 여러 요소가 있으면 문서 순서대로 대응합니다
 const T = [
   ['.back', ['FTVOT Studio'], ['FTVOT Studio']],
-  ['.release > span:first-child', ['Coming December 2029'], ['2029年12月 発売予定']],
-  ['.scroll-cue', ['Beyond the veil'], ['帳の向こうへ']],
+  ['.rel-label', ['Coming December 2029'], ['2029年12月 発売予定']],
+  ['.scroll-cue span', ['Beyond the veil'], ['帳の向こうへ']],
   ['.latin', ['<span>I</span>Exilium — Exile', '<span>II</span>Arca — World', '<span>III</span>Septem Dies — Seven Days', '<span>IV</span>Personae — Characters', '<span>V</span>Ludus — Systems', '<span>VI</span>Imago — Artwork', '<span>VII</span>Acta — Details'], ['<span>I</span>Exilium — 追放', '<span>II</span>Arca — 世界', '<span>III</span>Septem Dies — 七日', '<span>IV</span>Personae — 人物', '<span>V</span>Ludus — システム', '<span>VI</span>Imago — 絵画', '<span>VII</span>Acta — 情報']],
   ['.main-tag', ['If refusing salvation is a sin,<br>then gladly I shall be a sinner.'], ['救いを拒むことが罪ならば、<br>喜んで罪人となろう。']],
   ['.sub-tag', ['Not even salvation granted by a god can take the place of my freedom.'], ['神が与えた救いでさえ、私の自由の代わりにはならない。']],

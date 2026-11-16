@@ -54,17 +54,17 @@ if (!reduce) {
   requestAnimationFrame(tick);
 }
 
-// 출시 카운트다운: 출시 '달'만 정해져 있어 2029년 12월 1일 0시(한국 시간) 기준으로 1초마다 셉니다
+// 출시 카운트다운: 2029년 12월 1일 0시(한국 시간)까지 일·시·분·초를 크게 보여 줍니다. 바뀐 칸만 살짝 뒤집히듯 갱신
 const dday = document.querySelector('[data-dday]');
 if (dday) {
   const target = new Date('2029-12-01T00:00:00+09:00').getTime();
+  const cells = { d: dday.querySelector('[data-cd="d"]'), h: dday.querySelector('[data-cd="h"]'), m: dday.querySelector('[data-cd="m"]'), s: dday.querySelector('[data-cd="s"]') };
   const pad = (n) => String(n).padStart(2, '0');
+  const put = (el, v) => { if (el.textContent === v) return; el.textContent = v; el.classList.remove('flip'); void el.offsetWidth; el.classList.add('flip'); };
   const tick = () => {
-    const left = Math.max(0, target - Date.now());
-    if (!left) { dday.textContent = '출시'; return; }
-    const s = Math.floor(left / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
-    dday.textContent = `D-${d.toLocaleString('ko-KR')} ${pad(h)}:${pad(m)}:${pad(s % 60)}`;
-    setTimeout(tick, 1000 - (Date.now() % 1000)); // 초가 바뀌는 순간에 맞춰 갱신
+    const left = Math.max(0, target - Date.now()), t = Math.floor(left / 1000);
+    put(cells.d, Math.floor(t / 86400).toLocaleString('ko-KR')); put(cells.h, pad(Math.floor(t % 86400 / 3600))); put(cells.m, pad(Math.floor(t % 3600 / 60))); put(cells.s, pad(t % 60));
+    if (left) setTimeout(tick, 1000 - (Date.now() % 1000));
   };
   tick();
 }
