@@ -4,21 +4,28 @@ const layers = [...document.querySelectorAll('[data-stage] .ly')];
 
 // 레이어가 모두 받아지면 함께 켜서 한 장씩 따로 뜨는 어색함을 막습니다
 let loaded = 0;
+const imgs = layers.map((l) => (l.tagName === 'IMG' ? l : l.querySelector('img')));
 const ready = () => { layers.forEach((l) => l.classList.add('is-in')); document.body.classList.add('is-ready'); };
-layers.forEach((l) => { if (l.complete) loaded++; else l.addEventListener('load', () => { if (++loaded === layers.length) ready(); }, { once: true }); l.addEventListener('error', () => { if (++loaded === layers.length) ready(); }, { once: true }); });
-if (loaded === layers.length) ready();
+imgs.forEach((l) => { if (l.complete) loaded++; else l.addEventListener('load', () => { if (++loaded === imgs.length) ready(); }, { once: true }); l.addEventListener('error', () => { if (++loaded === imgs.length) ready(); }, { once: true }); });
+if (loaded === imgs.length) ready();
 setTimeout(ready, 6000); // 느린 연결에서도 6초 뒤에는 보여 줍니다
 
 // 시차: 마우스(데스크톱)와 스크롤 양쪽을 부드럽게 따라갑니다
 if (!reduce) {
-  let mx = 0, my = 0, cx = 0, cy = 0, sy = 0;
-  addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; }, { passive: true });
+  let mx = 0, my = 0, cx = 0, cy = 0, sy = 0, px = 0, py = 0, hasMouse = false;
+  const pupil = document.querySelector('[data-pupil]');
+  addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; hasMouse = true; mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; }, { passive: true });
   const depth = layers.map((l) => Number(l.dataset.depth) || 0);
   const isBody = layers.map((l) => l.classList.contains('body'));
   const tick = () => {
     cx += (mx - cx) * .06; cy += (my - cy) * .06; sy = Math.min(scrollY, innerHeight);
     // 숨쉬기: 몸 레이어만 약 4.2초 주기로 아주 살짝 위아래로 늘었다 줄어듭니다 (엉덩이 쪽을 기준점으로)
     const breath = (Math.sin(performance.now() / 4200 * Math.PI * 2) + 1) / 2;
+    // 눈동자: 마우스를 따라 눈 안에서만 움직입니다(눈 모양 마스크로 잘라 눈꺼풀 밖으로 나가지 않음). 마우스가 없으면 천천히 두리번거립니다
+    const now = performance.now() / 1000;
+    const lookX = hasMouse ? mx : Math.sin(now * .35) * .35, lookY = hasMouse ? my : Math.sin(now * .23) * .2;
+    px += (lookX - px) * .08; py += (lookY - py) * .08;
+    if (pupil) pupil.style.transform = `translate(${px * .8}%, ${py * .5}%)`;
     layers.forEach((l, i) => { const d = depth[i]; const b = isBody[i] ? breath : 0; l.style.transform = `translate3d(${-cx * d * 260}px, ${-cy * d * 160 + sy * d * 1.4 - b * 3}px, 0) scale(${1 + d * .2}, ${1 + d * .2 + b * .008})`; });
     requestAnimationFrame(tick);
   };
