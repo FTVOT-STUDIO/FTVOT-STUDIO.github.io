@@ -162,7 +162,7 @@ if (wind && !reduce) {
   }
   document.querySelectorAll('[data-gate]').forEach((a) => a.addEventListener('click', (e) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || reduce) return;
-    e.preventDefault(); try { const sw = new Audio('./assets/swoosh.mp3?v=1'); sw.volume = .5; sw.play().catch(() => {}); } catch { /* 재생 불가 */ } /* 사이트 전환 효과음 */
+    e.preventDefault(); try { const sw = new Audio('./assets/swoosh.mp3?v=2'); sw.volume = .5; sw.play().catch(() => {}); } catch { /* 재생 불가 */ } /* 사이트 전환 효과음 */
     const x = e.clientX, y = e.clientY, el = build(), r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
     el.animate([{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${r}px at ${x}px ${y}px)` }], { duration: 650, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' });
     el.querySelector('.gate-sigil').animate([{ transform: 'translate(-50%,-50%) scale(.2) rotate(-90deg)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity: 1 }], { duration: 650, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'forwards' });
