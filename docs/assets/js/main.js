@@ -1,9 +1,13 @@
 // FTVOT_STUDIO — main.js
+/* 짧게 올라간 뒤 이어서 할 일: 페이지 넘김처럼 '먼저 스크롤 → 그다음 정렬'이 필요한 곳에서 씁니다 (0.45초) */
+window.__scrollThen = (y, cb) => { const from = scrollY, d = y - from; if (Math.abs(d) < 4 || matchMedia('(prefers-reduced-motion: reduce)').matches) { scrollTo(0, y); cb(); return; }
+window.__navGliding = true; const t0 = performance.now(), D = 450, ease = (k) => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const step = (n) => { const k = Math.min(1, (n - t0) / D); scrollTo(0, Math.round(from + d * ease(k))); if (k < 1) requestAnimationFrame(step); else { setTimeout(() => { window.__navGliding = false; }, 300); cb(); } }; requestAnimationFrame(step); };
 // 빌드 없는 ES 모듈입니다. 모든 기능은 JS가 실패해도 기본 HTML이 동작하도록 "덧붙이는" 방식입니다.
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261120a';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261118a';
+import { initSephirot } from './sephirot.js?v=20261118b';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117a';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
@@ -379,7 +383,7 @@ button.type = 'button';
 button.textContent = String(i + 1).padStart(2, '0');
 button.setAttribute('aria-label', `프로젝트 ${i + 1}페이지`);
 if (i === page) button.setAttribute('aria-current', 'page');
-button.addEventListener('click', () => { page = i; render(); });
+button.addEventListener('click', () => { const t = controls.getBoundingClientRect().top; const go = () => { page = i; render(); }; if (t < 80) window.__scrollThen(t + scrollY - 120, go); else go(); }); /* 먼저 목록 위로 올라간 뒤 페이지를 바꿈 */
 pager.append(button);
 }
 if (status) status.textContent = `${matches.length}개 중 ${matches.length ? page * pageSize + 1 : 0}–${Math.min(matches.length, (page + 1) * pageSize)}개를 표시합니다.`;
@@ -428,6 +432,8 @@ pager.innerHTML = '<button type="button" data-art-page="-1" aria-label="이전 �
 grid.after(pager);
 pager.addEventListener('click', (e) => { const b = e.target instanceof Element ? e.target.closest('[data-art-page]') : null; if (!b) return;
 const dir = Number(b.dataset.artPage), pages = Math.ceil(allFiles.length / PER_PAGE); if (turning || pages < 2) return; turning = true;
+/* 순서: 그리드 윗부분이 화면 위로 지나가 있으면 먼저 그리드 시작점으로 올라간 뒤, 그다음 페이지를 넘깁니다 */
+const turn = () => {
 /* 페이지 넘김: 지금 그림들이 넘기는 방향으로 살짝 밀리며 흐려지고, 새 그림들이 반대쪽에서 들어옵니다 (높이는 고정해 아래 내용이 튀지 않게) */
 const h0 = grid.offsetHeight; grid.style.height = `${h0}px`; grid.dataset.turn = dir > 0 ? 'out-next' : 'out-prev';
 setTimeout(() => { page = (page + dir + pages) % pages; render(allFiles, true); grid.dataset.turn = dir > 0 ? 'in-next' : 'in-prev';
@@ -437,8 +443,8 @@ grid.style.height = 'auto'; const h1 = grid.offsetHeight; grid.style.height = `$
 const shrink = h1 < h0, hDelay = shrink ? .4 : 0, inDelay = shrink ? 0 : .35;
 grid.style.transition = `height .5s cubic-bezier(.22, .8, .2, 1) ${hDelay}s, opacity .3s ease ${inDelay}s, translate .4s cubic-bezier(.16, 1, .3, 1) ${inDelay}s`; grid.style.height = `${h1}px`;
 requestAnimationFrame(() => requestAnimationFrame(() => { grid.dataset.turn = ''; setTimeout(() => { grid.style.height = ''; grid.style.transition = ''; turning = false; }, 950); }));
-/* 그리드 윗부분이 화면 위로 지나가 있을 때만 그리드 시작점으로 부드럽게 올려 줍니다 */
-const top = grid.getBoundingClientRect().top; if (top < 80) { const y = top + scrollY - 120; if (window.__glideTo) window.__glideTo(y); else scrollTo({ top: y, behavior: 'smooth' }); } }, 220); });
+}, 220); };
+const gt = grid.getBoundingClientRect().top; if (gt < 80) window.__scrollThen(gt + scrollY - 120, turn); else turn(); });
 let turning = false;
 const artHref = (f) => `https://raw.githubusercontent.com/FTVOT-STUDIO/FTVOT-STUDIO.github.io/main/docs/assets/gallery/${encodeURIComponent(f.name)}?v=${encodeURIComponent(f.sha)}`;
 window.__artworkItems = () => allFiles.map((f) => ({ href: artHref(f), alt: f.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ') }));
@@ -761,8 +767,8 @@ const r = item.getBoundingClientRect();
 const rect = predict ? { top: r.top, height: item.scrollHeight, bottom: r.top + item.scrollHeight } : r;
 const room = innerHeight - TOP_GAP - BOTTOM_GAP;
 let delta = 0;
-if (rect.height > room || rect.top < TOP_GAP) delta = rect.top - TOP_GAP;
-else delta = Math.max(0, rect.top - (TOP_GAP + (room - rect.height) / 2)); /* 펼친 항목이 화면 가운데 오도록(이미 위쪽에 있으면 그대로) */
+if (rect.top < TOP_GAP) delta = rect.top - TOP_GAP;
+else { const nav = item.closest('section, article')?.querySelector('.arka-nav.is-reader-nav'); const navB = nav ? nav.getBoundingClientRect().bottom : 0; const topLine = Math.max(TOP_GAP, navB > 0 && navB < innerHeight * .5 ? navB + 12 : 0); delta = Math.max(0, rect.top - topLine); } /* 펼친 항목의 맨 위를 상단 메뉴·고정 탭 바로 아래까지 올림 */
 if (Math.abs(delta) > 4) glide(delta);
 };
 document.addEventListener('toggle', (event) => {
@@ -914,6 +920,7 @@ const step = (t) => { const k = Math.min(1, (t - t0) / DUR), e = easeOut(k); scr
 if (k < 1) requestAnimationFrame(step); else { document.documentElement.style.scrollBehavior = ''; glided = true; release(); } };
 requestAnimationFrame(step); };
 const top = () => { const h = sec.querySelector('.q-head'); return (h || sec).getBoundingClientRect().top + scrollY - 76; }; /* 제목부터 나무 끝까지 한 화면에 들어오도록 제목이 상단바 바로 아래 오게 */
+addEventListener('ftvot:resume', () => { busy = false; window.__freeze?.('q', false); }); // bfcache 복원 시 하강·상승 잠금 해제
 const descend = () => { if (busy) return; busy = true; window.__freeze?.('q', true); animDone = false; let lit = false;
 sfx('q-enter'); /* 진입음: 내려가기 시작하는 순간 바로 */
 glide(top(), (k) => { document.documentElement.style.setProperty('--qd', easeOut(k).toFixed(3)); if (k >= .35 && !lit) { lit = true; light(); } }); };

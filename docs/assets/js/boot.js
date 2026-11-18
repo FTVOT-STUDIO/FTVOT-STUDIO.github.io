@@ -10,4 +10,10 @@ try { const q = new URLSearchParams(location.search); if (q.get('from') === 'cv'
 // 터치 기기 전용 스크롤 동결: iOS·안드로이드는 손을 뗀 뒤의 관성 스크롤을 막을 수 없고 그동안 scrollTo도 무시합니다.
 // 연출이 시작될 때 문서의 overflow를 잠깐 막으면 관성이 그 자리에서 끊기고, 연출용 글라이드(scrollTo)는 계속 동작합니다
 (() => { const keys = new Set(), coarse = matchMedia('(pointer: coarse)');
+  window.__freezeReset = () => { keys.clear(); document.documentElement.classList.remove('scroll-frozen'); };
   window.__freeze = (key, on) => { if (!coarse.matches) return; on ? keys.add(key) : keys.delete(key); document.documentElement.classList.toggle('scroll-frozen', keys.size > 0); }; })();
+
+// 뒤로가기·앞으로가기로 저장된 화면이 되살아날 때(bfcache): 떠나는 순간 걸려 있던 스크롤 잠금·동결·글라이드 상태를 모두 풀고, 각 모듈에 다시 맞추라고 알립니다
+addEventListener('pageshow', (e) => { if (!e.persisted) return; const h = document.documentElement; h.classList.remove('scroll-frozen', 'portal-in', 'portal-out', 'is-scroll-locked');
+  document.body.style.overflow = ''; h.style.overflow = ''; window.__navGliding = false; if (window.__scrollHold) window.__scrollHold.until = 0; window.__freezeReset?.();
+  dispatchEvent(new Event('ftvot:resume')); });

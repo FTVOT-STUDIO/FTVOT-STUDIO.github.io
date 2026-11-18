@@ -226,7 +226,7 @@ document.querySelectorAll('[data-bgm], [data-lang]').forEach((b) => b.addEventLi
 
 // 뒤로가기로 돌아왔을 때 떠날 때 덮어 둔 균열 화면이 남지 않게(bfcache 복원)
 const clearGate = () => { document.querySelectorAll('.gate').forEach((n) => n.remove()); const b = document.querySelector('[data-bgm-audio]'), w = document.querySelector('[data-wind-audio]'); if (b && !b.paused) { b.volume = .45; if (w) w.volume = .22; } };
-addEventListener('pageshow', (e) => { if (e.persisted) clearGate(); });
+addEventListener('pageshow', (e) => { if (e.persisted) { clearGate(); document.body.classList.remove('is-loading'); document.querySelector('[data-loader]')?.remove(); } });
 /* 일부 브라우저는 bfcache 표시 없이 되살리기도 해서, 화면이 다시 보일 때 오래된 균열 화면이 남아 있으면 걷어 냄 */
 document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(() => { if (document.querySelector('.gate[data-leaving]')) clearGate(); }, 50); });
 addEventListener('focus', () => { if (document.querySelector('.gate[data-leaving]')) clearGate(); });

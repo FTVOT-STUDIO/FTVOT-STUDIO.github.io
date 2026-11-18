@@ -326,6 +326,7 @@ const blockKeys = (event) => { if (LOCK_KEYS.has(event.key)) event.preventDefaul
 /* 관성 흡수: 잠금이 풀린 직후 트랙패드·휠 관성이 계속 들어오면, 관성이 멎을 때까지(마지막 입력 후 0.2초, 최대 1.6초) 대기를 늘려 연출 직후 화면이 휙 날아가지 않게 */
 window.addEventListener('wheel', (e) => { if (holding() && e.cancelable) { e.preventDefault(); const cap = window.__holdCap || 0; window.__scrollHold.until = Math.min(Math.max(window.__scrollHold.until, performance.now() + 200), cap || performance.now() + 200); } }, { passive: false, capture: true });
 window.addEventListener('touchmove', (e) => { if (holding() && e.cancelable) e.preventDefault(); }, { passive: false, capture: true });
+addEventListener('ftvot:resume', () => { wantUp = false; wantDown = false; prevRaw = null; setScrollLock(false); schedule(); }); // bfcache 복원 시 잠금 해제 후 다시 계산
 function setScrollLock(on) {
 scrollLocked = on;
 window.__freeze?.('tree', on); /* 터치 기기: 관성 스크롤을 즉시 끊어 연출 도중 화면이 날아가지 않게 */
