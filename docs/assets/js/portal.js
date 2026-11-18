@@ -16,7 +16,7 @@ const el = build(), r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, inne
 el.animate([{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${r}px at ${x}px ${y}px)` }], { duration: 650, easing: 'cubic-bezier(.7, 0, .3, 1)', fill: 'forwards' });
 el.querySelector('.portal-sigil').animate([{ transform: 'translate(-50%, -50%) scale(.2) rotate(-90deg)', opacity: 0 }, { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1 }], { duration: 650, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'forwards' });
 /* 들어갈 때와 나올 때 같은 효과음: 게임 화면에는 사이트 효과음 체계가 없어서 직접 재생합니다 (효과음 끄기 설정은 따름) */
-try { if (localStorage.getItem('sfx') !== 'off') { const a = new Audio('./assets/q-enter.mp3?v=3'); a.volume = .32; a.play().catch(() => {}); } } catch { /* 재생 불가 */ }
+try { if (localStorage.getItem('sfx') !== 'off') { const a = new Audio('./assets/swoosh.mp3?v=1'); a.volume = .5; /* 사이트 전환 효과음 */ a.play().catch(() => {}); } } catch { /* 재생 불가 */ }
 setTimeout(() => { location.href = href; }, 700);
 };
 /* 도착: 덮인 상태로 시작해 마법진이 가운데로 오므라들며 화면을 엽니다. 홈은 위치를 잡은 뒤 직접 열어 달라고 부릅니다 */
