@@ -198,9 +198,9 @@ if (wind && !reduce) {
 (() => {
   const g = document.querySelector('.ly.body'); if (!g || reduce) return;
   const set = (v) => { if (v) g.dataset.blink = v; else delete g.dataset.blink; };
-  // 감기: 뜬 눈 → 감은 눈을 45ms에 빠르게 / 머묾 70ms / 뜨기: 반쯤 뜬 눈을 거쳐 90ms씩 천천히
-  const once = (done) => { g.style.setProperty('--blink-t', '45ms'); set('closed');
-    setTimeout(() => { g.style.setProperty('--blink-t', '90ms'); set('half'); setTimeout(() => { set(''); setTimeout(() => done?.(), 100); }, 90); }, 115); };
+  // 24프레임 애니메이션 원화 타이밍: 반쯤(1프레임) → 감음(2프레임) → 반쯤(1프레임) → 뜬 눈. 겹침 없이 끊어 바꿔야 찰진 맛이 납니다
+  const F = 1000 / 24;
+  const once = (done) => { set('half'); setTimeout(() => { set('closed'); setTimeout(() => { set('half'); setTimeout(() => { set(''); done?.(); }, F); }, F * 2); }, F); };
   const loop = () => setTimeout(() => { if (document.hidden) return loop(); once(() => { if (Math.random() < .22) setTimeout(() => once(loop), 160); else loop(); }); }, 2500 + Math.random() * 3500);
   loop();
 })();
