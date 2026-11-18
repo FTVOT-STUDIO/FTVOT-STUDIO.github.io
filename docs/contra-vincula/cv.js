@@ -198,7 +198,9 @@ if (wind && !reduce) {
 (() => {
   const g = document.querySelector('.ly.body'); if (!g || reduce) return;
   const set = (v) => { if (v) g.dataset.blink = v; else delete g.dataset.blink; };
-  const once = (done) => { set('half'); setTimeout(() => { set('closed'); setTimeout(() => { set('half'); setTimeout(() => { set(''); done?.(); }, 70); }, 85); }, 45); };
+  // 감기: 뜬 눈 → 감은 눈을 45ms에 빠르게 / 머묾 70ms / 뜨기: 반쯤 뜬 눈을 거쳐 90ms씩 천천히
+  const once = (done) => { g.style.setProperty('--blink-t', '45ms'); set('closed');
+    setTimeout(() => { g.style.setProperty('--blink-t', '90ms'); set('half'); setTimeout(() => { set(''); setTimeout(() => done?.(), 100); }, 90); }, 115); };
   const loop = () => setTimeout(() => { if (document.hidden) return loop(); once(() => { if (Math.random() < .22) setTimeout(() => once(loop), 160); else loop(); }); }, 2500 + Math.random() * 3500);
   loop();
 })();
