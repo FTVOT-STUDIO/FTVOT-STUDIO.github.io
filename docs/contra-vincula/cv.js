@@ -201,3 +201,6 @@ if (wind && !reduce) {
   const loop = () => setTimeout(() => { if (document.hidden) return loop(); once(() => { if (Math.random() < .22) setTimeout(() => once(loop), 160); else loop(); }); }, 2500 + Math.random() * 3500);
   loop();
 })();
+
+// 소리·언어 버튼을 포인터로 누른 뒤 남은 포커스 때문에 스페이스바가 버튼을 다시 누르던 문제 방지
+document.querySelectorAll('[data-bgm], [data-lang]').forEach((b) => b.addEventListener('click', (e) => { if (e.detail > 0) b.blur(); }));

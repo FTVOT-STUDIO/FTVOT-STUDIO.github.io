@@ -1047,3 +1047,6 @@ const hero = document.getElementById('tree'); if (!hero) return;
 const sync = () => document.documentElement.classList.toggle('in-hero', hero.getBoundingClientRect().bottom > innerHeight * .2);
 addEventListener('scroll', sync, { passive: true }); addEventListener('resize', sync); sync();
 })();
+
+/* 소리 버튼을 마우스·터치로 누른 뒤 포커스가 남아 있으면, 이후 스페이스바(스크롤)·엔터가 버튼을 다시 눌러 저절로 켜지고 꺼졌습니다. 포인터로 누른 경우엔 포커스를 바로 풀어 줍니다(키보드 탐색은 그대로) */
+document.querySelectorAll('[data-music-toggle], [data-sound-toggle]').forEach((b) => b.addEventListener('click', (e) => { if (e.detail > 0) b.blur(); }));
