@@ -762,7 +762,7 @@ const rect = predict ? { top: r.top, height: item.scrollHeight, bottom: r.top + 
 const room = innerHeight - TOP_GAP - BOTTOM_GAP;
 let delta = 0;
 if (rect.height > room || rect.top < TOP_GAP) delta = rect.top - TOP_GAP;
-else if (rect.bottom > innerHeight - BOTTOM_GAP) delta = rect.bottom - (innerHeight - BOTTOM_GAP);
+else delta = Math.max(0, rect.top - (TOP_GAP + (room - rect.height) / 2)); /* 펼친 항목이 화면 가운데 오도록(이미 위쪽에 있으면 그대로) */
 if (Math.abs(delta) > 4) glide(delta);
 };
 document.addEventListener('toggle', (event) => {
