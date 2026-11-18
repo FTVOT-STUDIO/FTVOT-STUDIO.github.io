@@ -398,9 +398,7 @@ html:lang(ko) .acta-facts dt, html:lang(ja) .acta-facts dt { letter-spacing: .1e
   section.block { padding: 64px 0; }
   .main-tag { font-size: 26px; }
 }
-/* 눈 깜빡임 프레임: 평소엔 숨기고, data-blink 상태에 따라 즉시 바꿔 끼웁니다(프레임 교체라 전환 효과 없음) */
-/* 애니메이션 원화처럼 프레임을 겹침 없이 딱딱 바꿔 끼워 찰지게 */
-.ly.body .f-half, .ly.body .f-closed { opacity: 0; }
-.ly.body[data-blink] .f-open, .ly.body[data-blink] .eyes { opacity: 0; }
-.ly.body[data-blink="half"] .f-half, .ly.body[data-blink="closed"] .f-closed { opacity: 1; }
+/* 눈 깜빡임: 눈 묶음(eyeset)이 눌렸다 펴지고, 감은 눈꺼풀(lids)이 그 사이에 나타남 */
+.ly.body .lids { opacity: 0; }
+.ly.body .eyeset { will-change: transform; }
 

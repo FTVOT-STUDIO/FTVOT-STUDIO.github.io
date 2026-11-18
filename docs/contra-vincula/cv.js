@@ -194,14 +194,30 @@ if (wind && !reduce) {
   if (art) addEventListener('scroll', () => { const r = art.parentElement.getBoundingClientRect(); const k = Math.max(-1, Math.min(1, (r.top + r.height / 2 - innerHeight / 2) / innerHeight)); art.style.transform = `scale(${1.08 - Math.abs(k) * .05}) translateY(${k * 24}px)`; }, { passive: true });
 })();
 
-// 눈 깜빡임: 뜬 눈 → 반쯤 감음 → 감음 → 반쯤 → 뜬 눈. 감을 때는 빠르게, 뜰 때는 조금 느리게(사람 눈처럼). 2.5~6초 간격, 가끔 두 번 연속
+// 눈 깜빡임(애프터 이펙트식): 눈 부분만 눈 높이를 기준으로 위아래로 부드럽게 눌렀다가(ease-in) 감은 눈꺼풀로 넘어가고,
+// 뜰 때는 살짝 지나쳤다 돌아오는 오버슈트로 탄력 있게. 눈동자도 같은 묶음이라 함께 눌립니다
 (() => {
-  const g = document.querySelector('.ly.body'); if (!g || reduce) return;
-  const set = (v) => { if (v) g.dataset.blink = v; else delete g.dataset.blink; };
-  // 24프레임 애니메이션 원화 타이밍: 반쯤(1프레임) → 감음(2프레임) → 반쯤(1프레임) → 뜬 눈. 겹침 없이 끊어 바꿔야 찰진 맛이 납니다
-  const F = 1000 / 24;
-  const once = (done) => { set('half'); setTimeout(() => { set('closed'); setTimeout(() => { set('half'); setTimeout(() => { set(''); done?.(); }, F); }, F * 2); }, F); };
-  const loop = () => setTimeout(() => { if (document.hidden) return loop(); once(() => { if (Math.random() < .22) setTimeout(() => once(loop), 160); else loop(); }); }, 2500 + Math.random() * 3500);
+  const set = document.querySelector('[data-eyeset]'), lids = document.querySelector('[data-lids]'), box = document.querySelector('.ly.body');
+  if (!set || !lids || reduce) return;
+  const EYE = { x: 1264 / 3500, y: 790 / 2100 }, RATIO = 3500 / 2100;
+  const origin = () => { // object-fit: cover로 잘린 그림 좌표를 화면 좌표로 바꿔 눈 중심을 기준점으로
+    const W = box.clientWidth, H = box.clientHeight, posX = innerWidth <= 700 ? .3 : .38;
+    const iw = Math.max(W, H * RATIO), ih = iw / RATIO, ox = (W - iw) * posX, oy = (H - ih) * .5;
+    set.style.transformOrigin = `${ox + EYE.x * iw}px ${oy + EYE.y * ih}px`;
+  };
+  origin(); addEventListener('resize', origin);
+  const D = 320;
+  const blink = () => {
+    set.animate([
+      { transform: 'scaleY(1)', easing: 'cubic-bezier(.55,0,.85,.35)' },
+      { transform: 'scaleY(.08)', offset: .26 },
+      { transform: 'scaleY(.08)', offset: .42, easing: 'cubic-bezier(.2,.9,.3,1.25)' },
+      { transform: 'scaleY(1)', offset: 1 }
+    ], { duration: D });
+    lids.animate([{ opacity: 0 }, { opacity: 0, offset: .18 }, { opacity: 1, offset: .26 }, { opacity: 1, offset: .42 }, { opacity: 0, offset: .54 }, { opacity: 0 }], { duration: D });
+    set.animate([{ opacity: 1 }, { opacity: 1, offset: .2 }, { opacity: 0, offset: .27 }, { opacity: 0, offset: .41 }, { opacity: 1, offset: .5 }, { opacity: 1 }], { duration: D });
+  };
+  const loop = () => setTimeout(() => { if (!document.hidden) { blink(); if (Math.random() < .22) setTimeout(blink, D + 120); } loop(); }, 2600 + Math.random() * 3400);
   loop();
 })();
 
