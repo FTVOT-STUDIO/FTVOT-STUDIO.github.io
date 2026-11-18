@@ -163,7 +163,7 @@ if (wind && !reduce) {
   document.querySelectorAll('[data-gate]').forEach((a) => a.addEventListener('click', (e) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || reduce) return;
     e.preventDefault(); try { const sw = new Audio('./assets/swoosh.mp3?v=2'); sw.volume = .5; sw.play().catch(() => {}); } catch { /* 재생 불가 */ } /* 사이트 전환 효과음 */
-    const x = e.clientX, y = e.clientY, el = build(), r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    const x = e.clientX, y = e.clientY, el = build(); el.dataset.leaving = "1"; const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
     el.animate([{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${r}px at ${x}px ${y}px)` }], { duration: 650, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' });
     el.querySelector('.gate-sigil').animate([{ transform: 'translate(-50%,-50%) scale(.2) rotate(-90deg)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity: 1 }], { duration: 650, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'forwards' });
     if (bgm && !bgm.paused) { const w = document.querySelector('[data-wind-audio]'), w0 = w ? w.volume : 0; const v0 = bgm.volume; const t0 = performance.now(); const f = (t) => { const k = Math.min((t - t0) / 600, 1); bgm.volume = v0 * (1 - k); if (w) w.volume = w0 * (1 - k); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
@@ -207,4 +207,8 @@ if (wind && !reduce) {
 document.querySelectorAll('[data-bgm], [data-lang]').forEach((b) => b.addEventListener('click', (e) => { if (e.detail > 0) b.blur(); }));
 
 // 뒤로가기로 돌아왔을 때 떠날 때 덮어 둔 균열 화면이 남지 않게(bfcache 복원)
-addEventListener('pageshow', (e) => { if (e.persisted) document.querySelectorAll('.gate').forEach((n) => n.remove()); });
+const clearGate = () => { document.querySelectorAll('.gate').forEach((n) => n.remove()); const b = document.querySelector('[data-bgm-audio]'), w = document.querySelector('[data-wind-audio]'); if (b && !b.paused) { b.volume = .45; if (w) w.volume = .22; } };
+addEventListener('pageshow', (e) => { if (e.persisted) clearGate(); });
+/* 일부 브라우저는 bfcache 표시 없이 되살리기도 해서, 화면이 다시 보일 때 오래된 균열 화면이 남아 있으면 걷어 냄 */
+document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(() => { if (document.querySelector('.gate[data-leaving]')) clearGate(); }, 50); });
+addEventListener('focus', () => { if (document.querySelector('.gate[data-leaving]')) clearGate(); });

@@ -29,7 +29,7 @@ window.__portalOpen = open;
 const arrive = () => { if (!document.documentElement.classList.contains('portal-in')) return;
 try { sessionStorage.removeItem(KEY); } catch { /* 저장소 없음 */ }
 if (reduce) { document.documentElement.classList.remove('portal-in'); return; }
-pending = build(); pending.classList.add('is-full');
+pending = build(); pending.classList.add('is-full'); pending.dataset.t = String(performance.now());
 if (!document.documentElement.classList.contains('is-returning')) setTimeout(open, 250); /* 게임 화면: 잠깐 보여 준 뒤 바로 열기 */
 setTimeout(open, 2500); /* 안전장치: 무슨 일이 있어도 2.5초 안에는 열림 */ };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrive); else arrive();
@@ -37,3 +37,6 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 
 // 뒤로가기·앞으로가기로 돌아오면 브라우저가 떠나기 직전 화면(마법진으로 덮인 상태)을 그대로 되살립니다(bfcache). 그 경우 덮개를 걷어 냅니다
 addEventListener('pageshow', (e) => { if (!e.persisted) return; document.querySelectorAll('.portal').forEach((n) => n.remove()); document.documentElement.classList.remove('portal-in', 'portal-out'); try { sessionStorage.removeItem('ftvot-portal'); } catch { /* 무시 */ } });
+/* bfcache 표시 없이 되살아나는 경우 대비: 화면이 다시 보이거나 창이 포커스를 받았는데 떠날 때 덮은 마법진이 남아 있으면 걷어 냄 */
+const clearStale = () => { if (!document.hidden) document.querySelectorAll('.portal.is-full').forEach((n) => { if (performance.now() - (Number(n.dataset.t) || 0) > 1500) n.remove(); }); };
+document.addEventListener('visibilitychange', () => setTimeout(clearStale, 50)); addEventListener('focus', clearStale);
