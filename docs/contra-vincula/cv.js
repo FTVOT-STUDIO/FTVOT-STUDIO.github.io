@@ -205,3 +205,6 @@ if (wind && !reduce) {
 
 // 소리·언어 버튼을 포인터로 누른 뒤 남은 포커스 때문에 스페이스바가 버튼을 다시 누르던 문제 방지
 document.querySelectorAll('[data-bgm], [data-lang]').forEach((b) => b.addEventListener('click', (e) => { if (e.detail > 0) b.blur(); }));
+
+// 뒤로가기로 돌아왔을 때 떠날 때 덮어 둔 균열 화면이 남지 않게(bfcache 복원)
+addEventListener('pageshow', (e) => { if (e.persisted) document.querySelectorAll('.gate').forEach((n) => n.remove()); });

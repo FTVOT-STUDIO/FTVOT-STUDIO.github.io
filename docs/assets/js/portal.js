@@ -34,3 +34,6 @@ if (!document.documentElement.classList.contains('is-returning')) setTimeout(ope
 setTimeout(open, 2500); /* 안전장치: 무슨 일이 있어도 2.5초 안에는 열림 */ };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrive); else arrive();
 })();
+
+// 뒤로가기·앞으로가기로 돌아오면 브라우저가 떠나기 직전 화면(마법진으로 덮인 상태)을 그대로 되살립니다(bfcache). 그 경우 덮개를 걷어 냅니다
+addEventListener('pageshow', (e) => { if (!e.persisted) return; document.querySelectorAll('.portal').forEach((n) => n.remove()); document.documentElement.classList.remove('portal-in', 'portal-out'); try { sessionStorage.removeItem('ftvot-portal'); } catch { /* 무시 */ } });
