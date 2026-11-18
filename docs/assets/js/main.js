@@ -3,7 +3,7 @@
 // 스크롤은 브라우저 기본 스크롤을 그대로 씁니다 (관성 스크롤 라이브러리는 이질감 때문에 뺐습니다).
 import { initIntro, initSky } from './intro.js?v=20261120a';
 import { initCosmos } from './cosmos.js?v=20261117q';
-import { initSephirot } from './sephirot.js?v=20261120i';
+import { initSephirot } from './sephirot.js?v=20261118a';
 import { initGalleryAdmin } from './gallery-admin.js?v=20261117a';
 import { initGames } from './games.js?v=20261118a';
 import { initGameAdmin } from './game-admin.js?v=20261118d';
@@ -621,7 +621,8 @@ const audio = new Audio();
 audio.preload = 'none';
 /* 첫 클릭 직후 바로 들리도록: 화면이 준비된 뒤(유휴 시간) GitHub Pages에서 음원을 미리 받아 둡니다. Cloudflare 경로는 한국에서 매우 느림 */
 const SRC = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? './assets/space-ambient.mp3' : 'https://ftvot-studio.github.io/assets/space-ambient.mp3';
-(window.requestIdleCallback || ((fn) => setTimeout(fn, 1500)))(() => { if (!audio.getAttribute('src')) { audio.preload = 'auto'; audio.src = SRC; audio.load(); } }, { timeout: 2500 });
+/* 바로 재생되도록 처음부터 음원을 받기 시작합니다(스트리밍이라 앞부분만 받아지면 곧바로 재생 가능) */
+audio.preload = 'auto'; audio.src = SRC; audio.load();
 audio.loop = true;
 // 배경음은 볼륨 변화 없이 작은 소리로 계속 반복합니다.
 audio.volume = 0.3; // 배경음 (예전 0.08은 거의 안 들려서 올림)
@@ -651,8 +652,8 @@ const unlock = (event) => {
 if (event.target instanceof Element && event.target.closest('[data-music-toggle]')) return;
 start();
 };
-document.addEventListener('pointerdown', unlock, { passive: true });
-document.addEventListener('keydown', unlock);
+/* 브라우저가 소리 재생을 허락하는 사용자 동작(클릭·터치·키)마다 시도합니다. pointerdown은 Safari에서 허락으로 치지 않아 첫 클릭이 헛돌던 문제 */
+['pointerdown', 'click', 'touchend', 'keydown'].forEach((t) => document.addEventListener(t, unlock, { passive: true, capture: true }));
 button.addEventListener('click', () => {
 // 자동 재생 대기 상태에서는 첫 클릭을 재생 요청으로 해석합니다.
 enabled = audio.paused;
@@ -665,12 +666,11 @@ audio.addEventListener('play', sync);
 audio.addEventListener('pause', sync);
 audio.addEventListener('error', () => { stop(); button.hidden = true; });
 sync();
+start(); // 자동 재생을 허용하는 브라우저면 첫 화면과 동시에 재생
 const afterLoad = () => {
 const idle = window.requestIdleCallback || ((run) => setTimeout(run, 0));
-idle(() => {
-document.querySelectorAll('[data-font-styles]').forEach((link) => { link.media = 'all'; });
-start();
-});
+idle(() => { document.querySelectorAll('[data-font-styles]').forEach((link) => { link.media = 'all'; }); });
+start(); /* 자동 재생이 허용된 경우(재방문 등) 기다리지 않고 바로 */
 };
 if (document.readyState === 'complete') afterLoad();
 else window.addEventListener('load', afterLoad, { once: true });

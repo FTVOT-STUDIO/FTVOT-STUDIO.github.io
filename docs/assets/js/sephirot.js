@@ -341,7 +341,7 @@ const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) 
 function initTreeScroll(hero, tree) {
 if (!hero || !tree) return;
 let pending = 0, previous = 0, traceTimer = 0, laid = false, prevRaw = null;
-let heroTop = 0, heroHeight = 1, treeW = 1, treeH = 1;
+let heroTop = 0, heroHeight = 1, treeW = 1, treeH = 1, fit0 = 1, shift0 = 0; /* fit0·shift0: 잠든 나무가 어떤 해상도에서도 소개 글과 아래 안내 사이 한 화면에 들어오게 하는 기본 축소·이동 */
 const copy = hero.querySelector('.ht-copy, .hero-copy');
 // 반대 회전 대상: 각 세피라의 문양·이름·번호, 경로 배지의 히브리 글자, 장막 글자. 기준점은 자기 원의 중심입니다
 const upright = [];
@@ -573,7 +573,7 @@ previous = progress;
 if (reduceMotion.matches) { tree.style.transform = ''; morph(1); return; }
 // 누운 나무가 화면 너비(누운 뒤의 가로 = 원래 세로)와 높이 안에 들어오도록 크기를 맞춥니다
 const fit = innerWidth < 700 ? Math.min(1, (innerHeight * 0.86) / treeH) : Math.min((innerWidth - 64) / treeH, (innerHeight * 0.78) / treeW, 1.25);
-const scale = 1 + (fit - 1) * e;
+const scale = fit0 + (fit - fit0) * e;
 // 고정: 스크롤한 만큼 아래로 밀어 화면 같은 자리에 머물게 합니다
 const hold = Math.min(distance, pin);
 // 원근 흔들림: 회전 중간에 가장 크게, 시작과 끝에서는 0
@@ -583,7 +583,7 @@ const leave = Math.min(1, Math.max(0, (distance - pin) / (innerHeight * .6)));
 morph(e, leave); // 회전 대신 각 세피라가 차례로 제자리를 찾아 이동하며 가로 배치가 됩니다
 // 모바일 세로 나무: 켜지는 동안 소개 글 아래에 있던 나무를 화면 한가운데로 끌어올려 말쿠트까지 한 화면에 보이게 합니다
 const centerShift = innerWidth < 700 ? (innerHeight / 2 - dialBox.y) * e : 0; /* 고정 상태 기준의 고정값이라 고정이 풀리면 페이지와 함께 올라갑니다 */
-const lift = `translate3d(0, ${(hold + centerShift - tension * 48).toFixed(1)}px, 0)`; // tension: 당겨질 때 살짝 끌려 올라가는 저항감
+const lift = `translate3d(0, ${(hold + centerShift + shift0 * (1 - e) - tension * 48).toFixed(1)}px, 0)`; // tension: 당겨질 때 살짝 끌려 올라가는 저항감
 const spin = `scale(${scale.toFixed(3)})`;
 // 다 바뀌면 고정을 풀고 페이지와 함께 자연스럽게 올라가며, 바로 아래 케테르 장이 이어집니다.
 // 떠나는 동안만 살짝 옅어져 다음 장으로 시선이 넘어가게 합니다
@@ -673,6 +673,18 @@ treeW = svg?.clientWidth || tree.clientWidth;
 treeH = svg?.clientHeight || tree.clientHeight;
 // 다이얼 중심 = 나무 중심 (히어로 기준 좌표, 고정 이동량은 update에서 더합니다)
 dialBox = { x: tree.offsetLeft + tree.offsetWidth / 2, y: tree.offsetTop + tree.offsetHeight / 2 };
+/* 잠든 나무 맞춤: 변형을 잠시 떼고 실제 자리를 재서, 위(소개 글이 위에 있으면 그 아래)와 아래(스크롤 안내 자리) 사이에 들어오도록 줄이고 가운데로 옮깁니다 */
+try {
+const prev = tree.style.transform; tree.style.transform = 'none';
+const hr = hero.getBoundingClientRect(), sr = (svg || tree).getBoundingClientRect(), cr = hero.querySelector('.ht-copy')?.getBoundingClientRect();
+tree.style.transform = prev;
+const stacked = cr && cr.bottom <= sr.top + 40 && cr.right > sr.left; // 소개 글이 나무 위에 쌓인 배치
+const topLim = (stacked ? cr.bottom - hr.top + 12 : 20), botLim = Math.min(hr.height, innerHeight) - 72;
+const h = sr.height, w = sr.width, top = sr.top - hr.top;
+fit0 = Math.min(1, Math.max(.3, (botLim - topLim) / h), (innerWidth - 24) / w);
+const cy = top + h / 2, want = (topLim + botLim) / 2;
+shift0 = (fit0 < 1 || top < topLim || top + h > botLim) ? want - cy : 0;
+} catch { fit0 = 1; shift0 = 0; }
 schedule();
 };
 window.addEventListener('scroll', schedule, { passive: true });

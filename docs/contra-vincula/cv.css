@@ -398,3 +398,7 @@ html:lang(ko) .acta-facts dt, html:lang(ja) .acta-facts dt { letter-spacing: .1e
   section.block { padding: 64px 0; }
   .main-tag { font-size: 26px; }
 }
+/* 눈 깜빡임 프레임: 평소엔 숨기고, data-blink 상태에 따라 즉시 바꿔 끼웁니다(프레임 교체라 전환 효과 없음) */
+.ly.body .f-half, .ly.body .f-closed { visibility: hidden; }
+.ly.body[data-blink] .f-open, .ly.body[data-blink] .eyes { visibility: hidden; }
+.ly.body[data-blink="half"] .f-half, .ly.body[data-blink="closed"] .f-closed { visibility: visible; }

@@ -192,3 +192,12 @@ if (wind && !reduce) {
   const art = document.querySelector('.keyart img');
   if (art) addEventListener('scroll', () => { const r = art.parentElement.getBoundingClientRect(); const k = Math.max(-1, Math.min(1, (r.top + r.height / 2 - innerHeight / 2) / innerHeight)); art.style.transform = `scale(${1.08 - Math.abs(k) * .05}) translateY(${k * 24}px)`; }, { passive: true });
 })();
+
+// 눈 깜빡임: 뜬 눈 → 반쯤 감음 → 감음 → 반쯤 → 뜬 눈. 감을 때는 빠르게, 뜰 때는 조금 느리게(사람 눈처럼). 2.5~6초 간격, 가끔 두 번 연속
+(() => {
+  const g = document.querySelector('.ly.body'); if (!g || reduce) return;
+  const set = (v) => { if (v) g.dataset.blink = v; else delete g.dataset.blink; };
+  const once = (done) => { set('half'); setTimeout(() => { set('closed'); setTimeout(() => { set('half'); setTimeout(() => { set(''); done?.(); }, 70); }, 85); }, 45); };
+  const loop = () => setTimeout(() => { if (document.hidden) return loop(); once(() => { if (Math.random() < .22) setTimeout(() => once(loop), 160); else loop(); }); }, 2500 + Math.random() * 3500);
+  loop();
+})();

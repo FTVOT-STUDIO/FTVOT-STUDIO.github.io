@@ -8,11 +8,11 @@ const T = [
   ['.main-tag', ['If refusing salvation is a sin,<br>then gladly I shall be a sinner.'], ['救いを拒むことが罪ならば、<br>喜んで罪人となろう。']],
   ['.sub-tag', ['Not even salvation granted by a god can take the place of my freedom.'], ['神が与えた救いでさえ、私の自由の代わりにはならない。']],
   ['#about .lead', [
-    'Chains forged in the name of divinity, and the one who would break them. <i>Contra Vincula: The Defiant Exile</i> is a narrative RPG set in the dark fantasy world of <b>ARCA</b>.',
-    'You are Seraphina Lilith, an exile stripped of her wings. Tear down the veil of the Faust Church, the cult that worships beauty, and dig up the truth buried beneath it.'
+    '<i>Contra Vincula: The Defiant Exile</i> is a narrative RPG set in the dark fantasy world of <b>ARCA</b>, telling the story of bonds forged in the name of divinity and the exile who would break them.',
+    'As Seraphina Lilith, an exile stripped of her wings, you will tear down the veil of the Faust Church, which worships beauty, and dig up the truth buried beneath it yourself.'
   ], [
-    '神性の名で満たされた鎖、そしてその鎖を断とうとする者。『コントラ・ヴィンクラ：ザ・ディファイアント・エグザイル』は、ダークファンタジー世界<b>アルカ</b>で繰り広げられるナラティブRPGです。',
-    'あなたは翼を奪われた追放者、セラフィナ・リリス。美を崇めるファウスト教の帳を剥ぎ、その下に埋もれた真実を自らの手で暴きます。'
+    '『コントラ・ヴィンクラ：ザ・ディファイアント・エグザイル』は、ダークファンタジー世界<b>アルカ</b>を舞台に、神性の名で満たされた束縛と、それを断ち切ろうとする一人の追放者の物語を描くナラティブRPGです。',
+    'プレイヤーは翼を奪われた追放者セラフィナ・リリスとなり、美を崇めるファウスト教の帳を剥ぎ取って、その下に埋もれた真実を自らの手で暴いていきます。'
   ]],
   ['#about dt', ['Genre', 'World', 'Themes'], ['ジャンル', '世界観', 'テーマ']],
   ['#about dd', ['Narrative RPG · Dark Fantasy', 'ARCA', 'Freedom · Bondage · Salvation · Faith · Choice · Defiance'], ['ナラティブRPG · ダークファンタジー', 'ARCA（アルカ）', '自由 · 束縛 · 救済 · 信仰 · 選択 · 抵抗']],
@@ -50,8 +50,8 @@ const T = [
     'ティフェレトに仕え、その意志を遂行する人物。教団の秩序と自らの信念を何よりも重んじ、リリスとの対立において重要な役割を担います。'
   ]],
   ['.gp h3', ['Investigation', 'Dialogue & Choices', 'Deduction & Mind Games', 'Time Management', 'RPG Elements', 'Relationships', 'Branching Story'], ['調査・探索', '会話・選択肢', '推理・心理戦', '時間管理', 'RPG要素', '人物関係', '分岐するストーリー']],
-  ['.gp p', ['Gather clues, records, and evidence from places and people', 'Read words and actions, and choose to turn the flow', 'Pierce contradictions in testimony with evidence', 'Where to search and whom to meet within seven days', 'Weigh your condition with every action', 'Affection, emotion, and past actions change reactions and information', 'Your choices and findings change the story'], ['場所や人物から手がかり・記録・証拠を集める', '発言と行動を読み、流れを変える選択', '証言の矛盾を証拠で突く', '7日の中で、どこを調べ誰に会うか', '行動のたびに状態を見極める', '好感度や感情、過去の行動が反応と情報を変える', '選択と調査の結果が展開を変える']],
-  ['.gp-center', ['Seven truths in seven days'], ['七日のうちに七つの真実']],
+  ['.gp p', ['Search places and people to gather clues, records, and evidence.', 'Read what others say and do, and turn the conversation with your choices.', 'Find the contradictions in testimony and pierce them with evidence.', 'Over seven days, decide where to search and whom to meet.', 'Weigh your health, action points, and suspicion before every move.', 'Affection, emotion, and past actions change how people react and what they reveal.', 'Your choices and findings decide where the story branches.'], ['場所や人物を調べ、手がかりや記録、証拠を集めます。', '相手の言葉と行動を読み、選択で会話の流れを変えます。', '証言の矛盾を見つけ、証拠で突き崩します。', '七日の間に、どこを調べ誰に会うかを決めなければなりません。', '体力や行動力、疑念度を見極めながら、一つひとつの行動を決めます。', '好感度や感情、これまでの行動によって、反応や得られる情報が変わります。', '選択と調査の結果によって、物語の流れが分かれていきます。']],
+  ['.gp-center', ['Seven truths to find in seven days'], ['七日のうちに見つけるべき七つの真実']],
   ['.gp-meters span', ['Health', 'Action', 'Suspicion'], ['体力', '行動力', '疑念度']],
   ['#news dt', ['Title', 'Genre', 'Developer', 'Release', 'Engine', 'Platforms'], ['タイトル', 'ジャンル', '開発', '発売', 'エンジン', 'プラットフォーム']],
   ['#news dd', ['Contra Vincula: The Defiant Exile', 'Narrative RPG · Dark Fantasy', 'FTVOT Studio', 'December 2029', 'Unity', 'Steam · Google Play'], ['Contra Vincula: The Defiant Exile', 'ナラティブRPG · ダークファンタジー', 'FTVOT STUDIO（セグスタジオ）', '2029年12月予定', 'Unity', 'Steam · Google Play']],
